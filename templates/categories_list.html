@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style type="text/css">
+        table td {
+            padding: 6px;
+        }
+    </style>
+</head>
+<body>
+    <table style="border: 1px solid black;padding: 4px;margin: 4px;" border="1">
+        <thead>
+            <th>S.No</th>
+            <th>Title</th>
+            <th>Status</th>
+            <th colspan="2">Actions</th>
+        </thead>
+
+        {% for category in categories_list %}
+            <tbody>
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ category.name }}</td>
+                    <td>{{ category.is_active }}</td>
+                    <td><a href="{% url 'blog:edit_category' category_id=category.id %}"><button>Edit</button></a></td>
+                    <td><a href="{% url 'blog:delete_category' category_id=category.id %}"><button>Delete</button></a></td>
+                </tr>
+            </tbody>
+
+        {% endfor %}
+    </table>
+</body>
+</html>
