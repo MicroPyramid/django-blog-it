@@ -55,5 +55,9 @@ docs/_build/
 
 # PyBuilder
 target/
-migrations/
+microblog/migrations/*
 .idea/
+*.pyc
+db.sqlite3
+media/
+*~
