@@ -55,4 +55,4 @@ docs/_build/
 
 # PyBuilder
 target/
-migrations/
+microblog/migrations/
