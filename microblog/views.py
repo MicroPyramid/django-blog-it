@@ -26,7 +26,6 @@ def blog_add(request):
     if request.method == "POST":
         blog_data = request.POST
         form = BlogPostForm(blog_data)
-
         if form.is_valid():
             blog_post = form.save(commit=False)
             blog_post.user = request.user
@@ -76,6 +75,7 @@ def add_category(request):
     form = BlogCategory()
     if request.method == 'POST':
         category_data = request.POST
+        print category_data.name
         form = BlogCategory(category_data)
         if form.is_valid():
             form.save()
@@ -95,9 +95,9 @@ def edit_category(request, category_id):
         form = BlogCategory(category_data, instance=category_name)
         if form.is_valid():
             form.save()
-            return HttpResponse({'error': False, 'response': 'Successfully updated your category'})
+            return HttpResponse(json.dumps({'error': False, 'response': 'Successfully updated your category'}))
         else:
-            return HttpResponse({'error': True, 'response': form.errors})
+            return HttpResponse(json.dumps({'error': True, 'response': form.errors}))
     context = {'form': form, 'category_name':category_name}
     return render(request, 'category_add.html', context)
 

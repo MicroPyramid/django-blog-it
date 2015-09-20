@@ -1,56 +1,60 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title></title>
-</head>
-<body>
-<form action="" method="post" enctype="multipart/form-data" id="post-form">
-    {% csrf_token %}
-     <div class="form_group">
-          <span class='control_label'>Title</span>
-          <div class="form_control">
-            <input id="title" type="text" name="title" class='post_maker_form_input' value="{{ blog_name.title }}">
-          </div>
-     </div>
-     <div class="form_group">
-          <span class='control_label'>Post</span>
-          <div class="form_control">
-             <textarea id='content' name="content" rows="10" cols="50">{{ blog_name.content }}</textarea>
-          </div>
-     </div>
+{% extends 'base.html' %}
+    {% block title %} - Add Blog{% endblock %}
+    {% block content %}
+    <div class="container">
+        <div class="row">
+            <h1 id="page_title"></h1>
+        </div>
+        <div class="row">
+            <form action="" method="post" enctype="multipart/form-data" id="post-form">
+                {% csrf_token %}
+                 <div class="form-group">
+                      <span class='control_label'>Title</span>
+                      <div class="form_control">
+                        <input id="title" type="text" name="title" class='form-control post_maker_form_input' value="{{ blog_name.title }}">
+                      </div>
+                 </div>
+                 <div class="form_group">
+                      <span class='control_label'>Post</span>
+                      <div class="form_control">
+                         <textarea id='content' class="form-control" name="content" rows="10" cols="50">{{ blog_name.content }}</textarea>
+                      </div>
+                 </div>
 
-     <div class="form_group">
-         <span class="control_label">Category :</span>
-         <div class="form_control">
-             <select id="category" name="category" class="form-control">
-                 <option value="" default>---------</option>
-                 {% for category in categories_list %}
-                    <option value="{{ category.id }}" {% ifequal blog_name.category category %}selected{% endifequal %}>{{ category }}</option>
-                 {% endfor %}
-             </select>
-         </div>
-     </div>
+                 <div class="form-group">
+                     <span class="control_label">Category :</span>
+                     <div class="form_control">
+                         <select id="category" name="category" class="form-control">
+                             <option value="" default>---------</option>
+                             {% for category in categories_list %}
+                                <option value="{{ category.id }}" {% ifequal blog_name.category category %}selected{% endifequal %}>{{ category }}</option>
+                             {% endfor %}
+                         </select>
+                     </div>
+                 </div>
 
-    <div class="form_group">
-         <span class="control_label">Status :</span>
-         <div class="form_control">
-             <select id="status" name="" class="form-control">
-                 <option value="" default>---------</option>
-                 {% for key,choice in status_choices %}
-                    <option value="{{ key }}" {% ifequal blog_name.status key %}selected{% endifequal %} >{{ choice }}</option>
-                 {% endfor %}
-             </select>
-         </div>
-     </div>
-
-    <button type="submit">Post</button>
-</form>
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+                <div class="form-group">
+                     <span class="control_label">Status :</span>
+                     <div class="form_control">
+                         <select id="status" name="status" class="form-control">
+                             <option value="" default>---------</option>
+                             {% for key,choice in status_choices %}
+                                <option value="{{ key }}" {% ifequal blog_name.status key %}selected{% endifequal %} >{{ choice }}</option>
+                             {% endfor %}
+                         </select>
+                     </div>
+                 </div>
+                <div class="form-group">
+                    <button class="btn btn-primary" type="submit">Post</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endblock %}
+    {% block js_script %}
     <script type="text/javascript">
-        $('#post-form').ajaxForm(function(){
-
+        $('#post-form').submit(function(event){
+            event.preventDefault();
             $.post("",$('#post-form').serialize(), function(data){
                 if(data.error){
                     $('p.error_required').remove();
@@ -59,9 +63,18 @@
                     }
                 }else{
                     alert(data['response']);
+                    window.location='/blog/';
                 }
             }, 'json');
         });
     </script>
-</body>
-</html>
+    <script type="text/javascript">
+        if(window.location.pathname=='/blog/add/'){
+            $('#page_title').text('Add Blog');
+        }
+        else{
+            var blog = '{{ blog_name.title }}';
+            $('#page_title').text('Edit Blog: '+ blog);
+        }
+    </script>
+    {% endblock %}

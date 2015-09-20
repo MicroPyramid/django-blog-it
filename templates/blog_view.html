@@ -1,24 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title></title>
-</head>
-<body>
-        <table style="border: 1px solid black;padding: 4px;margin: 4px;" border="1">
-
-        <tbody>
-            <tr>
-                <td>{{ blog_name.title }}</td>
-            </tr>
-            <tr>
-                <td>{{ blog_name.user }}</td>
-            </tr>
-            <tr>
-                <td>{{ blog_name.content }}</td>
-            </tr>
-        </tbody>
-
-    </table>
-</body>
-</html>
+{% extends 'base.html' %}
+    {% block title %} - View{% endblock %}
+    {% block content %}
+    <div class="container">
+        <div class="row">
+            <table class="table table-bordered">
+                <thead>
+                    <th>
+                        Title: {{ blog_name.title }}
+                    </th>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Author</strong>: {{ blog_name.user }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Content</strong>: {{ blog_name.content }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    <!-- end div of row -->
+    </div>
+    <!-- end div of container -->
+    {% endblock %}

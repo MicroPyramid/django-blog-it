@@ -1,40 +1,50 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title></title>
-</head>
-<body>
-    <form action="" id="post-form" enctype="multipart/form-data" method="post">
-        {% csrf_token %}
-        <div class="form_group">
-          <span class='control_label'>Name:</span>
-          <div class="form_control">
-            <input id="name" type="text" maxlength="20" name="name" value="{{ category_name.name }}">
-          </div>
+{% extends 'base.html' %}
+    {% block title %} - Add Category{% endblock %}
+    {% block content %}
+        <div class="container">
+            <div class="row">
+                <h1 id="page_title"></h1>
+            </div>
+            <!-- end class of row -->
+            <div class="row">
+                <form action="" id="post-form" enctype="multipart/form-data" method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                      <span class='control_label'>Name:</span>
+                      <div class="form_control">
+                        <input id="name" class="form-control" type="text" maxlength="20" name="name" value="{{ category_name.name }}">
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <span class='control_label'>Description:</span>
+                      <div class="form_control">
+                        <input id="description" class="form-control" type="text" maxlength="500" name="description" value="{{ category_name.description }}">
+                      </div>
+                    </div>
+
+                    <div class="checkbox">
+                      <span class='control_label'>Is active:</span>
+                      <div class="form_control">
+                          <label>
+                            <input id="is_active" type="checkbox" name="is_active" {% if category_name.is_active %}checked{% endif %}>
+                          </label>
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                        <button class="btn btn-primary" type="submit">Submit</button>
+                    </div>
+                </form>
+            </div>
+            <!-- end div row of form -->
         </div>
-
-        <div class="form_group">
-          <span class='control_label'>Description:</span>
-          <div class="form_control">
-            <input id="description" type="text" maxlength="500" name="description" value="{{ category_name.description }}">
-          </div>
-        </div>
-
-        <div class="form_group">
-          <span class='control_label'>Is active:</span>
-          <div class="form_control">
-            <input id="is_active" type="checkbox" name="is_active" {% if category_name.is_active %}checked{% endif %}>
-          </div>
-        </div>
-
-
-        <button type="submit">Submit</button>
-    </form>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+        <!-- end div container -->
+    {% endblock %}
+    {% block js_script %}
     <script type="text/javascript">
-        $('#post-form').ajaxForm(function(){
-
+        $('#post-form').submit(function(event){
+            event.preventDefault();
             $.post("",$('#post-form').serialize(), function(data){
                 if(data.error){
                     $('p.error_required').remove();
@@ -43,9 +53,19 @@
                     }
                 }else{
                     alert(data['response']);
+                    window.location='/blog/category/';
                 }
             }, 'json');
         });
     </script>
-</body>
-</html>
+    <script type="text/javascript">
+        console.log(window.location.pathname);
+        if(window.location.pathname == '/blog/add_category/'){
+            $('#page_title').text('Add Category');
+        }
+        else {
+            $('#page_title').text('Edit Category');
+        }
+
+    </script>
+    {% endblock %}
