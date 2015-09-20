@@ -55,5 +55,5 @@ docs/_build/
 
 # PyBuilder
 target/
-/migrations/
+migrations/
 .idea/
