@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+    {% block title %} - Categories{% endblock %}
+    {% block extra_css %}
+    <style type="text/css">
+        table td {
+            padding: 6px;
+        }
+    </style>
+    {% endblock %}
+    {% block content %}
+   <div class="container">
+
+        <div class="row">
+            <p class="lead"><a href="{% url 'blog:add_category' %}" ><button class="btn btn-default">Add Category</button></a></p>
+             <!-- end div of add blog button -->
+        </div>
+
+        <div class="row">
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <th>S.No</th>
+                    <th>Title</th>
+                    <th>Status</th>
+                    <th colspan="2">Actions</th>
+                </thead>
+
+                {% for category in categories_list %}
+                    <tbody>
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ category.name }}</td>
+                            <td id="category_status"><i class=""></i> {{ category.is_active }}</td>
+                            <td><a href="{% url 'blog:edit_category' category_id=category.id %}"><button class="btn btn-info"><i class="fa fa-edit"></i> Edit</button></a></td>
+                            <td><a href="{% url 'blog:delete_category' category_id=category.id %}"><button class="btn btn-danger"><i class="fa fa-trash-o"></i> Delete</button></a></td>
+                        </tr>
+                    </tbody>
+
+                {% endfor %}
+            </table>
+            <!-- end div of table -->
+        </div>
+    <!-- end div of container -->
+    </div>
+    {% endblock %}
+    {% block js_script %}
+        <script type="text/javascript">
+            $('table tr td:nth-child(3)').each(function(){
+                var category_status = $(this).text();
+                if(category_status == ' True'){
+                    $(this).children('i').attr('class','fa fa-check-square-o');
+                }
+                else if(category_status == ' False'){
+                    $(this).children('i').attr('class','fa fa-minus-square-o');
+                }
+            });
+        </script>
+    {% endblock %}

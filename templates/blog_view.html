@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+    {% block title %} - View{% endblock %}
+    {% block content %}
+    <div class="container">
+        <div class="row">
+            <table class="table table-bordered">
+                <thead>
+                    <th>
+                        Title: {{ blog_name.title }}
+                    </th>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Author</strong>: {{ blog_name.user }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Content</strong>: {{ blog_name.content }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    <!-- end div of row -->
+    </div>
+    <!-- end div of container -->
+    {% endblock %}
