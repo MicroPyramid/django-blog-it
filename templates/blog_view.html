@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load post_keywords %}
     {% block title %} - View{% endblock %}
     {% block content %}
 
@@ -15,6 +16,9 @@
                 </tr>
                 <tr>
                     <td><strong>Content</strong>: {{ blog_name.content }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Keywords</strong>: {{ blog_name.keywords|safe }}</td>
                 </tr>
             </tbody>
         </table>

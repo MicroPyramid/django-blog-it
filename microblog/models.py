@@ -69,6 +69,7 @@ class Post(models.Model):
     category = models.ForeignKey(Category)
     tags = models.ManyToManyField(Tags, related_name='rel_posts', blank=True)
     status = models.CharField(max_length=2, choices=STATUS_CHOICE, blank=True)
+    keywords = models.TextField(max_length=500, blank=False)
 
     def __str__(self):
         return self.title

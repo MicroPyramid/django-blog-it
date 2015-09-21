@@ -14,10 +14,17 @@
                     <input id="title" type="text" name="title" class='form-control post_maker_form_input' value="{{ blog_name.title }}">
                   </div>
              </div>
-             <div class="form_group">
+             <div class="form-group">
                   <span class='control_label'>Post</span>
                   <div class="form_control">
                      <textarea id='content' class="form-control" name="content" rows="10" cols="50">{{ blog_name.content }}</textarea>
+                  </div>
+             </div>
+
+            <div class="form-group">
+                  <span class='control_label'>KeyWords</span>
+                  <div class="form_control">
+                     <textarea id='keywords' class="form-control" name="keywords" rows="10" cols="50">{{ blog_name.keywords }}</textarea>
                   </div>
              </div>
 

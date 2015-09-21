@@ -22,11 +22,9 @@ def view_blog(request, blog_id):
 
 
 def blog_add(request):
-    form = BlogPostForm()
     categories_list = Category.objects.all()
     if request.method == "POST":
-        blog_data = request.POST
-        form = BlogPostForm(blog_data)
+        form = BlogPostForm(request.POST)
         if form.is_valid():
             blog_post = form.save(commit=False)
             blog_post.user = request.user
@@ -41,7 +39,7 @@ def blog_add(request):
         else:
             data = {'error': True, 'response': form.errors}
         return HttpResponse(json.dumps(data))
-    context = {'form': form, 'status_choices': STATUS_CHOICE, 'categories_list': categories_list}
+    context = {'status_choices': STATUS_CHOICE, 'categories_list': categories_list}
     return render(request, 'blog_add.html', context)
 
 
@@ -58,7 +56,6 @@ def edit_blog(request, blog_id):
                 blog_post.status = 'P'
             elif request.POST.get('status') == 'T':
                 blog_post.status = 'T'
-            blog_post.save()
             blog_post.save()
 
             data = {'errors': False, 'response': 'Successfully updated your blog post'}
