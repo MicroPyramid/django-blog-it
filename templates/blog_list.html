@@ -24,6 +24,7 @@
                     <th>S.No</th>
                     <th>Title</th>
                     <th>Author</th>
+                    <th>Category</th>
                     <th>Status</th>
                     <th colspan="3">Actions</th>
                 </thead>
@@ -34,6 +35,7 @@
                             <td>{{ forloop.counter }}</td>
                             <td>{{ blog.title }}</td>
                             <td>{{ blog.user }}</td>
+                            <td>{{ blog.category }}</td>
                             <td id="blog_status"><i class=""></i> {{ blog.status }}</td>
                             <td><a href="{% url 'blog:view_blog' blog_id=blog.id %}" ><button class="btn btn-primary"><i class="fa fa-list"></i> View</button></a></td>
                             <td><a href="{% url 'blog:edit_blog' blog_id=blog.id %}"><button class="btn btn-info"><i class="fa fa-edit"></i> Edit</button></a></td>
@@ -49,7 +51,7 @@
     {% endblock %}
     {% block js_script %}
         <script type="text/javascript">
-            $('table tr td:nth-child(4)').each(function(){
+            $('table tr td#blog_status').each(function(){
                 var status_val = $(this).text();
                 console.log(status_val);
                 if(status_val == ' D'){
