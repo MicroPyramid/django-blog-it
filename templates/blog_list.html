@@ -7,10 +7,14 @@
     </style>
     {% endblock %}
     {% block content %}
-    <div class="container">
 
         <div class="row">
-            <p class="lead"><a href="{% url 'blog:blog_add' %}" ><button class="btn btn-default">Add Blog</button></a></p>
+            <h1 align="center"><i class="fa fa-list"></i> Blog List </h1>
+            <p align="center" class="lead">
+                <a href="{% url 'blog:blog_add' %}" >
+                    <button class="btn btn-default"><i class="fa fa-plus"></i> Add Blog</button>
+                </a>
+            </p>
         <!-- end div of add blog button -->
         </div>
 
@@ -39,10 +43,9 @@
 
                 {% endfor %}
             </table>
-            <!-- end div of table -->
+        <!-- end div of table -->
         </div>
-    <!-- end div of container -->
-    </div>
+
     {% endblock %}
     {% block js_script %}
         <script type="text/javascript">
@@ -59,7 +62,7 @@
                     $(this).children('i').attr('class',"fa fa-thumbs-down");
                 }
             });
-            console.log($('#blog_status').text());
+            $('#home').addClass('active');
 
         </script>
     {% endblock %}

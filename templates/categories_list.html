@@ -8,10 +8,14 @@
     </style>
     {% endblock %}
     {% block content %}
-   <div class="container">
 
         <div class="row">
-            <p class="lead"><a href="{% url 'blog:add_category' %}" ><button class="btn btn-default">Add Category</button></a></p>
+            <h1 align="center"><i class="fa fa-list"></i> Categories list</h1>
+            <p align="center" class="lead">
+                <a href="{% url 'blog:add_category' %}" >
+                    <button class="btn btn-default"><i class="fa fa-plus"></i> Add Category</button>
+                </a>
+            </p>
              <!-- end div of add blog button -->
         </div>
 
@@ -39,8 +43,6 @@
             </table>
             <!-- end div of table -->
         </div>
-    <!-- end div of container -->
-    </div>
     {% endblock %}
     {% block js_script %}
         <script type="text/javascript">
@@ -53,5 +55,6 @@
                     $(this).children('i').attr('class','fa fa-minus-square-o');
                 }
             });
+            $('#categories').addClass('active');
         </script>
     {% endblock %}

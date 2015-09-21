@@ -11,10 +11,19 @@
     {% endblock %}
 </head>
 <body>
-
-{% block content %}
-{% endblock %}
-
+        <div class="container">
+            {% block menu_block %}
+            <div class="row">
+                <ul class="nav nav-pills">
+                  <li role="presentation" id="home"><a href="/blog">Home</a></li>
+                  <li role="presentation" id="categories"><a href="{% url 'blog:categories' %}">Categories</a></li>
+                </ul>
+            </div>
+            {% endblock %}
+            {% block content %}
+            {% endblock %}
+        </div>
+        <!-- end div container -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 

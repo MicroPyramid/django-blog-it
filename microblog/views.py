@@ -72,19 +72,17 @@ def categories(request):
 
 
 def add_category(request):
-    form = BlogCategory()
+
     if request.method == 'POST':
-        category_data = request.POST
-        print category_data.name
-        form = BlogCategory(category_data)
+        form = BlogCategory(request.POST)
         if form.is_valid():
             form.save()
 
             return HttpResponse(json.dumps({'error': False, 'response': 'Successfully added your category'}))
         else:
             return HttpResponse(json.dumps({'error': True, 'response': form.errors}))
-    context = {'form': form}
-    return render(request, 'category_add.html', context)
+
+    return render(request, 'category_add.html')
 
 
 def edit_category(request, category_id):

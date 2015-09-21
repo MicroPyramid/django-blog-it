@@ -7,13 +7,9 @@ from django.core.exceptions import ObjectDoesNotExist
 
 class Category(models.Model):
     name = models.CharField(max_length=20, unique=True)
-    slug = models.CharField(max_length=20, unique=True)
+    slug = models.SlugField(unique=True)
     description = models.CharField(max_length=500)
     is_active = models.BooleanField(default=False)
-
-    def save(self, *args, **kwargs):
-        self.slug = slugify(self.name)
-        super(Category, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.name
