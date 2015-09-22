@@ -82,7 +82,6 @@ def add_category(request):
     if request.method == 'POST':
         form = BlogCategoryForm(request.POST)
         if form.is_valid():
-            print 'alskdfjasf'*10
             form.save()
 
             data = {'error': False, 'response': 'Successfully added your category'}
