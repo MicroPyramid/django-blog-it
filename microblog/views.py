@@ -51,11 +51,11 @@ def edit_blog(request, blog_id):
         if form.is_valid():
             blog_post = form.save(commit=False)
             blog_post.user = request.user
-            blog_post.status = 'D'
-            if request.POST.get('status') == 'P':
-                blog_post.status = 'P'
-            elif request.POST.get('status') == 'T':
-                blog_post.status = 'T'
+            blog_post.status = 'Drafted'
+            if request.POST.get('status') == 'Published':
+                blog_post.status = 'Published'
+            elif request.POST.get('status') == 'Rejected':
+                blog_post.status = 'Rejected'
             blog_post.save()
 
             data = {'errors': False, 'response': 'Successfully updated your blog post'}
@@ -82,6 +82,7 @@ def add_category(request):
     if request.method == 'POST':
         form = BlogCategoryForm(request.POST)
         if form.is_valid():
+            print 'alskdfjasf'*10
             form.save()
 
             data = {'error': False, 'response': 'Successfully added your category'}
@@ -91,13 +92,13 @@ def add_category(request):
     return render(request, 'category_add.html')
 
 
-def edit_category(request, category_id):
-    category_name = Category.objects.get(id=category_id)
+def edit_category(request, category_slug):
+    category_name = Category.objects.get(slug=category_slug)
     if request.method == 'POST':
-        category_data = request.POST
-        form = BlogCategoryForm(category_data, instance=category_name)
+        form = BlogCategoryForm(request.POST, instance=category_name)
         if form.is_valid():
             form.save()
+
             data = {'error': False, 'response': 'Successfully updated your category'}
         else:
             data = {'error': True, 'response': form.errors}
@@ -106,7 +107,7 @@ def edit_category(request, category_id):
     return render(request, 'category_add.html', context)
 
 
-def delete_category(request, category_id):
-    category = Category.objects.get(id=category_id)
+def delete_category(request, category_slug):
+    category = Category.objects.get(slug=category_slug)
     category.delete()
     return HttpResponseRedirect('/blog/category/')

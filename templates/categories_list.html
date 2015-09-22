@@ -34,8 +34,8 @@
                             <td>{{ forloop.counter }}</td>
                             <td>{{ category.name }}</td>
                             <td id="category_status"><i class=""></i> {{ category.is_active }}</td>
-                            <td><a href="{% url 'blog:edit_category' category_id=category.id %}"><button class="btn btn-info"><i class="fa fa-edit"></i> Edit</button></a></td>
-                            <td><a href="{% url 'blog:delete_category' category_id=category.id %}"><button class="btn btn-danger"><i class="fa fa-trash-o"></i> Delete</button></a></td>
+                            <td><a href="{% url 'blog:edit_category' category_slug=category.slug %}"><button class="btn btn-info"><i class="fa fa-edit"></i> Edit</button></a></td>
+                            <td><a href="{% url 'blog:delete_category' category_slug=category.slug %}"><button class="btn btn-danger"><i class="fa fa-trash-o"></i> Delete</button></a></td>
                         </tr>
                     </tbody>
 

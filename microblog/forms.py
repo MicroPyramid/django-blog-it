@@ -14,10 +14,19 @@ class BlogCategoryForm(ModelForm):
         model = Category
         exclude = ('slug',)
 
-    def clean_name(self):
-        clean_data = self.cleaned_data
+    # def clean_name(self):
+    #     clean_data = self.cleaned_data
+    #     if Category.objects.filter(name__icontains=clean_data['name']).exists():
+    #         raise forms.ValidationError('Name already exists')
+    #     return clean_data['name']
 
-        if Category.objects.filter(slug=slugify(clean_data['name'])).exists():
-            raise forms.ValidationError('Slug already created with this name')
-        return clean_data['name']
+    # def __init__(self, *args, **kwargs):
+    #     super(BlogCategoryForm, self).__init__(*args, **kwargs)
+    #
+    # def save(self):
+    #     instance = super(BlogCategoryForm, self).save(commit=False)
+    #     form_data = self.cleaned_data
+    #     instance.slug= slugify(form_data['name'])
+    #     instance.save()
+    #     return instance
 

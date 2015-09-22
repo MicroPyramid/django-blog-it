@@ -18,10 +18,6 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
-    @property
-    def get_url(self):
-        return settings.SITE_BLOG_URL + "category/" + self.slug
-
 
 class Tags(models.Model):
     name = models.CharField(max_length=20, unique=True)
@@ -52,9 +48,9 @@ def create_tag_slug(tempslug):
             return tempslug
 
 STATUS_CHOICE = (
-                    ('D', 'Draft'),
-                    ('P', 'Published'),
-                    ('T', 'Rejected'),
+                    ('Drafted', 'Draft'),
+                    ('Published', 'Published'),
+                    ('Rejected', 'Rejected'),
                     )
 
 
@@ -68,40 +64,11 @@ class Post(models.Model):
     content = models.TextField()
     category = models.ForeignKey(Category)
     tags = models.ManyToManyField(Tags, related_name='rel_posts', blank=True)
-    status = models.CharField(max_length=2, choices=STATUS_CHOICE, blank=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICE, blank=True)
     keywords = models.TextField(max_length=500, blank=False)
 
     def __str__(self):
         return self.title
-
-    @property
-    def author(self):
-        return self.user.first_name + ' ' + self.user.last_name
-
-    def save(self, *args, **kwargs):
-        tempslug = slugify(self.title)
-        if self.id:
-            blogpost = Post.objects.get(pk=self.id)
-            if blogpost.title != self.title:
-                self.slug = create_slug(tempslug)
-        else:
-            self.slug = create_slug(tempslug)
-
-        super(Post, self).save(*args, **kwargs)
-
-    @property
-    def get_url(self):
-        return settings.SITE_BLOG_URL + self.slug
-
-    def is_editable_by(self, user):
-        if self.user == user or user.is_superuser:
-            return True
-        return False
-
-    def is_deletable_by(self, user):
-        if self.user == user or user.is_superuser:
-            return True
-        return False
 
 
 def create_slug(tempslug):

@@ -9,7 +9,7 @@ urlpatterns = patterns('',
     url(r'^edit/(?P<blog_id>[0-9]+)/$', edit_blog, name='edit_blog'),
     url(r'^add_category/$', add_category, name='add_category'),
     url(r'^category/$', categories, name='categories'),
-    url(r'^delete_category/(?P<category_id>[0-9]+)/$', delete_category, name='delete_category'),
-    url(r'^edit_category/(?P<category_id>[0-9]+)/$', edit_category, name='edit_category'),
+    url(r'^delete_category/(?P<category_slug>[-\w]+)/$', delete_category, name='delete_category'),
+    url(r'^edit_category/(?P<category_slug>[-\w]+)/$', edit_category, name='edit_category'),
 
 )
