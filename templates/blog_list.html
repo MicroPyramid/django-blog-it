@@ -15,23 +15,48 @@
                     <button class="btn btn-default"><i class="fa fa-plus"></i> Add Blog</button>
                 </a>
             </p>
+
         <!-- end div of add blog button -->
+
+            <div class="bulk_button">
+               <!-- Bulk actions -->
+                <div class="btn-group">
+                  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span class="fa fa-gear"></span> Bulk <span class="caret"></span>
+                    <span class="sr-only">Toggle Dropdown</span>
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li id="drafted"><a href="#"> Drafted <span class="fa fa-file pull-right"></span></a></li>
+                    <li id="published"><a href="#"> Published <span class="fa fa-thumbs-up pull-right"></span></a></li>
+                    <li id="rejected"><a href="#"> Rejected <span class="fa fa-thumbs-down pull-right"></span></a></li>
+                    <li id="delete"><a href="#"> Delete <span class="fa fa-trash-o pull-right"></span></a></li>
+                  </ul>
+                </div>
+              <!--Bulk actions end-->
+            </div>
+
         </div>
+
+        <br clear="all">
 
         <div class="row">
             <table class="table table-bordered table-hover">
                 <thead>
-                    <th>S.No</th>
-                    <th>Title</th>
-                    <th>Author</th>
-                    <th>Category</th>
-                    <th>Status</th>
-                    <th colspan="3">Actions</th>
+                    <tr>
+                        <th><input name="bulk_actions" id="selectAll" type="checkbox"></th>
+                        <th>S.No</th>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>Category</th>
+                        <th>Status</th>
+                        <th colspan="3">Actions</th>
+                    </tr>
                 </thead>
 
                 {% for blog in blog_list %}
                     <tbody>
                         <tr>
+                            <td><input name="bulk_actions" class="bulk_actions" value="{{ blog.id }}" type="checkbox"></td>
                             <td>{{ forloop.counter }}</td>
                             <td>{{ blog.title }}</td>
                             <td>{{ blog.user }}</td>
@@ -46,6 +71,8 @@
                 {% endfor %}
             </table>
         <!-- end div of table -->
+
+
         </div>
 
     {% endblock %}
@@ -54,17 +81,95 @@
             $('table tr td#blog_status').each(function(){
                 var status_val = $(this).text();
                 console.log(status_val);
-                if(status_val == ' D'){
+                if(status_val == ' Drafted'){
                     $(this).children('i').attr('class',"fa fa-file-o");
                 }
-                else if(status_val == ' P'){
+                else if(status_val == ' Published'){
                     $(this).children('i').attr('class',"fa fa-thumbs-up");
                 }
-                else if(status_val == ' T'){
+                else if(status_val == ' Rejected'){
                     $(this).children('i').attr('class',"fa fa-thumbs-down");
                 }
             });
             $('#home').addClass('active');
 
         </script>
+
+        <script type="text/javascript">
+        $("#selectAll").change(function() {
+            $(".bulk_actions:checkbox").attr('checked', this.checked);
+        });
+
+        $('#published').click(function(){
+
+            var blog_ids = [];
+            $.each($(".bulk_actions:checked"), function(){
+                blog_ids.push(parseInt($(this).val(), 0));
+            });
+
+            $.get("{% url 'blog:bulk_actions_blog' %}", {'blog_ids':blog_ids, 'action': "Published"}, function(data){
+                if(data['response']=='success'){
+                    alert('Record(s) successfully updated as Published!');
+                    window.location='/blog/';
+                }else{
+                    alert('Please select at least one record !');
+                }
+            }, 'json');
+
+        });
+
+        $('#drafted').click(function(){
+
+            var blog_ids = [];
+            $.each($(".bulk_actions:checked"), function(){
+                blog_ids.push(parseInt($(this).val(), 0));
+            });
+
+            $.get("{% url 'blog:bulk_actions_blog' %}", {'blog_ids':blog_ids, 'action': 'Drafted'}, function(data){
+                if(data['response']=='success'){
+                    alert('Record(s) successfully updated as Drafted!');
+                    window.location='/blog/';
+                }else{
+                    alert('Please select at least one record !');
+                }
+            }, 'json');
+
+        });
+
+        $('#rejected').click(function(){
+
+            var blog_ids = [];
+            $.each($(".bulk_actions:checked"), function(){
+                blog_ids.push(parseInt($(this).val(), 0));
+            });
+
+            $.get("{% url 'blog:bulk_actions_blog' %}", {'blog_ids':blog_ids, 'action': 'Rejected'}, function(data){
+                if(data['response']=='success'){
+                    alert('Record(s) successfully updated as Rejected!');
+                    window.location='/blog/';
+                }else{
+                    alert('Please select at least one record !');
+                }
+            }, 'json');
+
+        });
+
+        $('#delete').click(function(){
+            var blog_ids = [];
+            $.each($(".bulk_actions:checked"), function(){
+                blog_ids.push(parseInt($(this).val(), 0));
+            });
+
+            $.get("{% url 'blog:bulk_actions_blog' %}", {'blog_ids':blog_ids, 'action': 'Delete'}, function(data){
+                if(data['response']=='success'){
+                    alert('Record(s) successfully Deleted!');
+                    window.location='/blog/';
+                }else{
+                    alert('Please select at least one record !');
+                }
+            }, 'json');
+
+        });
+        </script>
+
     {% endblock %}

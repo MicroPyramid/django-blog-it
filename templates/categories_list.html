@@ -10,30 +10,60 @@
     {% block content %}
 
         <div class="row">
-            <h1 align="center"><i class="fa fa-list"></i> Categories list</h1>
+            <h1 align="center"><i class="fa fa-database"></i> Categories list</h1>
             <p align="center" class="lead">
                 <a href="{% url 'blog:add_category' %}" >
                     <button class="btn btn-default"><i class="fa fa-plus"></i> Add Category</button>
                 </a>
             </p>
              <!-- end div of add blog button -->
+
+            <div class="bulk_button full-left">
+               <!-- Bulk actions -->
+                <div class="btn-group">
+                  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span class="fa fa-gear"></span> Bulk <span class="caret"></span>
+                    <span class="sr-only">Toggle Dropdown</span>
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li id="true"><a href="#"> Active <span class="fa fa-check-square-o pull-right"></span></a></li>
+                    <li id="false"><a href="#"> Inactive <span class="fa fa-minus-square-o pull-right"></span></a></li>
+                    <li id="delete"><a href="#"> Delete <span class="fa fa-trash-o pull-right"></span></a></li>
+                  </ul>
+                </div>
+              <!--Bulk actions end-->
+            </div>
+
         </div>
+
+        <br clear="all">
 
         <div class="row">
             <table class="table table-bordered table-hover">
                 <thead>
-                    <th>S.No</th>
-                    <th>Title</th>
-                    <th>Status</th>
-                    <th colspan="2">Actions</th>
+                    <tr>
+                        <th><input name="bulk_actions" id="selectAll" type="checkbox"></th>
+                        <th>S.No</th>
+                        <th>Title</th>
+                        <th>Status</th>
+                        <th colspan="2">Actions</th>
+                    </tr>
                 </thead>
 
                 {% for category in categories_list %}
                     <tbody>
                         <tr>
+                            <td><input name="bulk_actions" class="bulk_actions" value="{{ category.id }}" type="checkbox"></td>
                             <td>{{ forloop.counter }}</td>
                             <td>{{ category.name }}</td>
-                            <td id="category_status"><i class=""></i> {{ category.is_active }}</td>
+
+                            {% if category.is_active %}
+                                <td><i class="fa fa-check-square-o"></i> Active</td>
+                            {% else %}
+
+                                <td><i class="fa fa-minus-square-o"></i> Inactive</td>
+                            {% endif %}
+
                             <td><a href="{% url 'blog:edit_category' category_slug=category.slug %}"><button class="btn btn-info"><i class="fa fa-edit"></i> Edit</button></a></td>
                             <td><a href="{% url 'blog:delete_category' category_slug=category.slug %}"><button class="btn btn-danger"><i class="fa fa-trash-o"></i> Delete</button></a></td>
                         </tr>
@@ -42,19 +72,71 @@
                 {% endfor %}
             </table>
             <!-- end div of table -->
+
         </div>
     {% endblock %}
     {% block js_script %}
         <script type="text/javascript">
-            $('table tr td:nth-child(3)').each(function(){
-                var category_status = $(this).text();
-                if(category_status == ' True'){
-                    $(this).children('i').attr('class','fa fa-check-square-o');
-                }
-                else if(category_status == ' False'){
-                    $(this).children('i').attr('class','fa fa-minus-square-o');
-                }
-            });
             $('#categories').addClass('active');
+        </script>
+
+
+        <script type="text/javascript">
+            $("#selectAll").change(function() {
+                $(".bulk_actions:checkbox").attr('checked', this.checked);
+            });
+            $('#true').click(function(){
+
+                var blog_ids = [];
+                $.each($(".bulk_actions:checked"), function(){
+                    blog_ids.push(parseInt($(this).val(), 0));
+                });
+
+                $.get("{% url 'blog:bulk_actions_category' %}", {'blog_ids':blog_ids, 'action': 'True'}, function(data){
+                    if(data['response']=='success'){
+                        alert('Record(s) successfully updated as Active!');
+                        window.location='/blog/category/';
+                    }else{
+                        alert('Please select at least one record !');
+                    }
+                }, 'json');
+
+            });
+
+            $('#false').click(function(){
+
+                var blog_ids = [];
+                $.each($(".bulk_actions:checked"), function(){
+                    blog_ids.push(parseInt($(this).val(), 0));
+                });
+                console.log(blog_ids);
+
+                $.get("{% url 'blog:bulk_actions_category' %}", {'blog_ids':blog_ids, 'action': 'False'}, function(data){
+                    if(data['response']=='success'){
+                        alert('Record(s) successfully updated as Inactive!');
+                        window.location='/blog/category/';
+                    }else{
+                        alert('Please select at least one record !');
+                    }
+                }, 'json');
+
+            });
+
+            $('#delete').click(function(){
+                var blog_ids = [];
+                $.each($(".bulk_actions:checked"), function(){
+                    blog_ids.push(parseInt($(this).val(), 0));
+                });
+
+                $.get("{% url 'blog:bulk_actions_category' %}", {'blog_ids':blog_ids, 'action': 'Delete'}, function(data){
+                    if(data['response']=='success'){
+                        alert('Record(s) successfully Deleted!');
+                        window.location='/blog/category/';
+                    }else{
+                        alert('Please select at least one record !');
+                    }
+                }, 'json');
+
+            });
         </script>
     {% endblock %}

@@ -28,11 +28,11 @@ def blog_add(request):
         if form.is_valid():
             blog_post = form.save(commit=False)
             blog_post.user = request.user
-            blog_post.status = 'D'
-            if request.POST.get('status') == 'P':
-                blog_post.status = 'P'
-            elif request.POST.get('status') == 'T':
-                blog_post.status = 'T'
+            blog_post.status = 'Drafted'
+            if request.POST.get('status') == 'Published':
+                blog_post.status = 'Published'
+            elif request.POST.get('status') == 'Rejected':
+                blog_post.status = 'Rejected'
             blog_post.save()
 
             data = {'error': False, 'response': 'Successfully posted your blog'}
@@ -110,3 +110,41 @@ def delete_category(request, category_slug):
     category = Category.objects.get(slug=category_slug)
     category.delete()
     return HttpResponseRedirect('/blog/category/')
+
+
+def bulk_actions_blog(request):
+    if request.method == 'GET':
+        if 'blog_ids[]' in request.GET:
+
+            if request.GET.get('action') == 'Published' or request.GET.get('action') == 'Drafted' or request.GET.get('action') == 'Rejected':
+                Post.objects.filter(id__in=request.GET.getlist('blog_ids[]')).update(
+                    status=request.GET.get('action'))
+
+            if request.GET.get('action') == 'Delete':
+                Post.objects.filter(id__in=request.GET.getlist('blog_ids[]')).delete()
+
+            return HttpResponse(json.dumps({'response': 'success'}))
+        else:
+            return HttpResponse(json.dumps({'response': 'fail'}))
+
+    return render(request, '/blog/')
+
+
+def bulk_actions_category(request):
+    if request.method == 'GET':
+        if 'blog_ids[]' in request.GET:
+            if request.GET.get('action') == 'True':
+                Category.objects.filter(id__in=request.GET.getlist('blog_ids[]')).update(
+                    is_active=True)
+            if request.GET.get('action') == 'False':
+                Category.objects.filter(id__in=request.GET.getlist('blog_ids[]')).update(
+                    is_active=False)
+
+            if request.GET.get('action') == 'Delete':
+                Category.objects.filter(id__in=request.GET.getlist('blog_ids[]')).delete()
+
+            return HttpResponse(json.dumps({'response': 'success'}))
+        else:
+            return HttpResponse(json.dumps({'response': 'fail'}))
+
+    return render(request, '/blog/category/')
