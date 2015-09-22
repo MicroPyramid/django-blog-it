@@ -28,6 +28,32 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 
+    <script type="text/javascript">
+
+        // for pagination
+
+        $('.pagination li a.active').each(function(){
+            $(this).css('background', '#337AB7');
+            $(this).css('color', '#fff');
+        });
+
+       if($('.pagination li:first').find('a span').text() == '<<'){
+            $('.pagination li:first').find('a span').text('First');
+        }
+
+        if($('.pagination li:nth-child(2)').find('a span').text() == '<'){
+            $('.pagination li:nth-child(2)').find('a span').text('Prev');
+        }
+
+        if($('.pagination li:last').find('a span').text() == '>>'){
+            $('.pagination li:last').find('a span').text('Last');
+        }
+        if($('.pagination li:nth-last-child(2)').find('a span').text() == '>'){
+            $('.pagination li:nth-last-child(2)').find('a span').text('Next');
+        }
+
+    </script>
+
     {% block js_script %}
     {% endblock %}
 

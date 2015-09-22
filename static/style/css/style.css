@@ -1,3 +1,11 @@
-table th, td {
+#my_table td {
+	text-align: center;
+}
+
+#my_table th {
+	text-align: center;
+}
+
+.pagination_wrap {
 	text-align: center;
 }
