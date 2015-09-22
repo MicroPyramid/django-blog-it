@@ -3,7 +3,7 @@
     {% block content %}
 
 
-        <div class="row">
+        <div class="row" id="head_style">
             <h1 id="page_title"></h1>
         </div>
         <!-- end class of row -->
@@ -59,7 +59,7 @@
         });
     </script>
     <script type="text/javascript">
-        console.log(window.location.pathname);
+
         if(window.location.pathname == '/blog/add_category/'){
             $('#page_title').text('Add Category');
         }

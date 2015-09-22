@@ -9,7 +9,7 @@
     {% endblock %}
     {% block content %}
 
-        <div class="row">
+        <div class="row" id="head_style">
             <h1 align="center"><i class="fa fa-newspaper-o"></i> Blog List </h1>
             <p align="center" class="lead">
                 <a href="{% url 'blog:blog_add' %}" >
@@ -87,7 +87,7 @@
         <script type="text/javascript">
             $('table tr td#blog_status').each(function(){
                 var status_val = $(this).text();
-                console.log(status_val);
+
                 if(status_val == ' Drafted'){
                     $(this).children('i').attr('class',"fa fa-file-o");
                 }

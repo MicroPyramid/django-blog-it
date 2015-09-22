@@ -1,3 +1,11 @@
+body {
+}
+
+#head_style {
+	margin-top: 40px;
+	top: 30px;
+}
+
 #my_table td {
 	text-align: center;
 }
@@ -8,4 +16,18 @@
 
 .pagination_wrap {
 	text-align: center;
+}
+
+#top_menu {
+  background-color: white;
+  opacity: 0.6;
+}
+
+#top_menu {
+  position: fixed;
+  margin: 5px;
+  padding: 0px 10px;
+  left: 20;
+  top: 0;
+  width: 80%;
 }

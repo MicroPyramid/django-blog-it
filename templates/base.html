@@ -13,14 +13,23 @@
 </head>
 <body>
         <div class="container">
-            {% block menu_block %}
-            <div class="row">
-                <ul class="nav nav-pills">
-                  <li role="presentation" id="home"><a href="/blog">Home</a></li>
-                  <li role="presentation" id="categories"><a href="{% url 'blog:categories' %}">Categories</a></li>
-                </ul>
-            </div>
-            {% endblock %}
+            {% if request.user.is_active %}
+                {% block menu_block %}
+                <div class="row" id="top_menu">
+                    <div class="row">
+                        <ul class="nav nav-pills pull-left">
+                          <li role="presentation" id="home"><a href="/blog">Home</a></li>
+                          <li role="presentation" id="categories"><a href="{% url 'blog:categories' %}">Categories</a></li>
+                        </ul>
+                        <p class="pull-right">
+                            <a href="{% url 'blog:admin_logout' %}">
+                                <button class="btn btn-danger"><i class="fa fa-sign-out"></i> Logout</button>
+                            </a>
+                        </p>
+                    </div>
+                </div>
+                {% endblock %}
+            {% endif %}
             {% block content %}
             {% endblock %}
         </div>

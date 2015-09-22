@@ -10,7 +10,7 @@
     {% endblock %}
     {% block content %}
 
-        <div class="row">
+        <div class="row" id="head_style">
             <h1 align="center"><i class="fa fa-database"></i> Categories list</h1>
             <p align="center" class="lead">
                 <a href="{% url 'blog:add_category' %}" >
@@ -117,7 +117,6 @@
                 $.each($(".bulk_actions:checked"), function(){
                     blog_ids.push(parseInt($(this).val(), 0));
                 });
-                console.log(blog_ids);
 
                 $.get("{% url 'blog:bulk_actions_category' %}", {'blog_ids':blog_ids, 'action': 'False'}, function(data){
                     if(data['response']=='success'){
