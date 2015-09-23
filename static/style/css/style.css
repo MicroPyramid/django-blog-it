@@ -41,6 +41,15 @@ body {
     position: fixed;
     top: 20px;
     left: 30%;
-    width: 40%;
+    min-width: 40%;
     z-index: 10;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__rendered{
+    height:27px;
+    border:none;
+}
+
+.my_view {
+    margin-top: 60px;
 }

@@ -47,15 +47,15 @@ def create_tag_slug(tempslug):
         except ObjectDoesNotExist:
             return tempslug
 
+
 STATUS_CHOICE = (
-                    ('Drafted', 'Draft'),
-                    ('Published', 'Published'),
-                    ('Rejected', 'Rejected'),
-                    )
+    ('Drafted', 'Draft'),
+    ('Published', 'Published'),
+    ('Rejected', 'Rejected'),
+)
 
 
 class Post(models.Model):
-
     title = models.CharField(max_length=100)
     slug = models.SlugField(max_length=100)
     created_on = models.DateTimeField(auto_now_add=True)
@@ -66,6 +66,16 @@ class Post(models.Model):
     tags = models.ManyToManyField(Tags, related_name='rel_posts', blank=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICE, blank=True)
     keywords = models.TextField(max_length=500, blank=False)
+
+    def save(self, *args, **kwargs):
+        tempslug = slugify(self.title)
+        if self.id:
+            tag = Post.objects.get(pk=self.id)
+            if tag.title != self.title:
+                self.slug = create_slug(tempslug)
+        else:
+            self.slug = create_slug(tempslug)
+        super(Post, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.title

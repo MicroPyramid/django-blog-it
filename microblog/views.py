@@ -52,13 +52,23 @@ def admin_logout(request):
 @active_admin_required
 def blog(request):
     blog_list = Post.objects.all()
-    context = {'blog_list': blog_list}
+    blogs = blog_list
+    context = {'blog_list': blog_list,'blogs': blogs, 'blog_choices': STATUS_CHOICE}
+
+    if request.method == "POST":
+        requested_blogs = request.POST.getlist('blog')
+        if request.POST.get('select_status', ''):
+            blog_list = blog_list.filter(status=request.POST.get('select_status'))
+
+        if request.POST.getlist('blog', []):
+            blog_list = blog_list.filter(id__in=request.POST.getlist('blog'))
+        context = {'blog_list': blog_list,'blogs': blogs, 'blog_choices': STATUS_CHOICE, 'requested_blogs': requested_blogs}
     return render(request, 'blog_list.html', context)
 
 
 @active_admin_required
-def view_blog(request, blog_id):
-    blog_name = Post.objects.get(id=blog_id)
+def view_blog(request, blog_slug):
+    blog_name = Post.objects.get(slug=blog_slug)
     context = {'blog_name': blog_name}
     return render(request, 'blog_view.html', context)
 
@@ -87,8 +97,8 @@ def blog_add(request):
 
 
 @active_admin_required
-def edit_blog(request, blog_id):
-    blog_name = Post.objects.get(id=blog_id)
+def edit_blog(request, blog_slug):
+    blog_name = Post.objects.get(slug=blog_slug)
     categories_list = Category.objects.all()
     if request.method == "POST":
         form = BlogPostForm(request.POST, instance=blog_name)
@@ -111,8 +121,8 @@ def edit_blog(request, blog_id):
 
 
 @active_admin_required
-def delete_blog(request, blog_id):
-    blog_name = Post.objects.get(id=blog_id)
+def delete_blog(request, blog_slug):
+    blog_name = Post.objects.get(id=blog_slug)
     blog_name.delete()
     return HttpResponseRedirect('/blog/')
 
@@ -120,7 +130,16 @@ def delete_blog(request, blog_id):
 @active_admin_required
 def categories(request):
     categories_list = Category.objects.all()
-    context = {'categories_list': categories_list}
+    category_choices = categories_list
+    context = {'categories_list': categories_list, 'category_choices': category_choices}
+
+    if request.method == "POST":
+        requested_categories = request.POST.getlist('category')
+        if request.POST.getlist('category', []):
+            categories_list = categories_list.filter(id__in=request.POST.getlist('category'))
+
+        context = {'categories_list': categories_list, 'requested_categories': requested_categories,
+                   'category_choices': category_choices}
     return render(request, 'categories_list.html', context)
 
 
@@ -170,15 +189,16 @@ def bulk_actions_blog(request):
                     'action') == 'Rejected':
                 Post.objects.filter(id__in=request.GET.getlist('blog_ids[]')).update(
                     status=request.GET.get('action'))
-                messages.success(request, 'Selected blog posts successfully updated as '+str(request.GET.get('action')))
+                messages.success(request,
+                                 'Selected blog posts successfully updated as ' + str(request.GET.get('action')))
 
             if request.GET.get('action') == 'Delete':
                 Post.objects.filter(id__in=request.GET.getlist('blog_ids[]')).delete()
 
-            return HttpResponse(json.dumps({'response': 'success'}))
+            return HttpResponse(json.dumps({'response': True}))
         else:
-            messages.warning(request, 'Please select atleast one record')
-            return HttpResponse(json.dumps({'response': 'fail'}))
+            messages.warning(request, 'Please select at-least one record to perform this action')
+            return HttpResponse(json.dumps({'response': False}))
 
     return render(request, '/blog/')
 
@@ -200,9 +220,9 @@ def bulk_actions_category(request):
                 Category.objects.filter(id__in=request.GET.getlist('blog_ids[]')).delete()
                 messages.success(request, 'Selected Categories successfully deleted!')
 
-            return HttpResponse(json.dumps({'response': 'success'}))
+            return HttpResponse(json.dumps({'response': True}))
         else:
-            messages.warning(request, 'Please select atleast one record')
-            return HttpResponse(json.dumps({'response': 'fail'}))
+            messages.warning(request, 'Please select at-least one record to perform this action')
+            return HttpResponse(json.dumps({'response': False}))
 
     return render(request, '/blog/category/')
