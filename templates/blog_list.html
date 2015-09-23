@@ -7,8 +7,8 @@
         }
     </style>
     {% endblock %}
-    {% block content %}
 
+    {% block content %}
         <div class="row" id="head_style">
             <h1 align="center"><i class="fa fa-newspaper-o"></i> Blog List </h1>
             <p align="center" class="lead">
@@ -116,7 +116,7 @@
 
             $.get("{% url 'blog:bulk_actions_blog' %}", {'blog_ids':blog_ids, 'action': "Published"}, function(data){
                 if(data['response']=='success'){
-                    alert('Record(s) successfully updated as Published!');
+                    //alert('Record(s) successfully updated as Published!');
                     window.location='/blog/';
                 }else{
                     alert('Please select at least one record !');
@@ -134,7 +134,7 @@
 
             $.get("{% url 'blog:bulk_actions_blog' %}", {'blog_ids':blog_ids, 'action': 'Drafted'}, function(data){
                 if(data['response']=='success'){
-                    alert('Record(s) successfully updated as Drafted!');
+                    //alert('Record(s) successfully updated as Drafted!');
                     window.location='/blog/';
                 }else{
                     alert('Please select at least one record !');
@@ -152,7 +152,7 @@
 
             $.get("{% url 'blog:bulk_actions_blog' %}", {'blog_ids':blog_ids, 'action': 'Rejected'}, function(data){
                 if(data['response']=='success'){
-                    alert('Record(s) successfully updated as Rejected!');
+                    //alert('Record(s) successfully updated as Rejected!');
                     window.location='/blog/';
                 }else{
                     alert('Please select at least one record !');
@@ -169,7 +169,7 @@
 
             $.get("{% url 'blog:bulk_actions_blog' %}", {'blog_ids':blog_ids, 'action': 'Delete'}, function(data){
                 if(data['response']=='success'){
-                    alert('Record(s) successfully Deleted!');
+                    //alert('Record(s) successfully Deleted!');
                     window.location='/blog/';
                 }else{
                     alert('Please select at least one record !');

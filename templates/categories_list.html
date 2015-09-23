@@ -102,8 +102,8 @@
 
                 $.get("{% url 'blog:bulk_actions_category' %}", {'blog_ids':blog_ids, 'action': 'True'}, function(data){
                     if(data['response']=='success'){
-                        alert('Record(s) successfully updated as Active!');
-                        window.location='/blog/category/';
+                        //alert('Record(s) successfully updated as Active!');
+                        window.location='/category/';
                     }else{
                         alert('Please select at least one record !');
                     }
@@ -120,8 +120,8 @@
 
                 $.get("{% url 'blog:bulk_actions_category' %}", {'blog_ids':blog_ids, 'action': 'False'}, function(data){
                     if(data['response']=='success'){
-                        alert('Record(s) successfully updated as Inactive!');
-                        window.location='/blog/category/';
+                        //alert('Record(s) successfully updated as Inactive!');
+                        window.location='/category/';
                     }else{
                         alert('Please select at least one record !');
                     }
@@ -137,8 +137,8 @@
 
                 $.get("{% url 'blog:bulk_actions_category' %}", {'blog_ids':blog_ids, 'action': 'Delete'}, function(data){
                     if(data['response']=='success'){
-                        alert('Record(s) successfully Deleted!');
-                        window.location='/blog/category/';
+                        //alert('Record(s) successfully Deleted!');
+                        window.location='/category/';
                     }else{
                         alert('Please select at least one record !');
                     }

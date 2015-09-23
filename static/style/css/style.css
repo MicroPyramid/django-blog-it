@@ -19,15 +19,28 @@ body {
 }
 
 #top_menu {
-  background-color: white;
-  opacity: 0.6;
+  background: rgba(255, 255, 255, 0.6);
+  border-bottom: 1px solid #e1e1e1;
 }
 
 #top_menu {
   position: fixed;
   margin: 5px;
   padding: 0px 10px;
-  left: 20;
+  left: 0;
   top: 0;
-  width: 80%;
+  width: 100%;
+}
+
+.error_required {
+    color: red;
+}
+
+.my_alert {
+    margin: 5px;
+    position: fixed;
+    top: 20px;
+    left: 30%;
+    width: 40%;
+    z-index: 10;
 }

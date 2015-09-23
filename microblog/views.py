@@ -5,6 +5,9 @@ from .models import Post, Category, Tags, Image_File, STATUS_CHOICE
 from .forms import BlogCategoryForm, BlogPostForm, AdminLoginForm
 from django.template.defaultfilters import slugify
 
+# for messages in views and templates
+from django.contrib import messages
+
 # for admin-login and logout
 from django.contrib.auth import logout, authenticate, login
 from django.contrib.auth.decorators import user_passes_test, login_required
@@ -26,6 +29,7 @@ def admin_login(request):
             user = authenticate(username=request.POST['username'], password=request.POST['password'])
             if user.is_staff:
                 login(request, user)
+                messages.success(request, 'You are successfully logged in')
                 response_data = {'error': False, 'response': 'Successfully logged in'}
             else:
                 response_data = {'error': True, 'response': 'You are not allowed to this page'}
@@ -41,6 +45,7 @@ def admin_login(request):
 @active_admin_required
 def admin_logout(request):
     logout(request)
+    messages.success(request, 'You are successfully logged out!')
     return HttpResponseRedirect('/')
 
 
@@ -72,7 +77,7 @@ def blog_add(request):
             elif request.POST.get('status') == 'Rejected':
                 blog_post.status = 'Rejected'
             blog_post.save()
-
+            messages.success(request, 'Successfully posted your blog')
             data = {'error': False, 'response': 'Successfully posted your blog'}
         else:
             data = {'error': True, 'response': form.errors}
@@ -96,7 +101,7 @@ def edit_blog(request, blog_id):
             elif request.POST.get('status') == 'Rejected':
                 blog_post.status = 'Rejected'
             blog_post.save()
-
+            messages.success(request, 'Successfully updated your blog post')
             data = {'errors': False, 'response': 'Successfully updated your blog post'}
         else:
             data = {'errors': True, 'response': form.errors}
@@ -125,7 +130,7 @@ def add_category(request):
         form = BlogCategoryForm(request.POST)
         if form.is_valid():
             form.save()
-
+            messages.success(request, 'Successfully added your category')
             data = {'error': False, 'response': 'Successfully added your category'}
         else:
             data = {'error': True, 'response': form.errors}
@@ -140,7 +145,7 @@ def edit_category(request, category_slug):
         form = BlogCategoryForm(request.POST, instance=category_name)
         if form.is_valid():
             form.save()
-
+            messages.success(request, 'Successfully updated your category')
             data = {'error': False, 'response': 'Successfully updated your category'}
         else:
             data = {'error': True, 'response': form.errors}
@@ -165,12 +170,14 @@ def bulk_actions_blog(request):
                     'action') == 'Rejected':
                 Post.objects.filter(id__in=request.GET.getlist('blog_ids[]')).update(
                     status=request.GET.get('action'))
+                messages.success(request, 'Selected blog posts successfully updated as '+str(request.GET.get('action')))
 
             if request.GET.get('action') == 'Delete':
                 Post.objects.filter(id__in=request.GET.getlist('blog_ids[]')).delete()
 
             return HttpResponse(json.dumps({'response': 'success'}))
         else:
+            messages.warning(request, 'Please select atleast one record')
             return HttpResponse(json.dumps({'response': 'fail'}))
 
     return render(request, '/blog/')
@@ -183,15 +190,19 @@ def bulk_actions_category(request):
             if request.GET.get('action') == 'True':
                 Category.objects.filter(id__in=request.GET.getlist('blog_ids[]')).update(
                     is_active=True)
+                messages.success(request, 'Selected Categories successfully updated as Active')
             if request.GET.get('action') == 'False':
                 Category.objects.filter(id__in=request.GET.getlist('blog_ids[]')).update(
                     is_active=False)
+                messages.success(request, 'Selected Categories successfully updated as Inactive')
 
             if request.GET.get('action') == 'Delete':
                 Category.objects.filter(id__in=request.GET.getlist('blog_ids[]')).delete()
+                messages.success(request, 'Selected Categories successfully deleted!')
 
             return HttpResponse(json.dumps({'response': 'success'}))
         else:
+            messages.warning(request, 'Please select atleast one record')
             return HttpResponse(json.dumps({'response': 'fail'}))
 
     return render(request, '/blog/category/')

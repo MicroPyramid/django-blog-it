@@ -13,23 +13,36 @@
 </head>
 <body>
         <div class="container">
+
             {% if request.user.is_active %}
                 {% block menu_block %}
                 <div class="row" id="top_menu">
-                    <div class="row">
-                        <ul class="nav nav-pills pull-left">
-                          <li role="presentation" id="home"><a href="/blog">Home</a></li>
-                          <li role="presentation" id="categories"><a href="{% url 'blog:categories' %}">Categories</a></li>
-                        </ul>
-                        <p class="pull-right">
-                            <a href="{% url 'blog:admin_logout' %}">
-                                <button class="btn btn-danger"><i class="fa fa-sign-out"></i> Logout</button>
-                            </a>
-                        </p>
+                    <div class="container">
+                        <div class="row menu_items">
+                            <ul class="nav nav-pills pull-left">
+                              <li role="presentation" id="home"><a href="/blog">Home</a></li>
+                              <li role="presentation" id="categories"><a href="{% url 'blog:categories' %}">Categories</a></li>
+                            </ul>
+                            <p class="pull-right">
+                                <a href="{% url 'blog:admin_logout' %}">
+                                    <button class="btn btn-danger"><i class="fa fa-sign-out"></i> Logout</button>
+                                </a>
+                            </p>
+                        </div>
                     </div>
                 </div>
                 {% endblock %}
             {% endif %}
+
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% endif %} alert-dismissible my_alert" role="alert">
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                  <strong>{% if message.tags %}{{ message.tags|title }} !{% endif %}</strong> {{ message }}.
+                </div>
+                {% endfor %}
+            {% endif %}
+
             {% block content %}
             {% endblock %}
         </div>
@@ -63,7 +76,23 @@
 
     </script>
 
+    <script type="text/javascript">
+        $(document).ready(function() {
+                setTimeout(function() {
+                      $('.my_alert').fadeOut(2000, function(){
+                    });
+                      }, 3000);
+
+        });
+        //window.setTimeout(function() {
+        //    $(".alert-message").fadeTo(500, 0).slideUp(500, function(){
+        //        $(this).remove();
+        //    });
+        //}, 5000);
+    </script>
+
     {% block js_script %}
+
     {% endblock %}
 
 </body>
