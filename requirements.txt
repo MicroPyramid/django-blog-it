@@ -1,0 +1,2 @@
+Django==1.8.4
+django-simple-pagination-1.1.1
