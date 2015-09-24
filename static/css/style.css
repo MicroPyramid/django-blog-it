@@ -19,17 +19,17 @@ body {
 }
 
 #top_menu {
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.9);
   border-bottom: 1px solid #e1e1e1;
-}
-
-#top_menu {
   position: fixed;
   margin: 5px;
+  margin-top:0px;
   padding: 0px 10px;
+  padding-top:5px;
   left: 0;
   top: 0;
   width: 100%;
+  z-index:10;
 }
 
 .error_required {
@@ -42,7 +42,11 @@ body {
     top: 20px;
     left: 30%;
     min-width: 40%;
-    z-index: 10;
+    z-index: 10 !important;
+}
+
+.select2 {
+    min-width: 150px;
 }
 
 .select2-container--default .select2-selection--multiple .select2-selection__rendered{
@@ -52,4 +56,14 @@ body {
 
 .my_view {
     margin-top: 60px;
+}
+
+.my_footer {
+  position: fixed;
+  bottom: 0px;
+  left: 0px;
+  width: 100%;
+  margin-top: 5px;
+  padding-top: 2px;
+  border-top: 1px solid #e1e1e1;
 }

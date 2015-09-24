@@ -25,7 +25,22 @@ class AdminLoginForm(forms.Form):
 class BlogPostForm(forms.ModelForm):
     class Meta:
         model = Post
-        exclude = ('slug', 'tags', 'user',)
+        exclude = ('slug', 'user',)
+
+    def __init__(self, *args, **kwargs):
+        super(BlogPostForm, self).__init__(*args, **kwargs)
+
+        for field in iter(self.fields):
+
+            if field == 'tags':
+                self.fields[field].widget.attrs.update({
+                    'class': 'form-control', 'id': 'myTags', "placeholder": "Please enter your Blog " + field.capitalize()
+                })
+
+            else:
+                self.fields[field].widget.attrs.update({
+                    'class': 'form-control', "placeholder": "Please enter your Blog " + field.capitalize()
+                })
 
 
 class BlogCategoryForm(forms.ModelForm):
@@ -33,18 +48,21 @@ class BlogCategoryForm(forms.ModelForm):
         model = Category
         exclude = ('slug',)
 
-        # def clean_name(self):
-        #     clean_data = self.cleaned_data
-        #     if Category.objects.filter(name__icontains=clean_data['name']).exists():
-        #         raise forms.ValidationError('Name already exists')
-        #     return clean_data['name']
+    def clean_name(self):
+        if not self.instance.id:
+            if Category.objects.filter(slug=slugify(self.cleaned_data['name'])).exists():
+                raise forms.ValidationError('Category with this Name already exists.')
+        else:
+            if Category.objects.filter(name__icontains=self.cleaned_data['name']).exclude(id=self.instance.id):
+                raise forms.ValidationError('Category with this Name already exists.')
 
-        # def __init__(self, *args, **kwargs):
-        #     super(BlogCategoryForm, self).__init__(*args, **kwargs)
-        #
-        # def save(self):
-        #     instance = super(BlogCategoryForm, self).save(commit=False)
-        #     form_data = self.cleaned_data
-        #     instance.slug= slugify(form_data['name'])
-        #     instance.save()
-        #     return instance
+        return self.cleaned_data['name']
+
+    def __init__(self, *args, **kwargs):
+        super(BlogCategoryForm, self).__init__(*args, **kwargs)
+
+        for field in iter(self.fields):
+            if max(enumerate(iter(self.fields)))[1] != field:
+                self.fields[field].widget.attrs.update({
+                    'class': 'form-control', "placeholder": "Please enter your Category " + field.capitalize()
+                })

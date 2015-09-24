@@ -5,12 +5,18 @@
     <title>Blog {% block title %}{% endblock %}</title>
     {% load staticfiles %}
     <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="{% static 'style/css/style.css' %}" type="text/css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" type="text/css">
+    <!-- for online links -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-    <!-- select2 -->
+    <!--select2 -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet" />
     <!-- // -->
+
+    <!-- for tags -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/jquery.tagsinput.css' %}" />
+    <!-- // -->
+
 
     {% block extra_css %}
     {% endblock %}
@@ -49,11 +55,31 @@
 
             {% block content %}
             {% endblock %}
+
+                <footer class="my_footer">
+                    <p align="center">Copyrights by &copy; MicroPyramid Pvt. Ltd.</p>
+                </footer>
+
+
         </div>
+
         <!-- end div container -->
+
+        <!-- for online links  -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
+
+    <script src="https://cdn.ckeditor.com/4.5.3/standard/ckeditor.js"></script>
+	<script src="http://malsup.github.com/jquery.form.js"></script>
+
+
+	<script src="{% static 'js/jquery.tagsinput.js' %}"></script>
+
+
+
+
     <script type="text/javascript">
       $('.select2').select2(
         {
