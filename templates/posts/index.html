@@ -1,12 +1,12 @@
 {% extends 'posts/base.html' %}
-
+{% load paginate %}
     {% block blog_content %}
 
                     <div class="row col-sm-12 col-md-9 blog-container-left">
                         <div class="blogs">
                             <ul class="blog-list">
                                 {% if blog_posts %}
-
+                                    {% paginate 5 blog_posts %}
                                     {% for blog in blog_posts %}
                                         <li class="list-item">
                                             <div class="blog-left">
@@ -20,7 +20,11 @@
                                         </li>
                                         <hr />
                                     {% endfor %}
-
+                                <!-- pagination -->
+                                  <div class="pagination_wrap">
+                                      {% show_pages %}
+                                  </div>
+                                <!--/ pagination -->
                                 {% else %}
                                     <h2 align="center">There are no Blog-posts are here !</h2>
                                 {% endif %}
