@@ -1,5 +1,6 @@
-{% extends 'base.html' %}
+{% extends 'dashboard/base.html' %}
 {% load paginate %}
+    {% block title %}Posts{% endblock %}
     {% block extra_css %}
     <style type="text/css">
         table td {
@@ -163,10 +164,10 @@
             $.get("{% url 'blog:bulk_actions_blog' %}", {'blog_ids':blog_ids, 'action': "Published"}, function(data){
                 if(data.response){
                     //alert('Record(s) successfully updated as Published!');
-                    window.location='/blog/';
+                    window.location='/dashboard/blog/';
                 }else{
                     //alert('Please select at least one record !');
-                    window.location='/blog/';
+                    window.location='/dashboard/blog/';
                 }
             }, 'json');
 
@@ -182,10 +183,10 @@
             $.get("{% url 'blog:bulk_actions_blog' %}", {'blog_ids':blog_ids, 'action': 'Drafted'}, function(data){
                 if(data.response){
                     //alert('Record(s) successfully updated as Drafted!');
-                    window.location='/blog/';
+                    window.location='/dashboard/blog/';
                 }else{
                     //alert('Please select at least one record !');
-                    window.location='/blog/';
+                    window.location='/dashboard/blog/';
                 }
             }, 'json');
 
@@ -201,10 +202,10 @@
             $.get("{% url 'blog:bulk_actions_blog' %}", {'blog_ids':blog_ids, 'action': 'Rejected'}, function(data){
                 if(data.response){
                     //alert('Record(s) successfully updated as Rejected!');
-                    window.location='/blog/';
+                    window.location='/dashboard/blog/';
                 }else{
                     //alert('Please select at least one record !');
-                    window.location='/blog/';
+                    window.location='/dashboard/blog/';
                 }
             }, 'json');
 
@@ -219,10 +220,10 @@
             $.get("{% url 'blog:bulk_actions_blog' %}", {'blog_ids':blog_ids, 'action': 'Delete'}, function(data){
                 if(data.response){
                     //alert('Record(s) successfully Deleted!');
-                    window.location='/blog/';
+                    window.location='/dashboard/blog/';
                 }else{
                     //alert('Please select at least one record !');
-                    window.location='/blog/';
+                    window.location='/dashboard/blog/';
                 }
             }, 'json');
 

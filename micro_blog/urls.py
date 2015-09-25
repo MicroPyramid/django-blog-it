@@ -20,7 +20,8 @@ from .settings import MEDIA_URL, MEDIA_ROOT
 
 urlpatterns = [
                   url(r'^admin/', include(admin.site.urls)),
-                  url(r'', include('microblog.urls', namespace='blog')),
+                  url(r'', include('posts.urls', namespace='posts')),
+                  url(r'^dashboard/', include('microblog.urls', namespace='blog')),
               ] + static(MEDIA_URL, document_root=MEDIA_ROOT)
 
 import os

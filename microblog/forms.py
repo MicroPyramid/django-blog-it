@@ -34,7 +34,7 @@ class BlogPostForm(forms.ModelForm):
 
             if field == 'tags':
                 self.fields[field].widget.attrs.update({
-                    'class': 'form-control', 'id': 'myTags', "placeholder": "Please enter your Blog " + field.capitalize()
+                    'class': 'form-control myTags', "placeholder": "Please enter your Blog " + field.capitalize()
                 })
 
             else:

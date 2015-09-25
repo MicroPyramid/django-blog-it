@@ -1,6 +1,6 @@
-{% extends 'base.html' %}
+{% extends 'dashboard/base.html' %}
 {% load paginate %}
-    {% block title %} - Categories{% endblock %}
+    {% block title %}Categories{% endblock %}
     {% block extra_css %}
     <style type="text/css">
         table td {
@@ -105,7 +105,6 @@
                                 {% if category.is_active %}
                                     <td><i class="fa fa-check-square-o"></i> Active</td>
                                 {% else %}
-
                                     <td><i class="fa fa-minus-square-o"></i> Inactive</td>
                                 {% endif %}
 
@@ -151,9 +150,9 @@
 
                 $.get("{% url 'blog:bulk_actions_category' %}", {'blog_ids':blog_ids, 'action': 'True'}, function(data){
                     if(data.response){
-                        window.location='/category/';
+                        window.location='/dashboard/category/';
                     }else{
-                        window.location='/category/';
+                        window.location='/dashboard/category/';
                     }
                 }, 'json');
 
@@ -168,9 +167,9 @@
 
                 $.get("{% url 'blog:bulk_actions_category' %}", {'blog_ids':blog_ids, 'action': 'False'}, function(data){
                     if(data.response){
-                        window.location='/category/';
+                        window.location='/dashboard/category/';
                     }else{
-                        window.location='/category/';
+                        window.location='/dashboard/category/';
                     }
                 }, 'json');
 
@@ -185,10 +184,10 @@
                 $.get("{% url 'blog:bulk_actions_category' %}", {'blog_ids':blog_ids, 'action': 'Delete'}, function(data){
                     if(data.response){
                         //alert('Record(s) successfully Deleted!');
-                        window.location='/category/';
+                        window.location='/dashboard/category/';
                     }else{
                         //alert('Please select at least one record !');
-                        window.location='/category/';
+                        window.location='/dashboard/category/';
                     }
                 }, 'json');
 

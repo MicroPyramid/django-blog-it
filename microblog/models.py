@@ -63,7 +63,7 @@ class Post(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
     content = models.TextField()
     category = models.ForeignKey(Category)
-    tags = models.TextField(blank=False)
+    tags = models.TextField()
     status = models.CharField(max_length=10, choices=STATUS_CHOICE, blank=True)
     keywords = models.TextField(max_length=500, blank=True)
 

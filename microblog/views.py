@@ -12,17 +12,17 @@ from django.contrib import messages
 from django.contrib.auth import logout, authenticate, login
 from django.contrib.auth.decorators import user_passes_test, login_required
 
-admin_required = user_passes_test(lambda user: user.is_staff, login_url='/')
+admin_required = user_passes_test(lambda user: user.is_staff, login_url='/dashboard')
 
 
 def active_admin_required(view_func):
-    decorated_view_func = login_required(admin_required(view_func), login_url='/')
+    decorated_view_func = login_required(admin_required(view_func), login_url='/dashboard')
     return decorated_view_func
 
 
 def admin_login(request):
     if request.user.is_staff:
-        return HttpResponseRedirect('/blog')
+        return HttpResponseRedirect('/dashboard/blog')
     if request.method == 'POST':
         login_form = AdminLoginForm(request.POST)
         if login_form.is_valid():
@@ -39,14 +39,14 @@ def admin_login(request):
 
         return HttpResponse(json.dumps(response_data))
 
-    return render(request, 'admin-login.html')
+    return render(request, 'dashboard/admin-login.html')
 
 
 @active_admin_required
 def admin_logout(request):
     logout(request)
     messages.success(request, 'You are successfully logged out!')
-    return HttpResponseRedirect('/')
+    return HttpResponseRedirect('/dashboard/')
 
 
 @active_admin_required
@@ -64,14 +64,14 @@ def blog(request):
             blog_list = blog_list.filter(id__in=request.POST.getlist('blog'))
         context = {'blog_list': blog_list, 'blogs': blogs, 'blog_choices': STATUS_CHOICE,
                    'requested_blogs': requested_blogs}
-    return render(request, 'blog/blog_list.html', context)
+    return render(request, 'dashboard/blog/blog_list.html', context)
 
 
 @active_admin_required
 def view_blog(request, blog_slug):
     blog_name = Post.objects.get(slug=blog_slug)
     context = {'blog_name': blog_name}
-    return render(request, 'blog/blog_view.html', context)
+    return render(request, 'dashboard/blog/blog_view.html', context)
 
 
 @active_admin_required
@@ -105,9 +105,10 @@ def blog_add(request):
         else:
             data = {'error': True, 'response': form.errors}
         return HttpResponse(json.dumps(data))
+    print form
     context = {'form': form, 'status_choices': STATUS_CHOICE, 'categories_list': categories_list,
-               'tags_list': tags_list}
-    return render(request, 'blog/blog_add.html', context)
+               'tags_list': tags_list, 'add_blog': True}
+    return render(request, 'dashboard/blog/blog_add.html', context)
 
 
 @active_admin_required
@@ -117,7 +118,7 @@ def edit_blog(request, blog_slug):
 
     categories_list = Category.objects.filter(is_active=True)
     if request.method == "POST":
-        form = BlogPostForm(request.POST, instance=blog_name, initial={'tags': ', '.join(blog_name.tags)})
+        form = BlogPostForm(request.POST, instance=blog_name)
         if form.is_valid():
             blog_post = form.save(commit=False)
             blog_post.user = request.user
@@ -144,7 +145,7 @@ def edit_blog(request, blog_slug):
         return HttpResponse(json.dumps(data))
     context = {'form': form, 'blog_name': blog_name, 'status_choices': STATUS_CHOICE,
                'categories_list': categories_list}
-    return render(request, 'blog/blog_add.html', context)
+    return render(request, 'dashboard/blog/blog_add.html', context)
 
 
 @active_admin_required
@@ -152,7 +153,7 @@ def delete_blog(request, blog_slug):
     blog_name = Post.objects.get(slug=blog_slug)
     blog_name.delete()
     messages.success(request, 'Blog successfully deleted')
-    return HttpResponseRedirect('/blog/')
+    return HttpResponseRedirect('/dashboard/blog/')
 
 
 @active_admin_required
@@ -175,7 +176,7 @@ def categories(request):
 
         context = {'categories_list': categories_list, 'requested_categories': requested_categories,
                    'category_choices': category_choices}
-    return render(request, 'category/categories_list.html', context)
+    return render(request, 'dashboard/category/categories_list.html', context)
 
 
 @active_admin_required
@@ -191,8 +192,8 @@ def add_category(request):
         else:
             data = {'error': True, 'response': form.errors}
         return HttpResponse(json.dumps(data))
-    context = {'form': form}
-    return render(request, 'category/category_add.html', context)
+    context = {'form': form, 'add_category': True}
+    return render(request, 'dashboard/category/category_add.html', context)
 
 
 @active_admin_required
@@ -210,14 +211,14 @@ def edit_category(request, category_slug):
             data = {'error': True, 'response': form.errors}
         return HttpResponse(json.dumps(data))
     context = {'form': form, 'category_name': category_name}
-    return render(request, 'category/category_add.html', context)
+    return render(request, 'dashboard/category/category_add.html', context)
 
 
 @active_admin_required
 def delete_category(request, category_slug):
     category = Category.objects.get(slug=category_slug)
     category.delete()
-    return HttpResponseRedirect('/category/')
+    return HttpResponseRedirect('/dashboard/category/')
 
 
 @active_admin_required
@@ -240,7 +241,7 @@ def bulk_actions_blog(request):
             messages.warning(request, 'Please select at-least one record to perform this action')
             return HttpResponse(json.dumps({'response': False}))
 
-    return render(request, '/blog/')
+    return render(request, '/dashboard/blog/')
 
 
 @active_admin_required
@@ -265,4 +266,4 @@ def bulk_actions_category(request):
             messages.warning(request, 'Please select at-least one record to perform this action')
             return HttpResponse(json.dumps({'response': False}))
 
-    return render(request, '/category/')
+    return render(request, '/dashboard/category/')

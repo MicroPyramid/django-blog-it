@@ -2,13 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Blog - {% block title %}Home{% endblock %}</title>
+    <title>Dashboard - {% block title %}Home{% endblock %}</title>
     {% load staticfiles %}
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}" type="text/css">
     <!-- for online links -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <!--select2 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet" />
+    <!-- // -->
+
+    <!-- for tags -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/jquery.tagsinput.css' %}" />
+    <!-- // -->
+
 
     {% block extra_css %}
     {% endblock %}
@@ -22,8 +30,14 @@
                     <div class="container">
                         <div class="row menu_items">
                             <ul class="nav nav-pills pull-left">
-                              <li role="presentation" id="home"><a href="/">Home</a></li>
+                              <li role="presentation" id="home"><a href="/dashboard/blog">Home</a></li>
+                              <li role="presentation" id="categories"><a href="{% url 'blog:categories' %}">Categories</a></li>
                             </ul>
+                            <p class="pull-right">
+                                <a href="{% url 'blog:admin_logout' %}">
+                                    <button class="btn btn-danger"><i class="fa fa-sign-out"></i> Logout</button>
+                                </a>
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -38,10 +52,9 @@
                 </div>
                 {% endfor %}
             {% endif %}
-            <div class="row" id="head_style">
-                {% block content %}
-                {% endblock %}
-            </div>
+
+            {% block content %}
+            {% endblock %}
 
                 <footer class="my_footer">
                     <p align="center">Copyrights by &copy; MicroPyramid Pvt. Ltd.</p>
@@ -56,7 +69,27 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
 
+    <script src="https://cdn.ckeditor.com/4.5.3/standard/ckeditor.js"></script>
+	<script src="http://malsup.github.com/jquery.form.js"></script>
+
+
+	<script src="{% static 'js/jquery.tagsinput.js' %}"></script>
+
+
+
+
+
+    <script type="text/javascript">
+      $('.select2').select2(
+        {
+            tags: "true",
+            placeholder: "Select an option"
+        }
+      );
+
+    </script>
     <script type="text/javascript">
 
         // for pagination

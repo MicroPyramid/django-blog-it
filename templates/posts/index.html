@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %} Home {% endblock %}
+
+    {% block content %}
+
+            <h2>Blog posts</h2>
+            <hr />
+            <div class="container" id="blog">
+                {% if blog_posts %}
+                    <div class="row col-sm-12 col-md-9 blog-container-left">
+                        <div class="blogs">
+                            <ul class="blog-list">
+                            {% for blog in blog_posts %}
+                                <li class="list-item">
+                                    <div class="blog-left">
+                                        <h3 class="title"><a href="">{{ blog }}</a></h3>
+                                    </div>
+                                    <div class="">
+                                            <span> {{ blog.user|title }} | {{ blog.updated_on|date:"d F Y" }}</span>
+                                            {{ blog.content|safe|truncatewords_html:50 }}
+                                    </div>
+                                </li>
+                                <hr />
+                            {% endfor %}
+
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="row col-sm-12 blog-colors col-md-3" id="right-sidebar">
+
+                        <div class="col-xs-12 widget categories" id="tag-blue">
+                            <h3><span> Categories </span></h3>
+                            <ul style="margin:0px;padding:0px;">
+                                {% for category in categories_list %}
+                                    <li><a href="{% url 'posts:selected_category' category_slug=category.slug %}">{{ category }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+
+                        <div class="col-xs-12 widget blog-posts" id="green">
+                            <h3><span> Blog-Posts </span></h3>
+                            <ul style="margin:0px;padding:0px;">
+
+                                {% for archive in archives_list %}
+                                    <li><a href="{% url 'posts:archive_posts' year=archive.year month=archive.month %}">{{ archive.month }}, {{ archive.year }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+
+                        <div class="col-xs-12 widget tags" id="pink">
+
+                                <h3><span> Tags </span></h3>
+                                <ul style="margin:0px;padding:0px;">
+                                    {% for tag in tags_list %}
+                                        <li><a href="{% url 'posts:selected_tag' tag_slug=tag.slug %}"><i class="fa fa-tag"></i> {{ tag }}</a></li>
+                                    {% endfor %}
+                                </ul>
+
+                        </div>
+                    </div>
+
+                {% else %}
+                    <h2 align="center">There are no Blog-posts are here !</h2>
+                {% endif %}
+            </div>
+
+    {% endblock %}
+
+    {% block js_script %}
+        <script type="text/javascript">
+
+        </script>
+    {% endblock %}
