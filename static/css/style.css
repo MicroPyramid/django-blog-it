@@ -83,11 +83,21 @@ body {
     list-style: none;
 }
 
+.blogs .blog-list .list-item .blog-left .title a {
+    text-decoration: none;
+
+}
+
+.blogs .blog-list .list-item .desc a {
+    text-decoration: none;
+}
+
 
 /*right side bar*/
 /* for tags and categories boxes display */
 
 #right-sidebar {
+    margin-left: 20px;
     padding-top: 10px;
     padding: 0!important;
 }
