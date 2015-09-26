@@ -1,5 +1,6 @@
 {% extends 'posts/base.html' %}
 {% load paginate %}
+{% load blog_tags %}
     {% block blog_content %}
 
                     <div class="row col-sm-12 col-md-9 blog-container-left">
@@ -15,7 +16,12 @@
                                             <div class="desc">
                                                     <span> {{ blog.user|title }} | {{ blog.updated_on|date:"d F Y" }}</span>
                                                     {{ blog.content|safe|truncatewords_html:50 }}
-                                                <p align="right"><a href="{% url 'posts:blog_post_view' blog_slug=blog.slug %}">Continue reading ....</a></p>
+                                                    {% for tag in blog.tags|seperate_tags %}
+                                                        <span class="tags">
+                                                            <a href="{% url 'posts:selected_tag' tag_slug=tag.slug %}" ><i class="fa fa-tags"></i> {{ tag }}</a>
+                                                        </span>
+                                                    {% endfor %}
+                                                <p class="continue-read"><a href="{% url 'posts:blog_post_view' blog_slug=blog.slug %}">Continue reading ....</a></p>
                                             </div>
                                         </li>
                                         <hr />

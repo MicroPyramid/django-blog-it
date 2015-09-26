@@ -127,6 +127,7 @@ def edit_blog(request, blog_slug):
                 blog_post.status = 'Published'
             elif request.POST.get('status') == 'Rejected':
                 blog_post.status = 'Rejected'
+            blog_post.created_on = date
             blog_post.save()
 
             if request.POST.get('tags', ''):

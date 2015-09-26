@@ -92,6 +92,52 @@ body {
     text-decoration: none;
 }
 
+table .widget.tags {
+    display: inline-block;
+    border: none;
+    margin-bottom: 0;
+    padding-bottom: 4px;
+    margin-left: 5px;
+}
+
+table .widget.tags a {
+    background: #fef0f0;
+    border-radius: 2px;
+    color: #FF405F!important;
+    font-size: 1.4rem;
+    margin: 0 0 0 -1px;
+    padding: 5px 8px 4px 8px;
+}
+
+table .widget.tags a i{
+    margin-right: 6px;
+}
+
+table .widget.tags a {
+    text-decoration: none;
+}
+
+.blogs .blog-list .list-item .desc .tags {
+    display: inline-block;
+    border: none;
+    margin-bottom: 0;
+    padding-bottom: 4px;
+    margin-left: 5px;
+}
+
+.blogs .blog-list .list-item .desc span a {
+    background: #fef0f0;
+    border-radius: 2px;
+    color: #FF405F!important;
+    font-size: 1.4rem;
+    margin: 0 0 0 -1px;
+    padding: 5px 8px 4px 8px;
+}
+
+.blogs .blog-list .list-item .desc .continue-read {
+    text-align: right;
+}
+
 
 /*right side bar*/
 /* for tags and categories boxes display */
