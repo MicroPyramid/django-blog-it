@@ -12,17 +12,17 @@ from django.contrib import messages
 from django.contrib.auth import logout, authenticate, login
 from django.contrib.auth.decorators import user_passes_test, login_required
 
-admin_required = user_passes_test(lambda user: user.is_staff, login_url='/')
+admin_required = user_passes_test(lambda user: user.is_staff, login_url='/dashboard')
 
 
 def active_admin_required(view_func):
-    decorated_view_func = login_required(admin_required(view_func), login_url='/')
+    decorated_view_func = login_required(admin_required(view_func), login_url='/dashboard')
     return decorated_view_func
 
 
 def admin_login(request):
     if request.user.is_staff:
-        return HttpResponseRedirect('/blog')
+        return HttpResponseRedirect('/dashboard/blog')
     if request.method == 'POST':
         login_form = AdminLoginForm(request.POST)
         if login_form.is_valid():
@@ -39,33 +39,46 @@ def admin_login(request):
 
         return HttpResponse(json.dumps(response_data))
 
-    return render(request, 'admin-login.html')
+    return render(request, 'dashboard/admin-login.html')
 
 
 @active_admin_required
 def admin_logout(request):
     logout(request)
     messages.success(request, 'You are successfully logged out!')
-    return HttpResponseRedirect('/')
+    return HttpResponseRedirect('/dashboard/')
 
 
 @active_admin_required
 def blog(request):
     blog_list = Post.objects.all()
-    context = {'blog_list': blog_list}
-    return render(request, 'blog_list.html', context)
+    blogs = blog_list
+    context = {'blog_list': blog_list, 'blogs': blogs, 'blog_choices': STATUS_CHOICE}
+
+    if request.method == "POST":
+        requested_blogs = request.POST.getlist('blog')
+        if request.POST.get('select_status', ''):
+            blog_list = blog_list.filter(status=request.POST.get('select_status'))
+
+        if request.POST.getlist('blog', []):
+            blog_list = blog_list.filter(id__in=request.POST.getlist('blog'))
+        context = {'blog_list': blog_list, 'blogs': blogs, 'blog_choices': STATUS_CHOICE,
+                   'requested_blogs': requested_blogs}
+    return render(request, 'dashboard/blog/blog_list.html', context)
 
 
 @active_admin_required
-def view_blog(request, blog_id):
-    blog_name = Post.objects.get(id=blog_id)
+def view_blog(request, blog_slug):
+    blog_name = Post.objects.get(slug=blog_slug)
     context = {'blog_name': blog_name}
-    return render(request, 'blog_view.html', context)
+    return render(request, 'dashboard/blog/blog_view.html', context)
 
 
 @active_admin_required
 def blog_add(request):
-    categories_list = Category.objects.all()
+    form = BlogPostForm()
+    tags_list = Tags.objects.all()
+    categories_list = Category.objects.filter(is_active=True)
     if request.method == "POST":
         form = BlogPostForm(request.POST)
         if form.is_valid():
@@ -77,19 +90,33 @@ def blog_add(request):
             elif request.POST.get('status') == 'Rejected':
                 blog_post.status = 'Rejected'
             blog_post.save()
+
+            if request.POST.get('tags', ''):
+                tags = request.POST.get('tags')
+
+                splitted = tags.split(',')
+                for s in splitted:
+                    final = s.strip()
+                    if not Tags.objects.filter(name=final).exists():
+                        Tags.objects.create(name=final)
+
             messages.success(request, 'Successfully posted your blog')
             data = {'error': False, 'response': 'Successfully posted your blog'}
         else:
             data = {'error': True, 'response': form.errors}
         return HttpResponse(json.dumps(data))
-    context = {'status_choices': STATUS_CHOICE, 'categories_list': categories_list}
-    return render(request, 'blog_add.html', context)
+    print form
+    context = {'form': form, 'status_choices': STATUS_CHOICE, 'categories_list': categories_list,
+               'tags_list': tags_list, 'add_blog': True}
+    return render(request, 'dashboard/blog/blog_add.html', context)
 
 
 @active_admin_required
-def edit_blog(request, blog_id):
-    blog_name = Post.objects.get(id=blog_id)
-    categories_list = Category.objects.all()
+def edit_blog(request, blog_slug):
+    blog_name = Post.objects.get(slug=blog_slug)
+    form = BlogPostForm(instance=blog_name)
+
+    categories_list = Category.objects.filter(is_active=True)
     if request.method == "POST":
         form = BlogPostForm(request.POST, instance=blog_name)
         if form.is_valid():
@@ -100,34 +127,65 @@ def edit_blog(request, blog_id):
                 blog_post.status = 'Published'
             elif request.POST.get('status') == 'Rejected':
                 blog_post.status = 'Rejected'
+            blog_post.created_on = date
             blog_post.save()
+
+            if request.POST.get('tags', ''):
+                tags = request.POST.get('tags')
+
+                splitted = tags.split(',')
+                for s in splitted:
+                    final = s.strip()
+                    if not Tags.objects.filter(name=final).exists():
+                        Tags.objects.create(name=final)
+
             messages.success(request, 'Successfully updated your blog post')
-            data = {'errors': False, 'response': 'Successfully updated your blog post'}
+            data = {'error': False, 'response': 'Successfully updated your blog post'}
         else:
-            data = {'errors': True, 'response': form.errors}
+            data = {'error': True, 'response': form.errors}
         return HttpResponse(json.dumps(data))
-    context = {'blog_name': blog_name, 'status_choices': STATUS_CHOICE, 'categories_list': categories_list}
-    return render(request, 'blog_add.html', context)
+    context = {'form': form, 'blog_name': blog_name, 'status_choices': STATUS_CHOICE,
+               'categories_list': categories_list}
+    return render(request, 'dashboard/blog/blog_add.html', context)
 
 
 @active_admin_required
-def delete_blog(request, blog_id):
-    blog_name = Post.objects.get(id=blog_id)
+def delete_blog(request, blog_slug):
+    blog_name = Post.objects.get(slug=blog_slug)
     blog_name.delete()
-    return HttpResponseRedirect('/blog/')
+    messages.success(request, 'Blog successfully deleted')
+    return HttpResponseRedirect('/dashboard/blog/')
 
 
 @active_admin_required
 def categories(request):
     categories_list = Category.objects.all()
-    context = {'categories_list': categories_list}
-    return render(request, 'categories_list.html', context)
+    category_choices = categories_list
+    context = {'categories_list': categories_list, 'category_choices': category_choices}
+
+    if request.method == "POST":
+        requested_categories = request.POST.getlist('category')
+
+        if request.POST.get('select_status', ''):
+            if request.POST.get('select_status') == "True":
+                categories_list = categories_list.filter(is_active=True)
+            else:
+                categories_list = categories_list.filter(is_active=False)
+
+        if request.POST.getlist('category', []):
+            categories_list = categories_list.filter(id__in=request.POST.getlist('category'))
+
+        context = {'categories_list': categories_list, 'requested_categories': requested_categories,
+                   'category_choices': category_choices}
+    return render(request, 'dashboard/category/categories_list.html', context)
 
 
 @active_admin_required
 def add_category(request):
+    form = BlogCategoryForm()
     if request.method == 'POST':
         form = BlogCategoryForm(request.POST)
+
         if form.is_valid():
             form.save()
             messages.success(request, 'Successfully added your category')
@@ -135,12 +193,15 @@ def add_category(request):
         else:
             data = {'error': True, 'response': form.errors}
         return HttpResponse(json.dumps(data))
-    return render(request, 'category_add.html')
+    context = {'form': form, 'add_category': True}
+    return render(request, 'dashboard/category/category_add.html', context)
 
 
 @active_admin_required
 def edit_category(request, category_slug):
     category_name = Category.objects.get(slug=category_slug)
+    form = BlogCategoryForm(instance=category_name)
+
     if request.method == 'POST':
         form = BlogCategoryForm(request.POST, instance=category_name)
         if form.is_valid():
@@ -150,15 +211,15 @@ def edit_category(request, category_slug):
         else:
             data = {'error': True, 'response': form.errors}
         return HttpResponse(json.dumps(data))
-    context = {'category_name': category_name}
-    return render(request, 'category_add.html', context)
+    context = {'form': form, 'category_name': category_name}
+    return render(request, 'dashboard/category/category_add.html', context)
 
 
 @active_admin_required
 def delete_category(request, category_slug):
     category = Category.objects.get(slug=category_slug)
     category.delete()
-    return HttpResponseRedirect('/blog/category/')
+    return HttpResponseRedirect('/dashboard/category/')
 
 
 @active_admin_required
@@ -170,17 +231,18 @@ def bulk_actions_blog(request):
                     'action') == 'Rejected':
                 Post.objects.filter(id__in=request.GET.getlist('blog_ids[]')).update(
                     status=request.GET.get('action'))
-                messages.success(request, 'Selected blog posts successfully updated as '+str(request.GET.get('action')))
+                messages.success(request,
+                                 'Selected blog posts successfully updated as ' + str(request.GET.get('action')))
 
             if request.GET.get('action') == 'Delete':
                 Post.objects.filter(id__in=request.GET.getlist('blog_ids[]')).delete()
 
-            return HttpResponse(json.dumps({'response': 'success'}))
+            return HttpResponse(json.dumps({'response': True}))
         else:
-            messages.warning(request, 'Please select atleast one record')
-            return HttpResponse(json.dumps({'response': 'fail'}))
+            messages.warning(request, 'Please select at-least one record to perform this action')
+            return HttpResponse(json.dumps({'response': False}))
 
-    return render(request, '/blog/')
+    return render(request, '/dashboard/blog/')
 
 
 @active_admin_required
@@ -200,9 +262,9 @@ def bulk_actions_category(request):
                 Category.objects.filter(id__in=request.GET.getlist('blog_ids[]')).delete()
                 messages.success(request, 'Selected Categories successfully deleted!')
 
-            return HttpResponse(json.dumps({'response': 'success'}))
+            return HttpResponse(json.dumps({'response': True}))
         else:
-            messages.warning(request, 'Please select atleast one record')
-            return HttpResponse(json.dumps({'response': 'fail'}))
+            messages.warning(request, 'Please select at-least one record to perform this action')
+            return HttpResponse(json.dumps({'response': False}))
 
-    return render(request, '/blog/category/')
+    return render(request, '/dashboard/category/')

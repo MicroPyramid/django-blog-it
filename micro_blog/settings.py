@@ -42,6 +42,7 @@ INSTALLED_APPS = (
     # added for simple pagination
     'simple_pagination',
     'microblog',
+    'posts',
 )
 
 MIDDLEWARE_CLASSES = (

@@ -1,8 +1,8 @@
-{% extends 'base.html' %}
-    {% block title %} - View{% endblock %}
+{% extends 'dashboard/base.html' %}
+    {% block title %}Posts View{% endblock %}
     {% block content %}
 
-    <div class="row">
+    <div class="row my_view">
         <table align="center" class="table table-bordered">
             <thead>
                 <th>
@@ -14,7 +14,10 @@
                     <td><strong>Author</strong>: {{ blog_name.user }}</td>
                 </tr>
                 <tr>
-                    <td><strong>Content</strong>: {{ blog_name.content }}</td>
+                    <td><strong>Content</strong>: {{ blog_name.content|safe }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Tags</strong>: {{ blog_name.tags }}</td>
                 </tr>
                 <tr>
                     <td><strong>Keywords</strong>: {{ blog_name.keywords|safe }}</td>

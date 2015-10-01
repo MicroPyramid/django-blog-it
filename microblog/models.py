@@ -42,20 +42,20 @@ def create_tag_slug(tempslug):
     while True:
         try:
             Tags.objects.get(slug=tempslug)
-            slugcount = slugcount + 1
+            slugcount += 1
             tempslug = tempslug + '-' + str(slugcount)
         except ObjectDoesNotExist:
             return tempslug
 
+
 STATUS_CHOICE = (
-                    ('Drafted', 'Draft'),
-                    ('Published', 'Published'),
-                    ('Rejected', 'Rejected'),
-                    )
+    ('Drafted', 'Drafted'),
+    ('Published', 'Published'),
+    ('Rejected', 'Rejected'),
+)
 
 
 class Post(models.Model):
-
     title = models.CharField(max_length=100)
     slug = models.SlugField(max_length=100)
     created_on = models.DateTimeField(auto_now_add=True)
@@ -63,9 +63,20 @@ class Post(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
     content = models.TextField()
     category = models.ForeignKey(Category)
-    tags = models.ManyToManyField(Tags, related_name='rel_posts', blank=True)
+    tags = models.TextField()
     status = models.CharField(max_length=10, choices=STATUS_CHOICE, blank=True)
-    keywords = models.TextField(max_length=500, blank=False)
+    keywords = models.TextField(max_length=500, blank=True)
+
+    def save(self, *args, **kwargs):
+        tempslug = slugify(self.title)
+        if self.id:
+            blogpost = Post.objects.get(pk=self.id)
+            if blogpost.title != self.title:
+                self.slug = create_slug(tempslug)
+        else:
+            self.slug = create_slug(tempslug)
+
+        super(Post, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.title
@@ -76,7 +87,7 @@ def create_slug(tempslug):
     while True:
         try:
             Post.objects.get(slug=tempslug)
-            slugcount = slugcount + 1
+            slugcount += 1
             tempslug = tempslug + '-' + str(slugcount)
         except ObjectDoesNotExist:
             return tempslug
