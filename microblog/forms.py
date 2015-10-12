@@ -28,8 +28,10 @@ class BlogPostForm(forms.ModelForm):
         exclude = ('slug', 'user',)
 
     def __init__(self, *args, **kwargs):
+        self.is_superuser = kwargs.pop('is_superuser', None)
         super(BlogPostForm, self).__init__(*args, **kwargs)
-
+        if not self.is_superuser:
+            del self.fields['status']
         for field in iter(self.fields):
 
             if field == 'tags':

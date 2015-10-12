@@ -10,6 +10,7 @@ class Category(models.Model):
     slug = models.CharField(max_length=20, unique=True)
     description = models.CharField(max_length=500)
     is_active = models.BooleanField(default=False)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL)
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
@@ -64,7 +65,7 @@ class Post(models.Model):
     content = models.TextField()
     category = models.ForeignKey(Category)
     tags = models.TextField()
-    status = models.CharField(max_length=10, choices=STATUS_CHOICE, blank=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICE, default='Drafted')
     keywords = models.TextField(max_length=500, blank=True)
 
     def save(self, *args, **kwargs):

@@ -19,7 +19,7 @@
             </p>
              <!-- end div of add blog button -->
 
-
+                {% if request.user.is_superuser %}
                 <div class="bulk_button pull-left">
                    <!-- Bulk actions -->
                     <div class="btn-group">
@@ -35,6 +35,7 @@
                     </div>
                   <!--Bulk actions end-->
                 </div>
+                {% endif %}
 
 
               <!-- filter -->
@@ -108,8 +109,10 @@
                                     <td><i class="fa fa-minus-square-o"></i> Inactive</td>
                                 {% endif %}
 
+                                {% if request.user.is_superuser or request.user == category.user %}
                                 <td><a href="{% url 'blog:edit_category' category_slug=category.slug %}"><button class="btn btn-info"><i class="fa fa-edit"></i> Edit</button></a></td>
                                 <td><a href="{% url 'blog:delete_category' category_slug=category.slug %}"><button class="btn btn-danger"><i class="fa fa-trash-o"></i> Delete</button></a></td>
+                                {% endif %}
                             </tr>
                         </tbody>
 

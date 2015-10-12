@@ -60,3 +60,5 @@ microblog/migrations/
 db.sqlite3
 media/
 *~
+*.swp
+*.swo
