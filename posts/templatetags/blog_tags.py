@@ -9,7 +9,7 @@ register = template.Library()
 def get_archives(context):
     archives = []
     dates = []
-    for each_object in Post.objects.filter(status="Published").order_by('created_on').values('created_on'):
+    for each_object in Post.objects.filter(category__is_active=True, status="Published").order_by('created_on').values('created_on'):
         for date in each_object.values():
             dates.append((date.year, date.month, 1))
 
@@ -25,6 +25,7 @@ def get_archives(context):
 
 @register.filter
 def seperate_tags(tags):
+    print tags.split(',')
     tags_list = tags.split(',')
     real_tags = []
     for tag in tags_list:
