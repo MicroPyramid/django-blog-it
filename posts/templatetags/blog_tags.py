@@ -25,7 +25,6 @@ def get_archives(context):
 
 @register.filter
 def seperate_tags(tags):
-    print tags.split(',')
     tags_list = tags.split(',')
     real_tags = []
     for tag in tags_list:

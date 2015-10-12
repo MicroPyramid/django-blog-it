@@ -55,5 +55,4 @@ def archive_posts(request, year, month):
     blog_posts = Post.objects.filter(category__is_active=True, status="Published", updated_on__year=year, updated_on__month=month).order_by('-updated_on')
     blog_posts = [post for post in blog_posts if post.category.is_active]
     context = {'blog_posts': blog_posts}.items() + categories_tags_lists().items()
-    print categories_tags_lists().items()
     return render(request, 'posts/index.html', context)

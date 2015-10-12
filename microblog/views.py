@@ -103,7 +103,6 @@ def blog_add(request):
         else:
             data = {'error': True, 'response': form.errors}
         return HttpResponse(json.dumps(data))
-    print form
     context = {'form': form, 'status_choices': STATUS_CHOICE, 'categories_list': categories_list,
                'tags_list': tags_list, 'add_blog': True}
     return render(request, 'dashboard/blog/blog_add.html', context)
