@@ -1,16 +1,14 @@
 import json
+
 from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponse
-from .models import Post, Category, Tags, Image_File, STATUS_CHOICE
-from .forms import BlogCategoryForm, BlogPostForm, AdminLoginForm
 from django.template.defaultfilters import slugify
-
-# for messages in views and templates
 from django.contrib import messages
-
-# for admin-login and logout
 from django.contrib.auth import logout, authenticate, login
 from django.contrib.auth.decorators import user_passes_test, login_required
+
+from .models import Post, Category, Tags, Image_File, STATUS_CHOICE
+from .forms import BlogCategoryForm, BlogPostForm, AdminLoginForm
 
 admin_required = user_passes_test(lambda user: user.is_staff, login_url='/dashboard')
 
@@ -60,7 +58,7 @@ def blog(request):
         if request.POST.get('select_status', ''):
             blog_list = blog_list.filter(status=request.POST.get('select_status'))
 
-        if request.POST.getlist('blog', []):
+        elif request.POST.getlist('blog', []):
             blog_list = blog_list.filter(id__in=request.POST.getlist('blog'))
         context = {'blog_list': blog_list, 'blogs': blogs, 'blog_choices': STATUS_CHOICE,
                    'requested_blogs': requested_blogs}
@@ -105,7 +103,6 @@ def blog_add(request):
         else:
             data = {'error': True, 'response': form.errors}
         return HttpResponse(json.dumps(data))
-    print form
     context = {'form': form, 'status_choices': STATUS_CHOICE, 'categories_list': categories_list,
                'tags_list': tags_list, 'add_blog': True}
     return render(request, 'dashboard/blog/blog_add.html', context)
@@ -127,7 +124,6 @@ def edit_blog(request, blog_slug):
                 blog_post.status = 'Published'
             elif request.POST.get('status') == 'Rejected':
                 blog_post.status = 'Rejected'
-            blog_post.created_on = date
             blog_post.save()
 
             if request.POST.get('tags', ''):
@@ -172,7 +168,7 @@ def categories(request):
             else:
                 categories_list = categories_list.filter(is_active=False)
 
-        if request.POST.getlist('category', []):
+        elif request.POST.getlist('category', []):
             categories_list = categories_list.filter(id__in=request.POST.getlist('category'))
 
         context = {'categories_list': categories_list, 'requested_categories': requested_categories,
@@ -234,7 +230,7 @@ def bulk_actions_blog(request):
                 messages.success(request,
                                  'Selected blog posts successfully updated as ' + str(request.GET.get('action')))
 
-            if request.GET.get('action') == 'Delete':
+            elif request.GET.get('action') == 'Delete':
                 Post.objects.filter(id__in=request.GET.getlist('blog_ids[]')).delete()
 
             return HttpResponse(json.dumps({'response': True}))
@@ -253,12 +249,12 @@ def bulk_actions_category(request):
                 Category.objects.filter(id__in=request.GET.getlist('blog_ids[]')).update(
                     is_active=True)
                 messages.success(request, 'Selected Categories successfully updated as Active')
-            if request.GET.get('action') == 'False':
+            elif request.GET.get('action') == 'False':
                 Category.objects.filter(id__in=request.GET.getlist('blog_ids[]')).update(
                     is_active=False)
                 messages.success(request, 'Selected Categories successfully updated as Inactive')
 
-            if request.GET.get('action') == 'Delete':
+            elif request.GET.get('action') == 'Delete':
                 Category.objects.filter(id__in=request.GET.getlist('blog_ids[]')).delete()
                 messages.success(request, 'Selected Categories successfully deleted!')
 
