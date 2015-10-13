@@ -1,14 +1,19 @@
 import json
+from PIL import Image
+import os
 
-from django.shortcuts import render
+from django.shortcuts import render, render_to_response
 from django.http import HttpResponseRedirect, HttpResponse
 from django.template.defaultfilters import slugify
 from django.contrib import messages
 from django.contrib.auth import logout, authenticate, login
 from django.contrib.auth.decorators import user_passes_test, login_required
+from django.views.decorators.csrf import csrf_exempt
+from django.core.files import File
 
 from .models import Post, Category, Tags, Image_File, STATUS_CHOICE
 from .forms import BlogCategoryForm, BlogPostForm, AdminLoginForm
+from micro_blog.settings import BASE_DIR
 
 admin_required = user_passes_test(lambda user: user.is_staff, login_url='/dashboard')
 
@@ -78,6 +83,9 @@ def blog_add(request):
     tags_list = Tags.objects.all()
     categories_list = Category.objects.filter(is_active=True)
     if request.method == "POST":
+        request.POST = request.POST.copy()
+        if request.POST.get('title') == '':
+            request.POST['title'] = 'Untitled document ' + str(Post.objects.all().count())
         form = BlogPostForm(request.POST, is_superuser=request.user.is_superuser)
         if form.is_valid():
             blog_post = form.save(commit=False)
@@ -97,9 +105,9 @@ def blog_add(request):
                         Tags.objects.create(name=final)
 
             messages.success(request, 'Successfully posted your blog')
-            data = {'error': False, 'response': 'Successfully posted your blog'}
+            data = {'error': False, 'response': 'Successfully posted your blog', 'title': request.POST['title']}
         else:
-            data = {'error': True, 'response': form.errors}
+            data = {'error': True, 'response': form.errors, 'title': request.POST['title']}
         return HttpResponse(json.dumps(data))
     context = {'form': form, 'status_choices': STATUS_CHOICE, 'categories_list': categories_list,
                'tags_list': tags_list, 'add_blog': True}
@@ -268,3 +276,46 @@ def bulk_actions_category(request):
                 return HttpResponse(json.dumps({'response': False}))
 
         return render(request, '/dashboard/category/')
+
+
+@csrf_exempt
+def upload_photos(request):
+    '''
+    takes all the images coming from the redactor editor and 
+    stores it in the database and returns all the files'''
+    if request.FILES.get("upload"):
+        f = request.FILES.get("upload")
+        obj = Image_File.objects.create(upload=f, is_image=True)
+        obj.save()
+        ##y=open(x,'w')
+        ##for i in f.chunks():
+        ##    y.write(i)
+        size = (128, 128)
+        thumbnail_name = 'thumb' + f.name
+        abs_path = BASE_DIR + obj.upload.url
+        im = Image.open(abs_path)
+        im.thumbnail(size)
+        im.save(thumbnail_name)
+        imdata = open(thumbnail_name)
+        obj.thumbnail.save(thumbnail_name, File(imdata))
+        obj.save()
+        os.remove(os.path.join(BASE_DIR, thumbnail_name))
+        upurl = obj.upload.url
+    return HttpResponse("""<script type='text/javascript'>
+        window.parent.CKEDITOR.tools.callFunction({0}, '{1}');
+        </script>""".format(request.GET['CKEditorFuncNum'], upurl)
+        )
+
+@csrf_exempt
+def recent_photos(request):
+    ''' returns all the images from the data base '''
+    
+    imgs = []
+    for obj in Image_File.objects.filter(is_image=True).order_by("-date_created"):
+        upurl = obj.upload.url
+        thumburl = obj.thumbnail.url
+        imgs.append({'src':upurl,'thumb': thumburl,
+                'is_image': True})
+    return render_to_response('dashboard/browse.html', {'files':imgs})
+
+

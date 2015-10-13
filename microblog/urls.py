@@ -16,5 +16,7 @@ urlpatterns = patterns('',
 
                        url(r'^bulk_actions_blog/$', bulk_actions_blog, name='bulk_actions_blog'),
                        url(r'^bulk_actions_category/$', bulk_actions_category, name='bulk_actions_category'),
+                       url(r'upload_photos/$', upload_photos, name='upload_photos'),
+                       url(r'recent_photos/$', recent_photos, name='recent_photos'),
 
                        )
