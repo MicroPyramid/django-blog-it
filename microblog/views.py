@@ -287,13 +287,13 @@ def upload_photos(request):
         f = request.FILES.get("upload")
         obj = Image_File.objects.create(upload=f, is_image=True)
         obj.save()
-        ##y=open(x,'w')
-        ##for i in f.chunks():
-        ##    y.write(i)
+        abs_path = BASE_DIR + obj.upload.url
+        with open(abs_path, 'wb+') as destination:
+            for chunk in f.chunks():
+                destination.write(chunk)
         size = (128, 128)
         thumbnail_name = 'thumb' + f.name
-        abs_path = BASE_DIR + obj.upload.url
-        im = Image.open(abs_path)
+        im = Image.open(destination.name)
         im.thumbnail(size)
         im.save(thumbnail_name)
         imdata = open(thumbnail_name)
