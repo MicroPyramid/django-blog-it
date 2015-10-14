@@ -10,7 +10,7 @@ import calendar
 
 
 def categories_tags_lists():
-    categories_list = Category.objects.filter(is_active=True, post__status='Published')
+    categories_list = Category.objects.filter(is_active=True, post__status='Published').distinct()
     tags_list = Tags.objects.all()
     cat_tags = {'categories_list': categories_list, 'tags_list': tags_list}
     return cat_tags
