@@ -1,14 +1,19 @@
 import json
+from PIL import Image
+import os
 
-from django.shortcuts import render
+from django.shortcuts import render, render_to_response
 from django.http import HttpResponseRedirect, HttpResponse
 from django.template.defaultfilters import slugify
 from django.contrib import messages
 from django.contrib.auth import logout, authenticate, login
 from django.contrib.auth.decorators import user_passes_test, login_required
+from django.views.decorators.csrf import csrf_exempt
+from django.core.files import File
 
 from .models import Post, Category, Tags, Image_File, STATUS_CHOICE
 from .forms import BlogCategoryForm, BlogPostForm, AdminLoginForm
+from micro_blog.settings import BASE_DIR
 
 admin_required = user_passes_test(lambda user: user.is_staff, login_url='/dashboard')
 
@@ -74,19 +79,20 @@ def view_blog(request, blog_slug):
 
 @active_admin_required
 def blog_add(request):
-    form = BlogPostForm()
+    form = BlogPostForm(request.GET, is_superuser=request.user.is_superuser)
     tags_list = Tags.objects.all()
     categories_list = Category.objects.filter(is_active=True)
     if request.method == "POST":
-        form = BlogPostForm(request.POST)
+        request.POST = request.POST.copy()
+        if request.POST.get('title') == '':
+            request.POST['title'] = 'Untitled document ' + str(Post.objects.all().count())
+        form = BlogPostForm(request.POST, is_superuser=request.user.is_superuser)
         if form.is_valid():
             blog_post = form.save(commit=False)
             blog_post.user = request.user
-            blog_post.status = 'Drafted'
-            if request.POST.get('status') == 'Published':
-                blog_post.status = 'Published'
-            elif request.POST.get('status') == 'Rejected':
-                blog_post.status = 'Rejected'
+            #blog_post.status = 'Drafted'
+            if request.user.is_superuser:
+                blog_post.status = request.POST.get('status')
             blog_post.save()
 
             if request.POST.get('tags', ''):
@@ -99,9 +105,9 @@ def blog_add(request):
                         Tags.objects.create(name=final)
 
             messages.success(request, 'Successfully posted your blog')
-            data = {'error': False, 'response': 'Successfully posted your blog'}
+            data = {'error': False, 'response': 'Successfully posted your blog', 'title': request.POST['title']}
         else:
-            data = {'error': True, 'response': form.errors}
+            data = {'error': True, 'response': form.errors, 'title': request.POST['title']}
         return HttpResponse(json.dumps(data))
     context = {'form': form, 'status_choices': STATUS_CHOICE, 'categories_list': categories_list,
                'tags_list': tags_list, 'add_blog': True}
@@ -111,46 +117,48 @@ def blog_add(request):
 @active_admin_required
 def edit_blog(request, blog_slug):
     blog_name = Post.objects.get(slug=blog_slug)
-    form = BlogPostForm(instance=blog_name)
+    if blog_name.user == request.user or request.user.is_superuser == True:
+        form = BlogPostForm(instance=blog_name)
 
-    categories_list = Category.objects.filter(is_active=True)
-    if request.method == "POST":
-        form = BlogPostForm(request.POST, instance=blog_name)
-        if form.is_valid():
-            blog_post = form.save(commit=False)
-            blog_post.user = request.user
-            blog_post.status = 'Drafted'
-            if request.POST.get('status') == 'Published':
-                blog_post.status = 'Published'
-            elif request.POST.get('status') == 'Rejected':
-                blog_post.status = 'Rejected'
-            blog_post.save()
+        categories_list = Category.objects.filter(is_active=True)
+        if request.method == "POST":
+            form = BlogPostForm(request.POST, instance=blog_name)
+            if form.is_valid():
+                blog_post = form.save(commit=False)
+                blog_post.user = request.user
+                blog_post.status = 'Drafted'
+                if request.POST.get('status') == 'Published':
+                    blog_post.status = 'Published'
+                elif request.POST.get('status') == 'Rejected':
+                    blog_post.status = 'Rejected'
+                blog_post.save()
 
-            if request.POST.get('tags', ''):
-                tags = request.POST.get('tags')
+                if request.POST.get('tags', ''):
+                    tags = request.POST.get('tags')
 
-                splitted = tags.split(',')
-                for s in splitted:
-                    final = s.strip()
-                    if not Tags.objects.filter(name=final).exists():
-                        Tags.objects.create(name=final)
+                    splitted = tags.split(',')
+                    for s in splitted:
+                        final = s.strip()
+                        if not Tags.objects.filter(name=final).exists():
+                            Tags.objects.create(name=final)
 
-            messages.success(request, 'Successfully updated your blog post')
-            data = {'error': False, 'response': 'Successfully updated your blog post'}
-        else:
-            data = {'error': True, 'response': form.errors}
-        return HttpResponse(json.dumps(data))
-    context = {'form': form, 'blog_name': blog_name, 'status_choices': STATUS_CHOICE,
-               'categories_list': categories_list}
-    return render(request, 'dashboard/blog/blog_add.html', context)
+                messages.success(request, 'Successfully updated your blog post')
+                data = {'error': False, 'response': 'Successfully updated your blog post'}
+            else:
+                data = {'error': True, 'response': form.errors}
+            return HttpResponse(json.dumps(data))
+        context = {'form': form, 'blog_name': blog_name, 'status_choices': STATUS_CHOICE,
+                   'categories_list': categories_list}
+        return render(request, 'dashboard/blog/blog_add.html', context)
 
 
 @active_admin_required
 def delete_blog(request, blog_slug):
     blog_name = Post.objects.get(slug=blog_slug)
-    blog_name.delete()
-    messages.success(request, 'Blog successfully deleted')
-    return HttpResponseRedirect('/dashboard/blog/')
+    if blog_name.user == request.user or request.user.is_superuser == True:
+        blog_name.delete()
+        messages.success(request, 'Blog successfully deleted')
+        return HttpResponseRedirect('/dashboard/blog/')
 
 
 @active_admin_required
@@ -196,71 +204,118 @@ def add_category(request):
 @active_admin_required
 def edit_category(request, category_slug):
     category_name = Category.objects.get(slug=category_slug)
-    form = BlogCategoryForm(instance=category_name)
+    if category_name.user == request.user or request.user.is_superuser == True:
+        form = BlogCategoryForm(instance=category_name)
 
-    if request.method == 'POST':
-        form = BlogCategoryForm(request.POST, instance=category_name)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Successfully updated your category')
-            data = {'error': False, 'response': 'Successfully updated your category'}
-        else:
-            data = {'error': True, 'response': form.errors}
-        return HttpResponse(json.dumps(data))
-    context = {'form': form, 'category_name': category_name}
-    return render(request, 'dashboard/category/category_add.html', context)
+        if request.method == 'POST':
+            form = BlogCategoryForm(request.POST, instance=category_name)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Successfully updated your category')
+                data = {'error': False, 'response': 'Successfully updated your category'}
+            else:
+                data = {'error': True, 'response': form.errors}
+            return HttpResponse(json.dumps(data))
+        context = {'form': form, 'category_name': category_name}
+        return render(request, 'dashboard/category/category_add.html', context)
 
 
 @active_admin_required
 def delete_category(request, category_slug):
     category = Category.objects.get(slug=category_slug)
-    category.delete()
-    return HttpResponseRedirect('/dashboard/category/')
+    if category.user == request.user or request.user.is_superuser == True:
+        category.delete()
+        return HttpResponseRedirect('/dashboard/category/')
 
 
 @active_admin_required
 def bulk_actions_blog(request):
-    if request.method == 'GET':
-        if 'blog_ids[]' in request.GET:
+    if request.user.is_superuser:
+        if request.method == 'GET':
+            if 'blog_ids[]' in request.GET:
 
-            if request.GET.get('action') == 'Published' or request.GET.get('action') == 'Drafted' or request.GET.get(
-                    'action') == 'Rejected':
-                Post.objects.filter(id__in=request.GET.getlist('blog_ids[]')).update(
-                    status=request.GET.get('action'))
-                messages.success(request,
-                                 'Selected blog posts successfully updated as ' + str(request.GET.get('action')))
+                if request.GET.get('action') == 'Published' or request.GET.get('action') == 'Drafted' or request.GET.get(
+                        'action') == 'Rejected':
+                    Post.objects.filter(id__in=request.GET.getlist('blog_ids[]')).update(
+                        status=request.GET.get('action'))
+                    messages.success(request,
+                                     'Selected blog posts successfully updated as ' + str(request.GET.get('action')))
 
-            elif request.GET.get('action') == 'Delete':
-                Post.objects.filter(id__in=request.GET.getlist('blog_ids[]')).delete()
+                elif request.GET.get('action') == 'Delete':
+                    Post.objects.filter(id__in=request.GET.getlist('blog_ids[]')).delete()
 
-            return HttpResponse(json.dumps({'response': True}))
-        else:
-            messages.warning(request, 'Please select at-least one record to perform this action')
-            return HttpResponse(json.dumps({'response': False}))
+                return HttpResponse(json.dumps({'response': True}))
+            else:
+                messages.warning(request, 'Please select at-least one record to perform this action')
+                return HttpResponse(json.dumps({'response': False}))
 
-    return render(request, '/dashboard/blog/')
+        return render(request, '/dashboard/blog/')
 
 
 @active_admin_required
 def bulk_actions_category(request):
-    if request.method == 'GET':
-        if 'blog_ids[]' in request.GET:
-            if request.GET.get('action') == 'True':
-                Category.objects.filter(id__in=request.GET.getlist('blog_ids[]')).update(
-                    is_active=True)
-                messages.success(request, 'Selected Categories successfully updated as Active')
-            elif request.GET.get('action') == 'False':
-                Category.objects.filter(id__in=request.GET.getlist('blog_ids[]')).update(
-                    is_active=False)
-                messages.success(request, 'Selected Categories successfully updated as Inactive')
+    if request.user.is_superuser:
+        if request.method == 'GET':
+            if 'blog_ids[]' in request.GET:
+                if request.GET.get('action') == 'True':
+                    Category.objects.filter(id__in=request.GET.getlist('blog_ids[]')).update(
+                        is_active=True)
+                    messages.success(request, 'Selected Categories successfully updated as Active')
+                elif request.GET.get('action') == 'False':
+                    Category.objects.filter(id__in=request.GET.getlist('blog_ids[]')).update(
+                        is_active=False)
+                    messages.success(request, 'Selected Categories successfully updated as Inactive')
 
-            elif request.GET.get('action') == 'Delete':
-                Category.objects.filter(id__in=request.GET.getlist('blog_ids[]')).delete()
-                messages.success(request, 'Selected Categories successfully deleted!')
+                elif request.GET.get('action') == 'Delete':
+                    Category.objects.filter(id__in=request.GET.getlist('blog_ids[]')).delete()
+                    messages.success(request, 'Selected Categories successfully deleted!')
 
-            return HttpResponse(json.dumps({'response': True}))
-        else:
-            messages.warning(request, 'Please select at-least one record to perform this action')
-            return HttpResponse(json.dumps({'response': False}))
+                return HttpResponse(json.dumps({'response': True}))
+            else:
+                messages.warning(request, 'Please select at-least one record to perform this action')
+                return HttpResponse(json.dumps({'response': False}))
 
-    return render(request, '/dashboard/category/')
+        return render(request, '/dashboard/category/')
+
+
+@csrf_exempt
+def upload_photos(request):
+    '''
+    takes all the images coming from the redactor editor and 
+    stores it in the database and returns all the files'''
+    if request.FILES.get("upload"):
+        f = request.FILES.get("upload")
+        obj = Image_File.objects.create(upload=f, is_image=True)
+        obj.save()
+        abs_path = BASE_DIR + obj.upload.url
+        with open(abs_path, 'wb+') as destination:
+            for chunk in f.chunks():
+                destination.write(chunk)
+        size = (128, 128)
+        thumbnail_name = 'thumb' + f.name
+        im = Image.open(destination.name)
+        im.thumbnail(size)
+        im.save(thumbnail_name)
+        imdata = open(thumbnail_name)
+        obj.thumbnail.save(thumbnail_name, File(imdata))
+        obj.save()
+        os.remove(os.path.join(BASE_DIR, thumbnail_name))
+        upurl = obj.upload.url
+    return HttpResponse("""<script type='text/javascript'>
+        window.parent.CKEDITOR.tools.callFunction({0}, '{1}');
+        </script>""".format(request.GET['CKEditorFuncNum'], upurl)
+        )
+
+@csrf_exempt
+def recent_photos(request):
+    ''' returns all the images from the data base '''
+    
+    imgs = []
+    for obj in Image_File.objects.filter(is_image=True).order_by("-date_created"):
+        upurl = obj.upload.url
+        thumburl = obj.thumbnail.url
+        imgs.append({'src':upurl,'thumb': thumburl,
+                'is_image': True})
+    return render_to_response('dashboard/browse.html', {'files':imgs})
+
+
