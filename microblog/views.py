@@ -1,6 +1,6 @@
 import json
 from PIL import Image
-import os
+import os, requests
 
 from django.shortcuts import render, render_to_response
 from django.http import HttpResponseRedirect, HttpResponse
@@ -13,7 +13,7 @@ from django.core.files import File
 
 from .models import Post, Category, Tags, Image_File, STATUS_CHOICE
 from .forms import BlogCategoryForm, BlogPostForm, AdminLoginForm
-from micro_blog.settings import BASE_DIR
+from micro_blog.settings import BASE_DIR, AWS_ENABLED
 
 admin_required = user_passes_test(lambda user: user.is_staff, login_url='/dashboard')
 
@@ -287,13 +287,19 @@ def upload_photos(request):
         f = request.FILES.get("upload")
         obj = Image_File.objects.create(upload=f, is_image=True)
         obj.save()
-        abs_path = BASE_DIR + obj.upload.url
-        with open(abs_path, 'wb+') as destination:
-            for chunk in f.chunks():
-                destination.write(chunk)
-        size = (128, 128)
-        thumbnail_name = 'thumb' + f.name
+        thumbnail_name = 'thumb' + f.name 
+        if AWS_ENABLED:
+            image_file = requests.get(f.upload.url, stream=True)
+            with open(thumbnail_name, 'wb') as destination:
+                for chunk in image_file.iter_content():
+                    destination.write(chunk)
+        else:
+            image_file = f
+            with open(thumbnail_name, 'wb') as destination:
+                for chunk in image_file.chunks():
+                    destination.write(chunk)
         im = Image.open(destination.name)
+        size = (128, 128)
         im.thumbnail(size)
         im.save(thumbnail_name)
         imdata = open(thumbnail_name)
