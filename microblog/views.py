@@ -90,9 +90,12 @@ def blog_add(request):
         if form.is_valid():
             blog_post = form.save(commit=False)
             blog_post.user = request.user
-            #blog_post.status = 'Drafted'
+            # for autosave
             if request.user.is_superuser:
-                blog_post.status = request.POST.get('status')
+                if request.POST.get('status') == 'Published' and blog_post.title != None:
+                    blog_post.status = 'Drafted'
+                else:
+                    blog_post.status = request.POST.get('status')
             blog_post.save()
 
             if request.POST.get('tags', ''):

@@ -63,7 +63,7 @@ class Post(models.Model):
     updated_on = models.DateField(auto_now=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
     content = models.TextField()
-    category = models.ForeignKey(Category, blank=True, null=True)
+    category = models.ForeignKey(Category)
     tags = models.TextField(blank=True, null=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICE, default='Drafted')
     keywords = models.TextField(max_length=500, blank=True)
