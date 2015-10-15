@@ -40,7 +40,6 @@
             </div>
         </form>
     </div>
-    <span id='dd'>dinesh</span>
     <!-- end of add form div -->
 
     {% endblock %}
@@ -109,52 +108,4 @@
 
           });
         </script>
-	<script>
-	var timeoutId;
-	$('#post-form').on('input propertychange change', function auto_save() {
-	    console.log('Textarea Change');
-	    
-	    clearTimeout(timeoutId);
-	    timeoutId = setTimeout(function() {
-	        // Runs 1 second (1000 ms) after the last change    
-	        saveToDB();
-	    }, 1000);
-	});
-	
-	function saveToDB()
-	{
-	    console.log('Saving to the db');
-	    form = $('#post-form');
-		$.ajax({
-			url: "",
-			type: "POST",
-            dataType: "json",
-			data: form.serialize(), // serializes the form's elements.
-			beforeSend: function(xhr) {
-	            // Let them know we are saving
-				$('#dd').html('Saving...');
-			},
-			success: function(data) {
-				//var jqObj = jQuery(data); // You can get data returned from your ajax call here. ex. jqObj.find('.returned-data').html()
-	            // Now show them we saved and when we did
-	            var d = new Date();
-	            $('#dd').html('Saved! Last: ' + d.toLocaleTimeString());
-                $('#id_title').val(data.title)
-			},
-		});
-	}
-	
-	// This is just so we don't go anywhere  
-	// and still save if you submit the form
-	/*$('.contact-form').submit(function(e) {
-		saveToDB();
-		e.preventDefault();
-	});*/
-	</script>
-
-    <script>
-        for (var i in CKEDITOR.instances) {
-            CKEDITOR.instances[i].on('blur', function(event){ event.preventDefault; alert('hi')});// { CKEDITOR.instances[i].updateElement() });
-        }
-    </script>
     {% endblock %}

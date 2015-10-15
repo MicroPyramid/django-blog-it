@@ -1,6 +1,6 @@
 import json
 from PIL import Image
-import os
+import os, requests
 
 from django.shortcuts import render, render_to_response
 from django.http import HttpResponseRedirect, HttpResponse
@@ -13,7 +13,7 @@ from django.core.files import File
 
 from .models import Post, Category, Tags, Image_File, STATUS_CHOICE
 from .forms import BlogCategoryForm, BlogPostForm, AdminLoginForm
-from micro_blog.settings import BASE_DIR
+from micro_blog import settings
 
 admin_required = user_passes_test(lambda user: user.is_staff, login_url='/dashboard')
 
@@ -90,9 +90,12 @@ def blog_add(request):
         if form.is_valid():
             blog_post = form.save(commit=False)
             blog_post.user = request.user
-            #blog_post.status = 'Drafted'
+            # for autosave
             if request.user.is_superuser:
-                blog_post.status = request.POST.get('status')
+                if request.POST.get('status') == 'Published' and blog_post.title != None:
+                    blog_post.status = 'Drafted'
+                else:
+                    blog_post.status = request.POST.get('status')
             blog_post.save()
 
             if request.POST.get('tags', ''):
@@ -118,11 +121,11 @@ def blog_add(request):
 def edit_blog(request, blog_slug):
     blog_name = Post.objects.get(slug=blog_slug)
     if blog_name.user == request.user or request.user.is_superuser == True:
-        form = BlogPostForm(instance=blog_name)
+        form = BlogPostForm(instance=blog_name, is_superuser=request.user.is_superuser)
 
         categories_list = Category.objects.filter(is_active=True)
         if request.method == "POST":
-            form = BlogPostForm(request.POST, instance=blog_name)
+            form = BlogPostForm(request.POST, instance=blog_name, is_superuser=request.user.is_superuser)
             if form.is_valid():
                 blog_post = form.save(commit=False)
                 blog_post.user = request.user
@@ -287,19 +290,25 @@ def upload_photos(request):
         f = request.FILES.get("upload")
         obj = Image_File.objects.create(upload=f, is_image=True)
         obj.save()
-        abs_path = BASE_DIR + obj.upload.url
-        with open(abs_path, 'wb+') as destination:
-            for chunk in f.chunks():
-                destination.write(chunk)
-        size = (128, 128)
-        thumbnail_name = 'thumb' + f.name
+        thumbnail_name = 'thumb' + f.name 
+        if getattr(settings, 'AWS_ENABLED', 'False'):
+            image_file = requests.get(obj.upload.url, stream=True)
+            with open(thumbnail_name, 'wb') as destination:
+                for chunk in image_file.iter_content():
+                    destination.write(chunk)
+        else:
+            image_file = f
+            with open(thumbnail_name, 'wb') as destination:
+                for chunk in image_file.chunks():
+                    destination.write(chunk)
         im = Image.open(destination.name)
+        size = (128, 128)
         im.thumbnail(size)
         im.save(thumbnail_name)
         imdata = open(thumbnail_name)
         obj.thumbnail.save(thumbnail_name, File(imdata))
         obj.save()
-        os.remove(os.path.join(BASE_DIR, thumbnail_name))
+        os.remove(os.path.join(settings.BASE_DIR, thumbnail_name))
         upurl = obj.upload.url
     return HttpResponse("""<script type='text/javascript'>
         window.parent.CKEDITOR.tools.callFunction({0}, '{1}');
