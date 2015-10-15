@@ -121,11 +121,11 @@ def blog_add(request):
 def edit_blog(request, blog_slug):
     blog_name = Post.objects.get(slug=blog_slug)
     if blog_name.user == request.user or request.user.is_superuser == True:
-        form = BlogPostForm(instance=blog_name)
+        form = BlogPostForm(instance=blog_name, is_superuser=request.user.is_superuser)
 
         categories_list = Category.objects.filter(is_active=True)
         if request.method == "POST":
-            form = BlogPostForm(request.POST, instance=blog_name)
+            form = BlogPostForm(request.POST, instance=blog_name, is_superuser=request.user.is_superuser)
             if form.is_valid():
                 blog_post = form.save(commit=False)
                 blog_post.user = request.user
@@ -292,7 +292,7 @@ def upload_photos(request):
         obj.save()
         thumbnail_name = 'thumb' + f.name 
         if AWS_ENABLED:
-            image_file = requests.get(f.upload.url, stream=True)
+            image_file = requests.get(obj.upload.url, stream=True)
             with open(thumbnail_name, 'wb') as destination:
                 for chunk in image_file.iter_content():
                     destination.write(chunk)

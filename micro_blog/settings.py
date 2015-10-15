@@ -43,6 +43,7 @@ INSTALLED_APPS = (
     'simple_pagination',
     'microblog',
     'posts',
+    'storages'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -107,4 +108,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
-AWS_ENABLED = False
+
+try:
+    from awssettings import *
+except ImportError:
+    pass
