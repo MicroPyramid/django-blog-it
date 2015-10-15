@@ -13,7 +13,7 @@ from django.core.files import File
 
 from .models import Post, Category, Tags, Image_File, STATUS_CHOICE
 from .forms import BlogCategoryForm, BlogPostForm, AdminLoginForm
-from micro_blog.settings import BASE_DIR, AWS_ENABLED
+from micro_blog import settings
 
 admin_required = user_passes_test(lambda user: user.is_staff, login_url='/dashboard')
 
@@ -291,7 +291,7 @@ def upload_photos(request):
         obj = Image_File.objects.create(upload=f, is_image=True)
         obj.save()
         thumbnail_name = 'thumb' + f.name 
-        if AWS_ENABLED:
+        if getattr(settings, 'AWS_ENABLED', 'False'):
             image_file = requests.get(obj.upload.url, stream=True)
             with open(thumbnail_name, 'wb') as destination:
                 for chunk in image_file.iter_content():
@@ -308,7 +308,7 @@ def upload_photos(request):
         imdata = open(thumbnail_name)
         obj.thumbnail.save(thumbnail_name, File(imdata))
         obj.save()
-        os.remove(os.path.join(BASE_DIR, thumbnail_name))
+        os.remove(os.path.join(settings.BASE_DIR, thumbnail_name))
         upurl = obj.upload.url
     return HttpResponse("""<script type='text/javascript'>
         window.parent.CKEDITOR.tools.callFunction({0}, '{1}');
