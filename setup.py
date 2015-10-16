@@ -22,8 +22,8 @@ for dirpath, dirnames, filenames in os.walk(PROJECT_NAME):
 
 setup(
     name='micro-blog',
-    version='0.0.1',
-    packages=[],
+    version='0.0.2',
+    packages=['microblog', 'microblog.migrations', 'posts.migrations', 'posts.templatetags'],
     include_package_data=True,
     description='A simple installable app for writing blog posts',
     long_description=README,
@@ -45,6 +45,12 @@ setup(
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     ],
     install_requires=[
-        "django",
+        'boto',
+        'Django',
+        'django-simple-pagination',
+        'django-storages',
+        'Pillow',
+        'requests',
+        'wheel'
     ],
 )
