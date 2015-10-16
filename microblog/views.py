@@ -92,10 +92,7 @@ def blog_add(request):
             blog_post.user = request.user
             # for autosave
             if request.user.is_superuser:
-                if request.POST.get('status') == 'Published' and blog_post.title != None:
-                    blog_post.status = 'Drafted'
-                else:
-                    blog_post.status = request.POST.get('status')
+                blog_post.status = request.POST.get('status')
             blog_post.save()
 
             if request.POST.get('tags', ''):

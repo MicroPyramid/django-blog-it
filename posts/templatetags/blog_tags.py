@@ -25,8 +25,10 @@ def get_archives(context):
 
 @register.filter
 def seperate_tags(tags):
-    tags_list = tags.split(',')
-    real_tags = []
-    for tag in tags_list:
-        real_tags.append(Tags.objects.get(name=tag))
-    return real_tags
+    if tags:
+        tags_list = tags.split(',')
+        real_tags = []
+        for tag in tags_list:
+            real_tags.append(Tags.objects.get(name=tag))
+        return real_tags
+    return None
