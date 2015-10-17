@@ -1,3 +1,4 @@
 include README.rst
-recursive-include micro_blog/templates *
-recursive-include micro_blog/static *
+recursive-include micro_blog/microblog/templates *
+recursive-include micro_blog/microblog/static *
+recursive-include micro_blog/posts/templates *
