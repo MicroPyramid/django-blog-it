@@ -23,7 +23,7 @@ for dirpath, dirnames, filenames in os.walk(PROJECT_NAME):
 
 setup(
     name='micro-blog',
-    version='0.0.3',
+    version='0.0.4',
     packages=find_packages(exclude=['tests', 'tests.*']),
     include_package_data=True,
     description='A simple installable app for writing blog posts',
