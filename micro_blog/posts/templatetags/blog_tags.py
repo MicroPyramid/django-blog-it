@@ -1,6 +1,6 @@
 import datetime
 from django import template
-from microblog.models import Post, Tags
+from micro_blog.microblog.models import Post, Tags
 
 register = template.Library()
 

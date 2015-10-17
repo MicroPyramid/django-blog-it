@@ -19,7 +19,7 @@
                             <h3><span> Categories </span></h3>
                             <ul style="margin:0px;padding:0px;">
                                 {% for category in categories_list %}
-                                    <li><a href="{% url 'posts:selected_category' category_slug=category.slug %}">{{ category }}</a></li>
+                                    <li><a href="{% url 'selected_category' category_slug=category.slug %}">{{ category }}</a></li>
                                 {% endfor %}
                             </ul>
                         </div>
@@ -29,7 +29,7 @@
                             <ul style="margin:0px;padding:0px;">
                                 {% get_archives as archives %}
                                 {% for archive in archives %}
-                                    <li><a href="{% url 'posts:archive_posts' year=archive|date:'Y' month=archive|date:'n' %}">{{ archive|date:"F Y" }}</a></li>
+                                    <li><a href="{% url 'archive_posts' year=archive|date:'Y' month=archive|date:'n' %}">{{ archive|date:"F Y" }}</a></li>
                                 {% endfor %}
                             </ul>
                         </div>
@@ -39,7 +39,7 @@
                                 <h3><span> Tags </span></h3>
                                 <ul style="margin:0px;padding:0px;">
                                     {% for tag in tags_list %}
-                                        <li><a href="{% url 'posts:selected_tag' tag_slug=tag.slug %}"><i class="fa fa-tag"></i> {{ tag }}</a></li>
+                                        <li><a href="{% url 'selected_tag' tag_slug=tag.slug %}"><i class="fa fa-tag"></i> {{ tag }}</a></li>
                                     {% endfor %}
                                 </ul>
 

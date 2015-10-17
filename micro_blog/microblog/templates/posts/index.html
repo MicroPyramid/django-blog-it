@@ -11,17 +11,17 @@
                                     {% for blog in blog_posts %}
                                         <li class="list-item">
                                             <div class="blog-left">
-                                                <h3 class="title" itemprop="headline"><a href="{% url 'posts:blog_post_view' blog_slug=blog.slug %}">{{ blog }}</a></h3>
+                                                <h3 class="title" itemprop="headline"><a href="{% url 'blog_post_view' blog_slug=blog.slug %}">{{ blog }}</a></h3>
                                             </div>
                                             <div class="desc">
                                                     <span> {{ blog.user|title }} | {{ blog.updated_on|date:"d F Y" }}</span>
                                                     {{ blog.content|safe|truncatewords_html:50 }}
                                                     {% for tag in blog.tags|seperate_tags %}
                                                         <span class="tags">
-                                                            <a href="{% url 'posts:selected_tag' tag_slug=tag.slug %}" ><i class="fa fa-tags"></i> {{ tag }}</a>
+                                                            <a href="{% url 'selected_tag' tag_slug=tag.slug %}" ><i class="fa fa-tags"></i> {{ tag }}</a>
                                                         </span>
                                                     {% endfor %}
-                                                <p class="continue-read"><a href="{% url 'posts:blog_post_view' blog_slug=blog.slug %}">Continue reading ....</a></p>
+                                                <p class="continue-read"><a href="{% url 'blog_post_view' blog_slug=blog.slug %}">Continue reading ....</a></p>
                                             </div>
                                         </li>
                                         <hr />

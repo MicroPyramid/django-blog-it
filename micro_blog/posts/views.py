@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponse
-from microblog.models import Post, Category, Tags, Image_File, STATUS_CHOICE
+from micro_blog.microblog.models import Post, Category, Tags, Image_File, STATUS_CHOICE
 
 import datetime
 import calendar
