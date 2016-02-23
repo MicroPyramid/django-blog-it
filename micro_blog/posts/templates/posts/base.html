@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load blog_tags %}
+
+{% block title %} Home {% endblock %}
+
+    {% block content %}
+
+        <h2>Blog posts</h2>
+        <hr />
+        <div class="container" id="blog">
+
+            {% block blog_content %}
+
+            {% endblock %}
+
+                    <div class="row col-sm-12 blog-colors col-md-3" id="right-sidebar">
+
+                        <div class="col-xs-12 widget categories" id="tag-blue">
+                            <h3><span> Categories </span></h3>
+                            <ul style="margin:0px;padding:0px;">
+                                {% for category in categories_list %}
+                                    <li><a href="{% url 'selected_category' category_slug=category.slug %}">{{ category }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+
+                        <div class="col-xs-12 widget blog-posts" id="green">
+                            <h3><span> Blog-Posts </span></h3>
+                            <ul style="margin:0px;padding:0px;">
+                                {% get_archives as archives %}
+                                {% for archive in archives %}
+                                    <li><a href="{% url 'archive_posts' year=archive|date:'Y' month=archive|date:'n' %}">{{ archive|date:"F Y" }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+
+                        <div class="col-xs-12 widget tags" id="pink">
+
+                                <h3><span> Tags </span></h3>
+                                <ul style="margin:0px;padding:0px;">
+                                    {% for tag in tags_list %}
+                                        <li><a href="{% url 'selected_tag' tag_slug=tag.slug %}"><i class="fa fa-tag"></i> {{ tag }}</a></li>
+                                    {% endfor %}
+                                </ul>
+
+                        </div>
+                    </div>
+
+
+        </div>
+
+    {% endblock %}
