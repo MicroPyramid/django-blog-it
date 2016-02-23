@@ -1,0 +1,47 @@
+{% extends 'posts/base.html' %}
+{% load blog_tags %}
+
+{% block title %} {{ blog_name.title }} {% endblock %}
+
+    {% block blog_content %}
+
+                    <div class="row col-sm-12 col-md-9 blog-container-left">
+                        <div class="blogs">
+                            <ul class="blog-list">
+                                <table align="center" class="table table-bordered">
+                                    <thead>
+                                        <th>
+                                            Title: {{ blog_name.title }}
+                                        </th>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>Author</strong>: {{ blog_name.user }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Content</strong>: {{ blog_name.content|safe }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="widget tags"><strong>Tags</strong>:
+                                                {% for tag in blog_name.tags|seperate_tags %}
+                                                    <a href="{% url 'selected_tag' tag_slug=tag.slug %}" ><i class="fa fa-tags"></i> {{ tag }}</a>
+                                                {% endfor %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Keywords</strong>: {{ blog_name.keywords|safe }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </ul>
+                        </div>
+                    </div>
+
+
+    {% endblock %}
+
+    {% block js_script %}
+        <script type="text/javascript">
+
+        </script>
+    {% endblock %}
