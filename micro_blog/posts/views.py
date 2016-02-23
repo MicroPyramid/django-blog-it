@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_list_or_404
 from django.http import HttpResponseRedirect, HttpResponse
 from micro_blog.microblog.models import Post, Category, Tags, Image_File, STATUS_CHOICE
 from django.db.models import Count
@@ -47,8 +47,10 @@ def selected_category(request, category_slug):
 
 
 def selected_tag(request, tag_slug):
-    tag_name = Tags.objects.get(slug=tag_slug)
-    blog_posts = Post.objects.filter(tags__icontains=tag_name, status='Published', category__is_active=True)
+    blog_posts = get_list_or_404(
+        Post, tags__slug=tag_slug,
+        status='Published', category__is_active=True
+    )
     context = {'blog_posts': blog_posts}.items() + categories_tags_lists().items()
     return render(request, 'posts/index.html', context)
 
