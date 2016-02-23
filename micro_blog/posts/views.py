@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponse
 from micro_blog.microblog.models import Post, Category, Tags, Image_File, STATUS_CHOICE
-
+from django.db.models import Count
 import datetime
 import calendar
 
@@ -11,7 +11,9 @@ import calendar
 
 def categories_tags_lists():
     categories_list = Category.objects.filter(is_active=True, post__status='Published').distinct()
-    tags_list = Tags.objects.all()
+    tags_list = Tags.objects.annotate(
+                    Num=Count('rel_posts')
+                ).filter(Num__gt=0, rel_posts__status='Published')[:20]
     cat_tags = {'categories_list': categories_list, 'tags_list': tags_list}
     return cat_tags
 

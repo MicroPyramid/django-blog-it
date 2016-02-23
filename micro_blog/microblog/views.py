@@ -97,12 +97,14 @@ def blog_add(request):
 
             if request.POST.get('tags', ''):
                 tags = request.POST.get('tags')
-
                 splitted = tags.split(',')
                 for s in splitted:
-                    final = s.strip()
-                    if not Tags.objects.filter(name=final).exists():
-                        Tags.objects.create(name=final)
+                    blog_tags = Tags.objects.filter(name__iexact=s.strip())
+                    if blog_tags:
+                        blog_tag = blog_tags.first()
+                    else:
+                        blog_tag = Tags.objects.create(name=s.strip())
+                    blog_post.tags.add(blog_tag)
 
             messages.success(request, 'Successfully posted your blog')
             data = {'error': False, 'response': 'Successfully posted your blog', 'title': request.POST['title']}
@@ -118,7 +120,8 @@ def blog_add(request):
 def edit_blog(request, blog_slug):
     blog_name = Post.objects.get(slug=blog_slug)
     if blog_name.user == request.user or request.user.is_superuser == True:
-        form = BlogPostForm(instance=blog_name, is_superuser=request.user.is_superuser)
+        form = BlogPostForm(instance=blog_name, is_superuser=request.user.is_superuser,
+            initial={'tags': ','.join([tag.name for tag in blog_name.tags.all()])})
 
         categories_list = Category.objects.filter(is_active=True)
         if request.method == "POST":
@@ -132,15 +135,17 @@ def edit_blog(request, blog_slug):
                 elif request.POST.get('status') == 'Rejected':
                     blog_post.status = 'Rejected'
                 blog_post.save()
-
+                blog_post.tags.clear()
                 if request.POST.get('tags', ''):
                     tags = request.POST.get('tags')
-
                     splitted = tags.split(',')
                     for s in splitted:
-                        final = s.strip()
-                        if not Tags.objects.filter(name=final).exists():
-                            Tags.objects.create(name=final)
+                        blog_tags = Tags.objects.filter(name__iexact=s.strip())
+                        if blog_tags:
+                            blog_tag = blog_tags.first()
+                        else:
+                            blog_tag = Tags.objects.create(name=s.strip())
+                        blog_post.tags.add(blog_tag)
 
                 messages.success(request, 'Successfully updated your blog post')
                 data = {'error': False, 'response': 'Successfully updated your blog post'}
