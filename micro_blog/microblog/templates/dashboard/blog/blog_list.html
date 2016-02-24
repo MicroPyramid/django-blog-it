@@ -43,37 +43,21 @@
               <div class="pull-right">
                 <form action="" method="post" id="blogs_data" class="form-inline">
                   {% csrf_token %}
-
-                <div class="form-group">
-                  <select class='input form-control' id="select_status" name="select_status">
-                    <option value="" default>Status</option>
-                    {% for key, choice in blog_choices %}
-                      <option value="{{ key }}" {% ifequal key request.POST.select_status %}selected{% endifequal %}>{{ choice }}</option>
-                    {% endfor %}
-
-                  </select>
-
-                </div>
-
-                <div class="form-group">
-
-                  <select class='input select2 select2_blog' id="blog" name="blog" multiple>
-
-                    {% for blog in blogs %}
-                      <option value="{{ blog.id }}" {% for blog_id in requested_blogs %}{% ifequal blog.id blog_id|add:'0' %}selected{% endifequal %}{% endfor %}>
-                          {{ blog }}
-                      </option>
-                    {% endfor %}
-
-                  </select>
-
-                </div>
-                <div class="form-group">
-                  <button type="submit" id="search_new_button" class="btn btn-default"><i class='fa fa-search'></i> Search</button>
-                </div>
-
-                <div class="clearfix"></div>
-
+                  <div class="form-group">
+                    <select class='input form-control' id="select_status" name="select_status">
+                      <option value="" default>Select status</option>
+                      {% for key, choice in blog_choices %}
+                        <option value="{{ key }}" {% ifequal key request.POST.select_status %}selected{% endifequal %}>{{ choice }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <input type="text" class="form-control" name="search_text" placeholder="Search Blogs" {% if request.POST.search_text %}value="{{request.POST.search_text}}"{% endif %}>
+                  </div>
+                  <div class="form-group">
+                    <button type="submit" id="search_new_button" class="btn btn-default"><i class='fa fa-search'></i> Search</button>
+                  </div>
+                  <div class="clearfix"></div>
                 </form>
               </div>
               <!--/ filter -->
@@ -104,7 +88,7 @@
                         <tbody>
                             <tr>
                                 <td><input name="bulk_actions" class="bulk_actions" value="{{ blog.id }}" type="checkbox"></td>
-                                <td>{{ blog.title }}</td>
+                                <td>{{ blog.title }} -- {{blog.tags.all}}</td>
                                 <td>{{ blog.user }}</td>
                                 <td>{{ blog.category }}</td>
                                 <td id="blog_status">
