@@ -3,7 +3,7 @@ from PIL import Image
 import os, requests
 
 from django.shortcuts import render, render_to_response
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.template.defaultfilters import slugify
 from django.contrib import messages
 from django.contrib.auth import logout, authenticate, login
@@ -159,11 +159,33 @@ def edit_blog(request, blog_slug):
 
 @active_admin_required
 def delete_blog(request, blog_slug):
-    blog_name = Post.objects.get(slug=blog_slug)
-    if blog_name.user == request.user or request.user.is_superuser == True:
-        blog_name.delete()
-        messages.success(request, 'Blog successfully deleted')
-        return HttpResponseRedirect('/dashboard/blog/')
+    if request.method == "POST" and request.POST.get("action"):
+        blog_post = Post.objects.get(slug=blog_slug)
+        print request.POST.get("action")
+        if blog_post.is_deletable_by(request.user):
+            if request.POST.get("action") == "trash":
+                blog_post.status = "Trashed"
+                blog_post.save()
+                messages.success(
+                    request,
+                    'Blog "'+ blog_post.title +'" has been moved to trash.'
+                )
+            elif request.POST.get("action") == "restore":
+                blog_post.status = "Drafted"
+                blog_post.save()
+                messages.success(
+                    request,
+                    'Blog "'+ blog_post.title +'" has been restored from trash.'
+                )
+            elif request.POST.get("action") == "delete":
+                blog_post.delete()
+                messages.success(request, 'Blog successfully deleted')
+            else:
+                raise Http404
+        else:
+            raise Http404
+    return HttpResponseRedirect('/dashboard/blog/')
+
 
 
 @active_admin_required

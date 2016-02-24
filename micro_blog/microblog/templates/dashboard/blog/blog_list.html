@@ -121,7 +121,18 @@
                                 <td><a href="{% url 'view_blog' blog_slug=blog.slug %}" ><button class="btn btn-primary"><i class="fa fa-eye"></i> View</button></a></td>
                                 {% if request.user.is_superuser or request.user == blog.user %}
                                 <td><a href="{% url 'edit_blog' blog_slug=blog.slug %}"><button class="btn btn-info"><i class="fa fa-edit"></i> Edit</button></a></td>
-                                <td><a href="{% url 'delete_blog' blog_slug=blog.slug %}"><button class="btn btn-danger"><i class="fa fa-trash-o"></i> Delete</button></a></td>
+                                <td>
+                                  <form id="blog_trash_form" role="form" method="POST" action="{% url 'delete_blog' blog_slug=blog.slug %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action">
+                                  </form>
+                                  {% ifequal blog.status "Trashed" %}
+                                    <button class="btn btn-success manage_blog" action="restore" title="Restore from trash"><i class="fa fa-refresh"></i> Restore</button>
+                                    <button class="btn btn-danger manage_blog" action="delete" title="Permanently delete from trash"><i class="fa fa-trash-o"></i> Delete</button>
+                                  {% else %}
+                                    <button class="btn btn-warning manage_blog" action="trash" title="Move to Trash"><i class="fa fa-times"></i> Trash</button>
+                                  {% endifequal %}
+                                </td>
                                 {% endif %}
                             </tr>
                         </tbody>
@@ -146,6 +157,12 @@
         <script type="text/javascript">
 
             $('#home').addClass('active');
+            $('.manage_blog').click(function(e){
+              e.preventDefault();
+              console.log("manage_blog");
+              $("form#blog_trash_form input[name='action']").val($(this).attr('action'));
+              $("form#blog_trash_form").submit();
+            });
 
         </script>
 

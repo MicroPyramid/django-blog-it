@@ -53,6 +53,7 @@ STATUS_CHOICE = (
     ('Drafted', 'Drafted'),
     ('Published', 'Published'),
     ('Rejected', 'Rejected'),
+    ('Trashed', 'Trashed'),
 )
 
 
@@ -81,6 +82,11 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
+
+    def is_deletable_by(self, user):
+        if self.user == user or user.is_superuser:
+            return True
+        return False
 
 
 def create_slug(tempslug):
