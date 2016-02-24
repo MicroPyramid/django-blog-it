@@ -21,7 +21,7 @@
         <!-- end div of add blog button -->
 
                 {% if request.user.is_superuser %}
-                <div class="bulk_button pull-left">
+                <div class="bulk_button pull-left" style="display:none">
                    <!-- Bulk actions -->
                     <div class="btn-group">
                       <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -139,6 +139,7 @@
 
         <script type="text/javascript">
         $("#selectAll").change(function() {
+            $(".bulk_button").toggle();
             $(".bulk_actions:checkbox").attr('checked', this.checked);
         });
 
