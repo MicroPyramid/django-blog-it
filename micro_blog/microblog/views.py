@@ -55,18 +55,18 @@ def admin_logout(request):
 @active_admin_required
 def blog(request):
     blog_list = Post.objects.all()
-    blogs = blog_list
-    context = {'blog_list': blog_list, 'blogs': blogs, 'blog_choices': STATUS_CHOICE}
 
     if request.method == "POST":
-        requested_blogs = request.POST.getlist('blog')
         if request.POST.get('select_status', ''):
             blog_list = blog_list.filter(status=request.POST.get('select_status'))
+        if request.POST.get('search_text'):
+            blog_list = blog_list.filter(
+                title__icontains=request.POST.get('search_text')
+            ).distinct() | blog_list.filter(
+                tags__name__icontains=request.POST.get('search_text')
+            ).distinct()
 
-        elif request.POST.getlist('blog', []):
-            blog_list = blog_list.filter(id__in=request.POST.getlist('blog'))
-        context = {'blog_list': blog_list, 'blogs': blogs, 'blog_choices': STATUS_CHOICE,
-                   'requested_blogs': requested_blogs}
+    context = {'blog_list': blog_list.distinct(), 'blog_choices': STATUS_CHOICE}
     return render(request, 'dashboard/blog/blog_list.html', context)
 
 
@@ -97,12 +97,14 @@ def blog_add(request):
 
             if request.POST.get('tags', ''):
                 tags = request.POST.get('tags')
-
                 splitted = tags.split(',')
                 for s in splitted:
-                    final = s.strip()
-                    if not Tags.objects.filter(name=final).exists():
-                        Tags.objects.create(name=final)
+                    blog_tags = Tags.objects.filter(name__iexact=s.strip())
+                    if blog_tags:
+                        blog_tag = blog_tags.first()
+                    else:
+                        blog_tag = Tags.objects.create(name=s.strip())
+                    blog_post.tags.add(blog_tag)
 
             messages.success(request, 'Successfully posted your blog')
             data = {'error': False, 'response': 'Successfully posted your blog', 'title': request.POST['title']}
@@ -118,7 +120,8 @@ def blog_add(request):
 def edit_blog(request, blog_slug):
     blog_name = Post.objects.get(slug=blog_slug)
     if blog_name.user == request.user or request.user.is_superuser == True:
-        form = BlogPostForm(instance=blog_name, is_superuser=request.user.is_superuser)
+        form = BlogPostForm(instance=blog_name, is_superuser=request.user.is_superuser,
+            initial={'tags': ','.join([tag.name for tag in blog_name.tags.all()])})
 
         categories_list = Category.objects.filter(is_active=True)
         if request.method == "POST":
@@ -132,15 +135,17 @@ def edit_blog(request, blog_slug):
                 elif request.POST.get('status') == 'Rejected':
                     blog_post.status = 'Rejected'
                 blog_post.save()
-
+                blog_post.tags.clear()
                 if request.POST.get('tags', ''):
                     tags = request.POST.get('tags')
-
                     splitted = tags.split(',')
                     for s in splitted:
-                        final = s.strip()
-                        if not Tags.objects.filter(name=final).exists():
-                            Tags.objects.create(name=final)
+                        blog_tags = Tags.objects.filter(name__iexact=s.strip())
+                        if blog_tags:
+                            blog_tag = blog_tags.first()
+                        else:
+                            blog_tag = Tags.objects.create(name=s.strip())
+                        blog_post.tags.add(blog_tag)
 
                 messages.success(request, 'Successfully updated your blog post')
                 data = {'error': False, 'response': 'Successfully updated your blog post'}
