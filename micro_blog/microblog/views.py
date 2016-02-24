@@ -55,18 +55,18 @@ def admin_logout(request):
 @active_admin_required
 def blog(request):
     blog_list = Post.objects.all()
-    blogs = blog_list
-    context = {'blog_list': blog_list, 'blogs': blogs, 'blog_choices': STATUS_CHOICE}
 
     if request.method == "POST":
-        requested_blogs = request.POST.getlist('blog')
         if request.POST.get('select_status', ''):
             blog_list = blog_list.filter(status=request.POST.get('select_status'))
+        if request.POST.get('search_text'):
+            blog_list = blog_list.filter(
+                title__icontains=request.POST.get('search_text')
+            ).distinct() | blog_list.filter(
+                tags__name__icontains=request.POST.get('search_text')
+            ).distinct()
 
-        elif request.POST.getlist('blog', []):
-            blog_list = blog_list.filter(id__in=request.POST.getlist('blog'))
-        context = {'blog_list': blog_list, 'blogs': blogs, 'blog_choices': STATUS_CHOICE,
-                   'requested_blogs': requested_blogs}
+    context = {'blog_list': blog_list.distinct(), 'blog_choices': STATUS_CHOICE}
     return render(request, 'dashboard/blog/blog_list.html', context)
 
 
