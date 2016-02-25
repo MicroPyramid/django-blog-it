@@ -17,6 +17,9 @@
                     <td><strong>Content</strong>: {{ blog_name.content|safe }}</td>
                 </tr>
                 <tr>
+                    <td><strong>Status</strong>: {{ blog_name.status }}</td>
+                </tr>
+                <tr>
                     <td><strong>Tags</strong>: {% for tag in blog_name.tags.all %}{{ tag }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
                 </tr>
                 <tr>

@@ -322,3 +322,9 @@ table .widget.tags a {
     text-decoration: none;
 }
 
+/* Dashboard Blog list */
+.blog_trash_form{
+    display: inline-block;
+}
+/* /Dashboard Blog list */
+

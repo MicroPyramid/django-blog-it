@@ -2,7 +2,7 @@ import json
 from PIL import Image
 import os, requests
 
-from django.shortcuts import render, render_to_response
+from django.shortcuts import render, render_to_response, get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.template.defaultfilters import slugify
 from django.contrib import messages
@@ -160,22 +160,21 @@ def edit_blog(request, blog_slug):
 @active_admin_required
 def delete_blog(request, blog_slug):
     if request.method == "POST" and request.POST.get("action"):
-        blog_post = Post.objects.get(slug=blog_slug)
-        print request.POST.get("action")
+        blog_post = get_object_or_404(Post, slug=blog_slug)
         if blog_post.is_deletable_by(request.user):
             if request.POST.get("action") == "trash":
                 blog_post.status = "Trashed"
                 blog_post.save()
                 messages.success(
                     request,
-                    'Blog "'+ blog_post.title +'" has been moved to trash.'
+                    'Blog "'+ str(blog_post.title) +'" has been moved to trash.'
                 )
             elif request.POST.get("action") == "restore":
                 blog_post.status = "Drafted"
                 blog_post.save()
                 messages.success(
                     request,
-                    'Blog "'+ blog_post.title +'" has been restored from trash.'
+                    'Blog "'+ str(blog_post.title) +'" has been restored from trash.'
                 )
             elif request.POST.get("action") == "delete":
                 blog_post.delete()
@@ -185,7 +184,6 @@ def delete_blog(request, blog_slug):
         else:
             raise Http404
     return HttpResponseRedirect('/dashboard/blog/')
-
 
 
 @active_admin_required
