@@ -62,9 +62,9 @@ def blog(request):
         if request.POST.get('search_text'):
             blog_list = blog_list.filter(
                 title__icontains=request.POST.get('search_text')
-            ).distinct() | blog_list.filter(
+            ) | blog_list.filter(
                 tags__name__icontains=request.POST.get('search_text')
-            ).distinct()
+            )
 
     context = {'blog_list': blog_list.distinct(), 'blog_choices': STATUS_CHOICE}
     return render(request, 'dashboard/blog/blog_list.html', context)
