@@ -11,7 +11,7 @@ from django.contrib.auth.decorators import user_passes_test, login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files import File
 
-from .models import Post, Category, Tags, Image_File, STATUS_CHOICE
+from .models import Post, PostHistory, Category, Tags, Image_File, STATUS_CHOICE
 from .forms import BlogCategoryForm, BlogPostForm, AdminLoginForm
 from micro_blog import settings
 
@@ -106,6 +106,7 @@ def blog_add(request):
                         blog_tag = Tags.objects.create(name=s.strip())
                     blog_post.tags.add(blog_tag)
 
+            blog_post.create_activity(user=request.user, content="added")
             messages.success(request, 'Successfully posted your blog')
             data = {'error': False, 'response': 'Successfully posted your blog', 'title': request.POST['title']}
         else:
@@ -125,15 +126,15 @@ def edit_blog(request, blog_slug):
 
         categories_list = Category.objects.filter(is_active=True)
         if request.method == "POST":
+            previous_status = blog_name.status
             form = BlogPostForm(request.POST, instance=blog_name, is_superuser=request.user.is_superuser)
             if form.is_valid():
                 blog_post = form.save(commit=False)
                 blog_post.user = request.user
-                blog_post.status = 'Drafted'
-                if request.POST.get('status') == 'Published':
-                    blog_post.status = 'Published'
-                elif request.POST.get('status') == 'Rejected':
-                    blog_post.status = 'Rejected'
+                if request.user.is_superuser:
+                    blog_post.status = request.POST.get('status')
+                else:
+                    blog_post.status = previous_status
                 blog_post.save()
                 blog_post.tags.clear()
                 if request.POST.get('tags', ''):
@@ -147,6 +148,13 @@ def edit_blog(request, blog_slug):
                             blog_tag = Tags.objects.create(name=s.strip())
                         blog_post.tags.add(blog_tag)
 
+                if blog_post.status == previous_status:
+                    blog_post.create_activity(user=request.user, content="updated")
+                else:
+                    blog_post.create_activity(user=request.user,
+                        content="changed status from " + \
+                        str(previous_status) + " to " + str(blog_post.status)
+                    )
                 messages.success(request, 'Successfully updated your blog post')
                 data = {'error': False, 'response': 'Successfully updated your blog post'}
             else:
@@ -162,9 +170,13 @@ def delete_blog(request, blog_slug):
     if request.method == "POST" and request.POST.get("action"):
         blog_post = get_object_or_404(Post, slug=blog_slug)
         if blog_post.is_deletable_by(request.user):
+            previous_status = blog_post.status
             if request.POST.get("action") == "trash":
                 blog_post.status = "Trashed"
                 blog_post.save()
+                blog_post.create_activity(user=request.user,
+                    content="moved to trash from " + str(previous_status)
+                )
                 messages.success(
                     request,
                     'Blog "'+ str(blog_post.title) +'" has been moved to trash.'
@@ -172,11 +184,15 @@ def delete_blog(request, blog_slug):
             elif request.POST.get("action") == "restore":
                 blog_post.status = "Drafted"
                 blog_post.save()
+                blog_post.create_activity(user=request.user,
+                    content="restored from trash to " + str(blog_post.status)
+                )
                 messages.success(
                     request,
                     'Blog "'+ str(blog_post.title) +'" has been restored from trash.'
                 )
             elif request.POST.get("action") == "delete":
+                blog_post.remove_activity()
                 blog_post.delete()
                 messages.success(request, 'Blog successfully deleted')
             else:
@@ -258,23 +274,31 @@ def bulk_actions_blog(request):
     if request.user.is_superuser:
         if request.method == 'GET':
             if 'blog_ids[]' in request.GET:
-
-                if request.GET.get('action') == 'Published' or request.GET.get('action') == 'Drafted' or request.GET.get(
-                        'action') == 'Rejected':
-                    Post.objects.filter(id__in=request.GET.getlist('blog_ids[]')).update(
-                        status=request.GET.get('action'))
-                    messages.success(request,
-                                     'Selected blog posts successfully updated as ' + str(request.GET.get('action')))
+                blog_posts = Post.objects.filter(id__in=request.GET.getlist('blog_ids[]'))
+                if request.GET.get('action') in [status[0] for status in STATUS_CHOICE]:
+                    history_list = []
+                    for blog in blog_posts:
+                        history_list.append(
+                            blog.create_activity_instance(user=request.user,
+                                content="changed status from " + str(blog.status) + \
+                                " to " + str(request.GET.get('action'))
+                            )
+                        )
+                    blog_posts.update(status=request.GET.get('action'))
+                    PostHistory.objects.bulk_create(history_list)
+                    messages.success(request, 'Selected blog posts' + \
+                        ' successfully updated as ' + str(request.GET.get('action')))
 
                 elif request.GET.get('action') == 'Delete':
-                    Post.objects.filter(id__in=request.GET.getlist('blog_ids[]')).delete()
+                    PostHistory.objects.filter(post__in=blog_posts).delete()
+                    blog_posts.delete()
 
                 return HttpResponse(json.dumps({'response': True}))
             else:
                 messages.warning(request, 'Please select at-least one record to perform this action')
                 return HttpResponse(json.dumps({'response': False}))
 
-        return render(request, '/dashboard/blog/')
+    return render(request, '/dashboard/blog/')
 
 
 @active_admin_required
