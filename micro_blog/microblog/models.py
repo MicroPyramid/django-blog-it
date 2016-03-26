@@ -88,6 +88,19 @@ class Post(models.Model):
             return True
         return False
 
+    def create_activity(self, user, content):
+        return PostHistory.objects.create(
+            user=user, post=self, content=content
+        )
+
+    def create_activity_instance(self, user, content):
+        return PostHistory(
+            user=user, post=self, content=content
+        )
+
+    def remove_activity(self):
+        self.history.all().delete()
+
 
 def create_slug(tempslug):
     slugcount = 0
@@ -98,6 +111,20 @@ def create_slug(tempslug):
             tempslug = tempslug + '-' + str(slugcount)
         except ObjectDoesNotExist:
             return tempslug
+
+
+class PostHistory(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL)
+    post = models.ForeignKey(Post, related_name='history')
+    content = models.CharField(max_length=200)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return '{username} {content} {blog_title}'.format(
+            username=str(self.user.get_username()),
+            content=str(self.content),
+            blog_title=str(self.post.title)
+        )
 
 
 class Image_File(models.Model):
