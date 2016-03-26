@@ -32,3 +32,9 @@ def seperate_tags(tags):
             real_tags.append(Tags.objects.get(name=tag))
         return real_tags
     return None
+
+
+@register.filter
+def is_deletable_by(blog_post, user):
+    return blog_post.is_deletable_by(user)
+

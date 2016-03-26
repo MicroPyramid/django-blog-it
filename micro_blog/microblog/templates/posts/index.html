@@ -16,7 +16,7 @@
                                             <div class="desc">
                                                     <span> {{ blog.user|title }} | {{ blog.updated_on|date:"d F Y" }}</span>
                                                     {{ blog.content|safe|truncatewords_html:50 }}
-                                                    {% for tag in blog.tags|seperate_tags %}
+                                                    {% for tag in blog.tags.all %}
                                                         <span class="tags">
                                                             <a href="{% url 'selected_tag' tag_slug=tag.slug %}" ><i class="fa fa-tags"></i> {{ tag }}</a>
                                                         </span>

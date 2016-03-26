@@ -1,2 +1,4 @@
-# micro-blog
-simple blog in django
+micro-blog
+------------
+
+Simple blog package in Django.
