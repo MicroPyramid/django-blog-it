@@ -37,4 +37,3 @@ def seperate_tags(tags):
 @register.filter
 def is_deletable_by(blog_post, user):
     return blog_post.is_deletable_by(user)
-
