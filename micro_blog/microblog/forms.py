@@ -24,6 +24,7 @@ class AdminLoginForm(forms.Form):
 
 class BlogPostForm(forms.ModelForm):
     tags = forms.CharField(label="Tags", max_length=300, required=False)
+
     class Meta:
         model = Post
         exclude = ('slug', 'user', 'tags')

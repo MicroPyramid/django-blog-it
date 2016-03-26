@@ -109,4 +109,5 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
 
-AWS_ENABLED = False 
+AWS_ENABLED = False
+
