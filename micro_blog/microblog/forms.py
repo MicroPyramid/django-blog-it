@@ -23,9 +23,10 @@ class AdminLoginForm(forms.Form):
 
 
 class BlogPostForm(forms.ModelForm):
+    tags = forms.CharField(label="Tags", max_length=300, required=False)
     class Meta:
         model = Post
-        exclude = ('slug', 'user',)
+        exclude = ('slug', 'user', 'tags')
 
     def __init__(self, *args, **kwargs):
         self.is_superuser = kwargs.pop('is_superuser', None)

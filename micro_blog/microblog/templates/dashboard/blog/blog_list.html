@@ -1,4 +1,5 @@
 {% extends 'dashboard/base.html' %}
+{% load blog_tags %}
 {% load paginate %}
     {% block title %}Posts{% endblock %}
     {% block extra_css %}
@@ -21,7 +22,7 @@
         <!-- end div of add blog button -->
 
                 {% if request.user.is_superuser %}
-                <div class="bulk_button pull-left">
+                <div class="bulk_button pull-left" style="display:none">
                    <!-- Bulk actions -->
                     <div class="btn-group">
                       <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -43,37 +44,21 @@
               <div class="pull-right">
                 <form action="" method="post" id="blogs_data" class="form-inline">
                   {% csrf_token %}
-
-                <div class="form-group">
-                  <select class='input form-control' id="select_status" name="select_status">
-                    <option value="" default>Status</option>
-                    {% for key, choice in blog_choices %}
-                      <option value="{{ key }}" {% ifequal key request.POST.select_status %}selected{% endifequal %}>{{ choice }}</option>
-                    {% endfor %}
-
-                  </select>
-
-                </div>
-
-                <div class="form-group">
-
-                  <select class='input select2 select2_blog' id="blog" name="blog" multiple>
-
-                    {% for blog in blogs %}
-                      <option value="{{ blog.id }}" {% for blog_id in requested_blogs %}{% ifequal blog.id blog_id|add:'0' %}selected{% endifequal %}{% endfor %}>
-                          {{ blog }}
-                      </option>
-                    {% endfor %}
-
-                  </select>
-
-                </div>
-                <div class="form-group">
-                  <button type="submit" id="search_new_button" class="btn btn-default"><i class='fa fa-search'></i> Search</button>
-                </div>
-
-                <div class="clearfix"></div>
-
+                  <div class="form-group">
+                    <select class='input form-control' id="select_status" name="select_status">
+                      <option value="" default>Select status</option>
+                      {% for key, choice in blog_choices %}
+                        <option value="{{ key }}" {% ifequal key request.POST.select_status %}selected{% endifequal %}>{{ choice }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <input type="text" class="form-control" name="search_text" placeholder="Search Blogs" {% if request.POST.search_text %}value="{{request.POST.search_text}}"{% endif %}>
+                  </div>
+                  <div class="form-group">
+                    <button type="submit" id="search_new_button" class="btn btn-default"><i class='fa fa-search'></i> Search</button>
+                  </div>
+                  <div class="clearfix"></div>
                 </form>
               </div>
               <!--/ filter -->
@@ -113,16 +98,30 @@
                                         <i class="fa fa-thumbs-up"></i> {{ blog.status }}
                                     {% elif blog.status == "Drafted" %}
                                         <i class="fa fa-file-o"></i> {{ blog.status }}
+                                    {% elif blog.status == "Trashed" %}
+                                        <i class="fa fa-trash-o"></i> {{ blog.status }}
                                     {% else %}
                                         <i class="fa fa-thumbs-down"></i> {{ blog.status }}
                                     {% endif %}
 
                                 </td>
-                                <td><a href="{% url 'view_blog' blog_slug=blog.slug %}" ><button class="btn btn-primary"><i class="fa fa-eye"></i> View</button></a></td>
-                                {% if request.user.is_superuser or request.user == blog.user %}
-                                <td><a href="{% url 'edit_blog' blog_slug=blog.slug %}"><button class="btn btn-info"><i class="fa fa-edit"></i> Edit</button></a></td>
-                                <td><a href="{% url 'delete_blog' blog_slug=blog.slug %}"><button class="btn btn-danger"><i class="fa fa-trash-o"></i> Delete</button></a></td>
-                                {% endif %}
+                                <td colspan="3">
+                                  <a href="{% url 'view_blog' blog_slug=blog.slug %}" ><button class="btn btn-primary"><i class="fa fa-eye"></i> View</button></a>
+                                  {% if blog|is_deletable_by:request.user %}
+                                    <a href="{% url 'edit_blog' blog_slug=blog.slug %}"><button class="btn btn-info"><i class="fa fa-edit"></i> Edit</button></a>
+                                  
+                                    <form class="blog_trash_form" role="form" method="POST" action="{% url 'delete_blog' blog_slug=blog.slug %}">
+                                      {% csrf_token %}
+                                      <input type="hidden" name="action">
+                                    </form>
+                                    {% ifequal blog.status "Trashed" %}
+                                      <button class="btn btn-success manage_blog" action="restore" title="Restore from trash"><i class="fa fa-refresh"></i> Restore</button>
+                                      <button class="btn btn-danger manage_blog" action="delete" title="Permanently delete from trash"><i class="fa fa-trash-o"></i> Delete</button>
+                                    {% else %}
+                                      <button class="btn btn-warning manage_blog" action="trash" title="Move to Trash"><i class="fa fa-times"></i> Trash</button>
+                                    {% endifequal %}
+                                  {% endif %}
+                                </td>
                             </tr>
                         </tbody>
 
@@ -146,6 +145,11 @@
         <script type="text/javascript">
 
             $('#home').addClass('active');
+            $('.manage_blog').click(function(e){
+              e.preventDefault();
+              $(this).siblings("form.blog_trash_form").children("input[name='action']").val($(this).attr('action'));
+              $(this).siblings("form.blog_trash_form").submit();
+            });
 
         </script>
 
@@ -155,6 +159,7 @@
 
         <script type="text/javascript">
         $("#selectAll").change(function() {
+            $(".bulk_button").toggle();
             $(".bulk_actions:checkbox").attr('checked', this.checked);
         });
 
