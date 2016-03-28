@@ -18,3 +18,6 @@ Simple blog package in Django.
 
 .. image:: https://www.herokucdn.com/deploy/button.svg
    :target: https://heroku.com/deploy?template=https://github.com/MicroPyramid/micro-blog
+
+
+You can view the complete documentation at http://micro-blog.readthedocs.org/en/latest/?badge=latest
