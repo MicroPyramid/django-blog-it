@@ -7,3 +7,4 @@ django-simple-pagination==1.1.4
 django-storages==1.4
 requests==2.9.1
 wheel==0.29.0
+Sphinx==1.3.6
