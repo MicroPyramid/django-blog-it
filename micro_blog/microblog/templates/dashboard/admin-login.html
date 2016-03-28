@@ -1,0 +1,66 @@
+{% extends 'dashboard/base.html' %}
+{% load staticfiles %}
+    {% block title %}Login{% endblock %}
+    {% block content %}
+
+        <!-- welcome meassge ends here -->
+        <!-- Description starts here -->
+        <div class="container">
+            <div class="row login-div">
+                <div class="">
+
+                  <h3 class="">Admin Login</h3>
+
+                  <div id="__all__"></div>
+
+                  <form class="form-div form-horizontal" action="" method="post" id="admin_login_form">
+                    {% csrf_token %}
+
+                      <div class="form-group">
+                          <label class="col-sm-1 control-label" for="username">Username</label>
+                          <div id='username_div' class="input-group col-sm-2">
+                            <div class="input-group-addon"><i class="fa fa-user"></i></div>
+                            <input type="text" name="username" id="username" class="form-control" placeholder="Username" autofocus>
+                          </div>
+                      </div>
+
+                      <div class="form-group">
+                          <label class="col-sm-1 control-label" for="password">Password</label>
+                          <div id='password_div' class="input-group col-sm-2">
+                              <div class="input-group-addon"><i class="fa fa-lock"></i></div>
+                              <input type="password" name="password" id="password" class="form-control" placeholder="Password" >
+                          </div>
+                      </div>
+
+                      <div id='__all___div' class="form-group">
+                          <div class="col-sm-offset-1 col-sm-2">
+                            <button type="submit" class="btn btn-primary"><i class="fa fa-sign-in"></i> Login</button>
+                          </div>
+                      </div>
+                  </form>
+
+                </div>
+            </div>
+        </div>
+        <!-- Description ends here -->
+
+    {% endblock %}
+
+{% block js_script %}
+    <script type="text/javascript">
+      $("#admin_login_form").submit(function(e){
+          e.preventDefault();
+          $.post(".", $("#admin_login_form").serialize(), function(data){
+              if(data.error){
+                  $('p.error_required').remove();
+                  for (var key in data.response) {
+                      $('#' + key + '_div').after("<p class='error_required'>&nbsp;&nbsp; * " + data.response[key] + "</p>");
+                  }
+              }else{
+                  //alert(data['response']);
+                  window.location = "/dashboard/blog/";
+              }
+          }, "json")
+      })
+    </script>
+{% endblock %}

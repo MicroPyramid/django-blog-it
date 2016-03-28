@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - {% block title %}Home{% endblock %}</title>
+    {% load staticfiles %}
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" type="text/css">
+    <!-- for online links -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <!--select2 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet" />
+    <!-- // -->
+
+    <!-- for tags -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/jquery.tagsinput.css' %}" />
+    <!-- // -->
+
+
+    {% block extra_css %}
+    {% endblock %}
+</head>
+<body>
+        <div class="container">
+
+            {% if request.user.is_active %}
+                {% block menu_block %}
+                <div class="row" id="top_menu">
+                    <div class="container">
+                        <div class="row menu_items">
+                            <ul class="nav nav-pills pull-left">
+                              <li role="presentation" id="home"><a href="/dashboard/blog">Home</a></li>
+                              <li role="presentation" id="categories"><a href="{% url 'blog:categories' %}">Categories</a></li>
+                            </ul>
+                            <p class="pull-right">
+                                <a href="{% url 'blog:admin_logout' %}">
+                                    <button class="btn btn-danger"><i class="fa fa-sign-out"></i> Logout</button>
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                {% endblock %}
+            {% endif %}
+
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% endif %} alert-dismissible my_alert" role="alert">
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                  <strong>{% if message.tags %}{{ message.tags|title }} !{% endif %}</strong> {{ message }}.
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            {% block content %}
+            {% endblock %}
+
+                <footer class="my_footer">
+                    <p align="center">Copyrights by &copy; MicroPyramid Pvt. Ltd.</p>
+                </footer>
+
+
+        </div>
+
+        <!-- end div container -->
+
+        <!-- for online links  -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
+
+    <script src="//cdn.ckeditor.com/4.5.4/standard/ckeditor.js"></script>
+	<script src="http://malsup.github.com/jquery.form.js"></script>
+
+
+	<script src="{% static 'js/jquery.tagsinput.js' %}"></script>
+
+
+
+
+
+    <script type="text/javascript">
+      $('.select2').select2(
+        {
+            tags: "true",
+            placeholder: "Select an option"
+        }
+      );
+
+    </script>
+    <script type="text/javascript">
+
+        // for pagination
+
+        $('.pagination li a.active').each(function(){
+            $(this).css('background', '#337AB7');
+            $(this).css('color', '#fff');
+        });
+
+       if($('.pagination li:first').find('a span').text() == '<<'){
+            $('.pagination li:first').find('a span').text('First');
+        }
+
+        if($('.pagination li:nth-child(2)').find('a span').text() == '<'){
+            $('.pagination li:nth-child(2)').find('a span').text('Prev');
+        }
+
+        if($('.pagination li:last').find('a span').text() == '>>'){
+            $('.pagination li:last').find('a span').text('Last');
+        }
+        if($('.pagination li:nth-last-child(2)').find('a span').text() == '>'){
+            $('.pagination li:nth-last-child(2)').find('a span').text('Next');
+        }
+
+    </script>
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+                setTimeout(function() {
+                      $('.my_alert').fadeOut(2000, function(){
+                    });
+                      }, 3000);
+
+        });
+        //window.setTimeout(function() {
+        //    $(".alert-message").fadeTo(500, 0).slideUp(500, function(){
+        //        $(this).remove();
+        //    });
+        //}, 5000);
+    </script>
+
+    {% block js_script %}
+
+    {% endblock %}
+
+</body>
+</html>

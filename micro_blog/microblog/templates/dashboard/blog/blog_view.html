@@ -1,0 +1,33 @@
+{% extends 'dashboard/base.html' %}
+    {% block title %}Posts View{% endblock %}
+    {% block content %}
+
+    <div class="row my_view">
+        <table align="center" class="table table-bordered">
+            <thead>
+                <th>
+                    Title: {{ blog_name.title }}
+                </th>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Author</strong>: {{ blog_name.user }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Content</strong>: {{ blog_name.content|safe }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Status</strong>: {{ blog_name.status }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Tags</strong>: {% for tag in blog_name.tags.all %}{{ tag }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+                </tr>
+                <tr>
+                    <td><strong>Keywords</strong>: {{ blog_name.keywords|safe }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <!-- end div of row -->
+
+    {% endblock %}

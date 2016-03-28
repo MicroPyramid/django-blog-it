@@ -1,0 +1,51 @@
+{% extends 'posts/base.html' %}
+{% load paginate %}
+{% load blog_tags %}
+    {% block blog_content %}
+
+                    <div class="row col-sm-12 col-md-9 blog-container-left">
+                        <div class="blogs">
+                            <ul class="blog-list">
+                                {% if blog_posts %}
+                                    {% paginate 5 blog_posts %}
+                                    {% for blog in blog_posts %}
+                                        <li class="list-item">
+                                            <div class="blog-left">
+                                                <h3 class="title" itemprop="headline"><a href="{% url 'blog_post_view' blog_slug=blog.slug %}">{{ blog }}</a></h3>
+                                            </div>
+                                            <div class="desc">
+                                                    <span> {{ blog.user|title }} | {{ blog.updated_on|date:"d F Y" }}</span>
+                                                    {{ blog.content|safe|truncatewords_html:50 }}
+                                                    {% for tag in blog.tags|seperate_tags %}
+                                                        <span class="tags">
+                                                            <a href="{% url 'selected_tag' tag_slug=tag.slug %}" ><i class="fa fa-tags"></i> {{ tag }}</a>
+                                                        </span>
+                                                    {% endfor %}
+                                                <p class="continue-read"><a href="{% url 'blog_post_view' blog_slug=blog.slug %}">Continue reading ....</a></p>
+                                            </div>
+                                        </li>
+                                        <hr />
+                                    {% endfor %}
+                                <!-- pagination -->
+                                  <div class="pagination_wrap">
+                                      {% show_pages %}
+                                  </div>
+                                <!--/ pagination -->
+                                {% else %}
+                                    <h2 align="center">There are no Blog-posts are here !</h2>
+                                {% endif %}
+
+                            </ul>
+                        </div>
+                    </div>
+
+
+    {% endblock %}
+
+    {% block js_script %}
+        <script type="text/javascript">
+
+            $('#home').addClass('active');
+
+        </script>
+    {% endblock %}
