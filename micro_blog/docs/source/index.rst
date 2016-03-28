@@ -11,12 +11,23 @@ Modules used:
 	* Django Simple Pagination
 
 
-Installation procedure
+Requirements
 ======================
 
-* Get code from micropyramid git repository https://github.com/MicroPyramid/micro-blog
-* use virtualenv to install requirements, add to your project Installed Apps and run migrations,    customize it as per your need.
+======  ====================
+Python  >= 2.6 (or Python 3.4)
+Django  = 1.9
+jQuery  >= 1.7
+======  ====================
 
+Installation Procedure
+======================
+
+* Get code from micropyramid git repository::
+
+    https://github.com/MicroPyramid/micro-blog
+
+* Use virtualenv to install requirements `` Pip install -r requirements.txt ``
 
 Working modules
 ===============
