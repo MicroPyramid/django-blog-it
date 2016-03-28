@@ -1,5 +1,7 @@
 micro-blog
 ------------
+Simple blog package in Django.
+
 .. image:: https://travis-ci.org/MicroPyramid/micro-blog.svg?branch=master
    :target: https://travis-ci.org/MicroPyramid/micro-blog
 
@@ -9,4 +11,3 @@ micro-blog
 .. image:: https://landscape.io/github/MicroPyramid/micro-blog/master/landscape.svg?style=flat
    :target: https://landscape.io/github/MicroPyramid/micro-blog/master
    :alt: Code Health
-Simple blog package in Django.
