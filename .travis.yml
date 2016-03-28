@@ -16,7 +16,7 @@ env:
 install:
   - pip install -r requirements.txt
   - pip install coveralls
-  - pip install mysql-python --use-mirrors
+
 
 #mysql db creation
 before_script:
