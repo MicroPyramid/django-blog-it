@@ -4,8 +4,7 @@ MicroBlog's documentation!
 Introduction:
 =============
 
-This is complete code for the blog management from MicroPyramid(https://micropyramid.com).
-We intend to opensource our code to be used in other projects.This is completely extensible and documented.
+Micro blog is a tool to handle blog management. You can integrate it into your project and customise the blog Application. Source Code is available in Micropyramid Repository(https://github.com/MicroPyramid/micro-blog).
 
 Modules used:
 	* Pillow
@@ -16,7 +15,7 @@ Installation procedure
 ======================
 
 * Get code from micropyramid git repository https://github.com/MicroPyramid/micro-blog
-* use virtualenv to install requirements and you can run the site, customize it as per your need.
+* use virtualenv to install requirements, add to your project Installed Apps and run migrations,    customize it as per your need.
 
 
 Working modules
