@@ -55,7 +55,6 @@ def admin_logout(request):
 @active_admin_required
 def blog(request):
     blog_list = Post.objects.all()
-
     if request.method == "POST":
         if request.POST.get('select_status', ''):
             blog_list = blog_list.filter(status=request.POST.get('select_status'))
@@ -307,8 +306,6 @@ def bulk_actions_blog(request):
                 messages.warning(request, 'Please select at-least one record to perform this action')
                 return HttpResponse(json.dumps({'response': False}))
 
-    return render(request, '/dashboard/blog/')
-
 
 @active_admin_required
 def bulk_actions_category(request):
@@ -333,8 +330,6 @@ def bulk_actions_category(request):
                 messages.warning(request, 'Please select at-least one record to perform this action')
                 return HttpResponse(json.dumps({'response': False}))
 
-        return render(request, '/dashboard/category/')
-
 
 @csrf_exempt
 def upload_photos(request):
@@ -342,6 +337,7 @@ def upload_photos(request):
     takes all the images coming from the redactor editor and
     stores it in the database and returns all the files
     '''
+    upurl = ''
     if request.FILES.get("upload"):
         f = request.FILES.get("upload")
         obj = Image_File.objects.create(upload=f, is_image=True)

@@ -15,13 +15,13 @@ def categories_tags_lists():
     return cat_tags
 
 
-def seperate_tags():
-    posts_tags = Post.objects.filter(category__is_active=True, status='Published')
-    for blog in posts_tags:
-        blog_tags_new = blog.tags.split(',')
-        for tag in blog_tags_new:
-            real_tags = Tags.objects.get(slug=tag)
-            return real_tags
+# def seperate_tags():
+#     posts_tags = Post.objects.filter(category__is_active=True, status='Published')
+#     for blog in posts_tags:
+#         blog_tags_new = blog.tags.split(',')
+#         for tag in blog_tags_new:
+#             real_tags = Tags.objects.get(slug=tag)
+#             return real_tags
 
 
 def index(request):
