@@ -16,8 +16,6 @@ class AdminLoginForm(forms.Form):
             user = authenticate(username=username, password=password)
             if user is None:
                 raise forms.ValidationError("Incorrect login details")
-            if not user.is_staff:
-                raise forms.ValidationError('You are not allowed to this page')
 
         return self.cleaned_data
 
@@ -31,8 +29,11 @@ class BlogPostForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         self.is_superuser = kwargs.pop('is_superuser', None)
+        self.user_role = kwargs.pop('user_role', None)
         super(BlogPostForm, self).__init__(*args, **kwargs)
-        if not self.is_superuser:
+        if self.is_superuser or self.user_role != 'Author':
+            pass
+        else:
             del self.fields['status']
         for field in iter(self.fields):
 
@@ -70,3 +71,7 @@ class BlogCategoryForm(forms.ModelForm):
                 self.fields[field].widget.attrs.update({
                     'class': 'form-control', "placeholder": "Please enter your Category " + field.capitalize()
                 })
+
+
+class UserRoleForm(forms.Form):
+    role = forms.CharField(max_length=10)

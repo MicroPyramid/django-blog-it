@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.test import Client
-from micro_blog.microblog.models import Category, Post, Tags, PostHistory
+from micro_blog.microblog.models import Category, Post, Tags, PostHistory, UserRole
 from django.contrib.auth.models import User
 from micro_blog.microblog.forms import BlogCategoryForm, BlogPostForm, AdminLoginForm
 
@@ -110,7 +110,7 @@ class micro_blog_forms_test(TestCase):
 
         form = AdminLoginForm(
             data={'username': 'mp@micropyramid.com', 'password': 'mp'})
-        self.assertFalse(form.is_valid())
+        self.assertTrue(form.is_valid())
 
 
 class micro_blog_views_get(TestCase):
@@ -402,3 +402,58 @@ class blog_post_creation(TestCase):
 
         response = self.client.post('/dashboard/delete/haystack-post/', {'action': 'delete'})
         self.assertEqual(response.status_code, 302)
+
+
+class users_roles(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_superuser(
+            'mp@mp.com', 'mp', 'mp')
+        self.user_role = UserRole.objects.create(user=self.user, role='Admin')
+        self.employee = User.objects.create_user(
+            'mp@micropyramid.com', 'mp', 'mp')
+        # self.employee_role = UserRole.objects.create(user=self.employee, role='Author')
+
+    def test_users_list(self):
+        user_login = self.client.login(username='mp@mp.com', password='mp')
+        self.assertTrue(user_login)
+
+        response = self.client.get('/dashboard/users/')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'dashboard/user/list.html')
+
+        response = self.client.get('/dashboard/users/', {'select_role': ''})
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get('/dashboard/users/', {'select_role': 'Admin'})
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get('/dashboard/users/', {'select_role': 'Author'})
+        self.assertEqual(response.status_code, 200)
+
+    def test_users_edit_delete(self):
+        user_login = self.client.login(username='mp@mp.com', password='mp')
+        self.assertTrue(user_login)
+
+        response = self.client.get('/dashboard/user/edit/' + str(self.user.id) + '/')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'dashboard/user/user_role.html')
+
+        response = self.client.post('/dashboard/user/edit/' + str(self.user.id) + '/', {'role': 'Publisher'})
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue('Successfully Updated User Role' in str(response.content))
+
+        response = self.client.post('/dashboard/user/edit/' + str(self.employee.id) + '/', {'role': 'Author'})
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue('Successfully Updated User Role' in str(response.content))
+
+        response = self.client.post('/dashboard/user/edit/' + str(self.employee.id) + '/', {'role': ''})
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse('Successfully Updated User Role' in str(response.content))
+
+        response = self.client.post('/dashboard/user/delete/' + str(self.employee.id) + '/')
+        self.assertEqual(response.status_code, 302)
+
+        response = self.client.post('/dashboard/user/delete/' + str(self.employee.id+1) + '/')
+        self.assertEqual(response.status_code, 404)

@@ -1,0 +1,116 @@
+{% extends 'dashboard/base.html' %}
+{% load paginate %}
+{% load blog_tags %}
+{% block title %}Users{% endblock %}
+{% block extra_css %}
+<style type="text/css">
+  table td {
+  padding: 6px;
+  }
+</style>
+{% endblock %}
+{% block content %}
+<div class="row" id="head_style">
+  <h1 align="center"><i class="fa fa-database"></i> Users list</h1>
+  <!-- end div of add blog button -->
+  {% if request.user.is_superuser %}
+  <div class="bulk_button pull-left">
+    <!-- Bulk actions 
+    <div class="btn-group">
+      <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      <span class="fa fa-gear"></span> Bulk <span class="caret"></span>
+      <span class="sr-only">Toggle Dropdown</span>
+      </button>
+      <ul class="dropdown-menu">
+        <li id="true"><a href="#" style="white-space: unset;"> Active <span class="fa fa-check-square-o pull-right"></span></a></li>
+        <li id="false"><a href="#" style="white-space: unset;"> Inactive <span class="fa fa-minus-square-o pull-right"></span></a></li>
+        <li id="delete"><a href="#" style="white-space: unset;"> Delete <span class="fa fa-trash-o pull-right"></span></a></li>
+      </ul>
+    </div>
+    Bulk actions end-->
+  </div>
+  {% endif %}
+  <!-- filter -->
+  <div class="pull-right">
+    <form action="" method="post" id="categories_data" class="form-inline">
+      {% csrf_token %}
+      <div class="form-group">
+        <select class='input form-control' id="select_role" name="select_role">
+          <option value="" default>Role</option>
+          {% for role in roles %}
+              <option value="{{ role.0 }}" {% ifequal request.POST.select_role role.0 %}Selected{% endifequal %}>{{ role.1 }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <button type="submit" class="btn btn-default" id="search_new_button"><i class='fa fa-search'></i> Search</button>
+      </div>
+      <div class="clearfix"></div>
+    </form>
+  </div>
+  <!--/ filter -->
+</div>
+<br clear="all">
+{% if users_list %}
+{% paginate 5 users_list %}
+{% show_pageitems %}
+<div class="row">
+  <table class="table table-bordered table-hover" id="my_table">
+    <thead>
+      <tr>
+        <th><input name="bulk_actions" id="selectAll" type="checkbox"></th>
+        <th>Title</th>
+        <th>Status</th>
+        <th>Role</th>
+        {% if request.user|get_user_role_name == 'Admin' %}
+        <th colspan="2">Actions</th>
+        {% endif %}
+      </tr>
+    </thead>
+    {% for user in users_list %}
+    <tbody>
+      <tr>
+        <td><input name="bulk_actions" class="bulk_actions" value="{{ category.id }}" type="checkbox"></td>
+        <td>{{ user.email }}</td>
+        <td>{% if user.is_active %}<i class="fa fa-check-square-o"></i> Active{% else %}<i class="fa fa-minus-square-o"></i> Inactive{% endif %} {% if user.is_superuser %}<i class="fa fa-check-square-o"></i> Administrator {% else %}<i class="fa fa-minus-square-o"></i> User {% endif %}</td>
+        <td>{{ user|get_user_role_name }}</td>
+        {% if request.user.is_superuser or request.user|get_user_role_name == 'Admin' %}
+        <td><a href="{% url 'edit_user_role' user.id %}"><button class="btn btn-info"><i class="fa fa-edit"></i> Edit</button></a></td>
+        <td><a href="{% url 'delete_user' user.id %}"><button class="btn btn-danger"><i class="fa fa-trash-o"></i> Delete</button></a></td>
+        {% endif %}
+      </tr>
+    </tbody>
+    {% endfor %}
+  </table>
+  <!-- end div of table -->
+  <!-- pagination -->
+  <div class="pagination_wrap">
+    {% show_pages %}
+  </div>
+  <!--/ pagination -->
+  {% else %}
+  <h2 align="center">There are no users here!</h2>
+  {% endif %}
+</div>
+{% endblock %}
+{% block js_script %}
+<script type="text/javascript">
+  $('#users').addClass('active');
+</script>
+<script type="text/javascript">
+  $('.select2_category').select2({placeholder: "Select Categories"});
+</script>
+<script type="text/javascript">
+  $("#selectAll").change(function() {
+      $(".bulk_actions:checkbox").attr('checked', this.checked);
+  });
+
+</script>
+<script type="text/javascript">
+  $('.pagination li a').click(function(event){
+      event.preventDefault();
+      $('#categories_data').attr('action', $(this).attr('href'));
+      $('#categories_data').submit();
+  });
+</script>
+{% endblock %}
