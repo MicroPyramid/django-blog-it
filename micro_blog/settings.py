@@ -110,3 +110,5 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
 
 AWS_ENABLED = False
+
+DISQUS_SHORTNAME = os.getenv('DISQUSSHORTNAME')
