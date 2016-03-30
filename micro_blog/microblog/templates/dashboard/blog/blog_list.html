@@ -107,20 +107,21 @@
                                 </td>
                                 <td colspan="3">
                                   <a href="{% url 'view_blog' blog_slug=blog.slug %}" ><button class="btn btn-primary"><i class="fa fa-eye"></i> View</button></a>
-                                  {% if blog|is_deletable_by:request.user %}
+                                  {% if blog|is_deletable_by:request.user or request.user|get_user_role_name != 'Author' %}
                                     <a href="{% url 'edit_blog' blog_slug=blog.slug %}"><button class="btn btn-info"><i class="fa fa-edit"></i> Edit</button></a>
-                                  
                                     <form class="blog_trash_form" role="form" method="POST" action="{% url 'delete_blog' blog_slug=blog.slug %}">
                                       {% csrf_token %}
                                       <input type="hidden" name="action">
                                     </form>
+                                  {% endif %}
+                                    {% if request.user.is_superuser or request.user|get_user_role_name != 'Author' %}
                                     {% ifequal blog.status "Trashed" %}
                                       <button class="btn btn-success manage_blog" action="restore" title="Restore from trash"><i class="fa fa-refresh"></i> Restore</button>
                                       <button class="btn btn-danger manage_blog" action="delete" title="Permanently delete from trash"><i class="fa fa-trash-o"></i> Delete</button>
                                     {% else %}
                                       <button class="btn btn-warning manage_blog" action="trash" title="Move to Trash"><i class="fa fa-times"></i> Trash</button>
                                     {% endifequal %}
-                                  {% endif %}
+                                    {% endif %}
                                 </td>
                             </tr>
                         </tbody>

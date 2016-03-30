@@ -135,3 +135,14 @@ class Image_File(models.Model):
 
     def __str__(self):
         return self.date_created
+
+ROLE_CHOICE = (
+    ('Admin', 'Admin'),
+    ('Publisher', 'Publisher'),
+    ('Author', 'Author'),
+)
+
+
+class UserRole(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL)
+    role = models.CharField(max_length=10, choices=STATUS_CHOICE)
