@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_list_or_404
 from micro_blog.microblog.models import Post, Category, Tags
 from django.db.models import Count
-
+from django.conf import settings
 
 # Create your views here.
 
@@ -33,7 +33,7 @@ def index(request):
 
 def blog_post_view(request, blog_slug):
     blog_name = Post.objects.get(slug=blog_slug)
-    context = list({'blog_name': blog_name}.items()) + list(categories_tags_lists().items())
+    context = list({'blog_name': blog_name}.items()) + list(categories_tags_lists().items()) + list({'disqus_shortname': settings.DISQUS_SHORTNAME}.items())
     return render(request, 'posts/blog_view.html', context)
 
 
