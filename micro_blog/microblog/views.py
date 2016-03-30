@@ -36,7 +36,7 @@ def admin_login(request):
         login_form = AdminLoginForm(request.POST)
         if login_form.is_valid():
             user = authenticate(username=request.POST['username'], password=request.POST['password'])
-            if user.is_active or get_user_role(user) == 'Admin':
+            if user.is_active:
                 login(request, user)
                 messages.success(request, 'You are successfully logged in')
                 response_data = {'error': False, 'response': 'Successfully logged in'}
