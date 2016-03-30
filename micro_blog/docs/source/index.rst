@@ -1,10 +1,12 @@
-MicroBlog's documentation!
+MicroBlog's documentation v0.1:
 =====================================
 
 Introduction:
 =============
 
-Micro blog is a tool to handle blog management. You can integrate it into your project and customise the blog Application. Source Code is available in Micropyramid Repository(https://github.com/MicroPyramid/micro-blog).
+Micro blog is a tool to handle blog management. You can integrate it into your project and customise the blog Application.
+
+Source Code is available in Micropyramid Repository(https://github.com/MicroPyramid/micro-blog).
 
 Modules used:
 	* Pillow
@@ -27,7 +29,7 @@ Installation Procedure
 
     https://github.com/MicroPyramid/micro-blog
 
-* Use virtualenv to install requirements `` Pip install -r requirements.txt ``
+* Use virtualenv to install requirements  pip install -r requirements.txt
 
 Working modules
 ===============
