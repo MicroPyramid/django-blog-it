@@ -11,11 +11,17 @@ from django.contrib.auth.decorators import user_passes_test, login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files import File
 
-from .models import Post, PostHistory, Category, Tags, Image_File, STATUS_CHOICE
-from .forms import BlogCategoryForm, BlogPostForm, AdminLoginForm
+from .models import Post, PostHistory, Category, Tags, Image_File, STATUS_CHOICE, ROLE_CHOICE, UserRole
+from .forms import BlogCategoryForm, BlogPostForm, AdminLoginForm, UserRoleForm
 from micro_blog import settings
+try:
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+except ImportError:
+    from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 
-admin_required = user_passes_test(lambda user: user.is_staff, login_url='/dashboard')
+admin_required = user_passes_test(lambda user: user.is_active, login_url='/dashboard')
 
 
 def active_admin_required(view_func):
@@ -24,13 +30,13 @@ def active_admin_required(view_func):
 
 
 def admin_login(request):
-    if request.user.is_staff:
+    if request.user.is_active:
         return HttpResponseRedirect('/dashboard/blog')
     if request.method == 'POST':
         login_form = AdminLoginForm(request.POST)
         if login_form.is_valid():
             user = authenticate(username=request.POST['username'], password=request.POST['password'])
-            if user.is_staff:
+            if user.is_active:
                 login(request, user)
                 messages.success(request, 'You are successfully logged in')
                 response_data = {'error': False, 'response': 'Successfully logged in'}
@@ -85,7 +91,7 @@ def blog_add(request):
         request.POST = request.POST.copy()
         if request.POST.get('title') == '':
             request.POST['title'] = 'Untitled document ' + str(Post.objects.all().count())
-        form = BlogPostForm(request.POST, is_superuser=request.user.is_superuser)
+        form = BlogPostForm(request.POST, is_superuser=request.user.is_superuser, user_role=get_user_role(request.user))
         if form.is_valid():
             blog_post = form.save(commit=False)
             blog_post.user = request.user
@@ -119,21 +125,21 @@ def blog_add(request):
 @active_admin_required
 def edit_blog(request, blog_slug):
     blog_name = Post.objects.get(slug=blog_slug)
-    if blog_name.user == request.user or request.user.is_superuser is True:
+    if blog_name.user == request.user or request.user.is_superuser is True or get_user_role(request.user) != 'Author':
         form = BlogPostForm(
                 instance=blog_name,
-                is_superuser=request.user.is_superuser,
+                is_superuser=request.user.is_superuser, user_role=get_user_role(request.user),
                 initial={'tags': ','.join([tag.name for tag in blog_name.tags.all()])}
             )
 
         categories_list = Category.objects.filter(is_active=True)
         if request.method == "POST":
             previous_status = blog_name.status
-            form = BlogPostForm(request.POST, instance=blog_name, is_superuser=request.user.is_superuser)
+            form = BlogPostForm(request.POST, instance=blog_name, is_superuser=request.user.is_superuser, user_role=get_user_role(request.user))
             if form.is_valid():
                 blog_post = form.save(commit=False)
                 blog_post.user = request.user
-                if request.user.is_superuser:
+                if request.user.is_superuser or get_user_role(request.user) != 'Author':
                     blog_post.status = request.POST.get('status')
                 else:
                     blog_post.status = previous_status
@@ -172,7 +178,7 @@ def edit_blog(request, blog_slug):
 def delete_blog(request, blog_slug):
     if request.method == "POST" and request.POST.get("action"):
         blog_post = get_object_or_404(Post, slug=blog_slug)
-        if blog_post.is_deletable_by(request.user):
+        if blog_post.is_deletable_by(request.user) or request.user.is_superuser is True or get_user_role(request.user) != 'Author':
             previous_status = blog_post.status
             if request.POST.get("action") == "trash":
                 blog_post.status = "Trashed"
@@ -369,6 +375,13 @@ def upload_photos(request):
         )
 
 
+def get_user_role(user):
+    user_role = UserRole.objects.filter(user=user)
+    if user_role:
+        return user_role[0].role
+    return 'No User Role'
+
+
 @csrf_exempt
 def recent_photos(request):
     ''' returns all the images from the data base '''
@@ -379,3 +392,47 @@ def recent_photos(request):
         thumburl = obj.thumbnail.url
         imgs.append({'src': upurl, 'thumb': thumburl, 'is_image': True})
     return render_to_response('dashboard/browse.html', {'files': imgs})
+
+
+@active_admin_required
+def users(request):
+    users_list = User.objects.all()
+    if request.method == 'POST':
+        if 'select_role' in request.POST.keys() and request.POST.get('select_role'):
+            users_list = []
+            user_roles = UserRole.objects.filter(role=request.POST.get('select_role'))
+            for role in user_roles:
+                users_list.append(role.user)
+    context = {'users_list': users_list, 'roles': ROLE_CHOICE}
+    return render(request, 'dashboard/user/list.html', context)
+
+
+def delete_user(request, pk):
+    users = User.objects.filter(pk=pk)
+    if users:
+        user = users[0]
+        user.delete()
+    else:
+        raise Http404
+    return HttpResponseRedirect(reverse('users'))
+
+
+def edit_user_role(request, pk):
+    user_role = UserRole.objects.filter(user_id=pk)
+    if request.method == 'GET':
+        context = {'user_role': user_role, 'roles': ROLE_CHOICE}
+        return render(request, 'dashboard/user/user_role.html', context)
+    validate_user_role = UserRoleForm(request.POST)
+    if validate_user_role.is_valid():
+        if user_role:
+            user_role = user_role[0]
+            user_role.role = request.POST.get('role')
+            user_role.save()
+        else:
+            user = User.objects.get(pk=pk)
+            UserRole.objects.create(user=user, role=request.POST.get('role'))
+        messages.success(request, 'Successfully Updated User Role')
+        data = {'error': False, 'response': 'Successfully Updated User Role'}
+    else:
+        data = {'error': True, 'response': validate_user_role.errors}
+    return HttpResponse(json.dumps(data))

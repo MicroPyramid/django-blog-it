@@ -1,30 +1,23 @@
 {% extends 'dashboard/base.html' %}
 {% block title %}
-{% if add_category %}
-    Add
-{% else %}
-    Edit
-{% endif %} Category
+User Role
 {% endblock %}
 {% block content %}
 <div class="row" id="head_style">
-  <h3 id="page_title"></h3>
+  <h3 id="page_title">Edit User Role</h3>
 </div>
 <!-- end class of row -->
 <div class="row">
   <form action="" id="post-form" enctype="multipart/form-data" method="post" role="form">
     {% csrf_token %}
-    {% for field in form %}
-    <div class="form-group">
-      <label>{{ field.label }} :</label>
-      <div class="controls">
-        {{ field }}
-        {% if field.help_text %}
-        <p class="help-inline"><small>{{ field.help_text }}</small></p>
-        {% endif %}
+      <div class="form-group">
+        <select class='input form-control' id="role" name="role">
+          <option value="">Role</option>
+          {% for role in roles %}
+              <option value="{{ role.0 }}" {% ifequal user_role.0.role role.0 %}Selected{% endifequal %}>{{ role.1 }}</option>
+          {% endfor %}
+        </select>
       </div>
-    </div>
-    {% endfor %}
     <div class="form-group">
       <button class="btn btn-primary" type="submit">Submit</button>
     </div>
@@ -40,23 +33,13 @@
           if(data.error){
               $('p.error_required').remove();
               for (var key in data.response) {
-                  $('#id_' + key).after('<p class="error_required">* ' + data.response[key] + '</p>');
+                  $('#' + key).after('<p class="error_required">* ' + data.response[key] + '</p>');
               }
           }else{
               //alert(data['response']);
-              window.location='/dashboard/category/';
+              window.location="{% url 'users' %}";
           }
       }, 'json');
   });
-</script>
-<script type="text/javascript">
-  if(window.location.pathname == '/add_category/'){
-      $('#page_title').text('Add Category');
-  }
-  else {
-      var category = '{{ category_name.name }}';
-      $('#page_title').text('Edit Category: '+ category);
-  }
-
 </script>
 {% endblock %}

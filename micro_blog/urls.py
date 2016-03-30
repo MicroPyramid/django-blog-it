@@ -44,5 +44,9 @@ urlpatterns = [
     url(r'^dashboard/bulk_actions_category/$', bulk_actions_category, name='bulk_actions_category'),
     url(r'^dashboard/upload_photos/$', upload_photos, name='upload_photos'),
     url(r'^dashboard/recent_photos/$', recent_photos, name='recent_photos'),
+    url(r'^dashboard/users/$', users, name='users'),
+    url(r'^dashboard/user/edit/(?P<pk>[-\w]+)/$', edit_user_role, name='edit_user_role'),
+    url(r'^dashboard/user/delete/(?P<pk>[-\w]+)/$', delete_user, name='delete_user'),
+
 
 ] + static(MEDIA_URL, document_root=MEDIA_ROOT)

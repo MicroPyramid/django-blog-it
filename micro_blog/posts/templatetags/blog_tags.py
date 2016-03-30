@@ -1,6 +1,7 @@
 import datetime
 from django import template
-from micro_blog.microblog.models import Post, Tags
+from micro_blog.microblog.models import Post, Tags, UserRole
+from micro_blog.microblog.views import get_user_role
 
 register = template.Library()
 
@@ -37,3 +38,8 @@ def seperate_tags(tags):
 @register.filter
 def is_deletable_by(blog_post, user):
     return blog_post.is_deletable_by(user)
+
+
+@register.filter
+def get_user_role_name(user):
+    return get_user_role(user)
