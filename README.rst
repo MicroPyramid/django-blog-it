@@ -16,6 +16,7 @@ Simple blog package in Django.
    :target: https://landscape.io/github/MicroPyramid/micro-blog/master
    :alt: Code Health
 
+
 Deploy To Heroku:
 
 .. image:: https://www.herokucdn.com/deploy/button.svg
