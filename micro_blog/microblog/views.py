@@ -398,10 +398,11 @@ def recent_photos(request):
 def users(request):
     users_list = User.objects.all()
     if request.method == 'POST':
-        users_list = []
-        user_roles = UserRole.objects.filter(role=request.POST.get('select_role'))
-        for role in user_roles:
-            users_list.append(role.user)
+        if 'select_role' in request.POST.keys() and request.POST.get('select_role'):
+            users_list = []
+            user_roles = UserRole.objects.filter(role=request.POST.get('select_role'))
+            for role in user_roles:
+                users_list.append(role.user)
     context = {'users_list': users_list, 'roles': ROLE_CHOICE}
     return render(request, 'dashboard/user/list.html', context)
 
