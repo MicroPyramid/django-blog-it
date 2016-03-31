@@ -24,6 +24,8 @@ Features:
 - google analytics
 - SEO compliant
 
+You can try it by hosting on your own or deploy to Heroku with a button click.
+
 Deploy To Heroku:
 
 .. image:: https://www.herokucdn.com/deploy/button.svg
