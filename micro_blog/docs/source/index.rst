@@ -4,7 +4,7 @@ MicroBlog's documentation v0.1:
 Introduction:
 =============
 
-Micro blog is a tool to handle blog management. You can integrate it into your project and customise the blog Application.
+Micro blog is simple and completely customizable blog application. You can integrate it into your project and customise the blog application or just host it to post your articles.
 
 Source Code is available in Micropyramid Repository(https://github.com/MicroPyramid/micro-blog).
 
