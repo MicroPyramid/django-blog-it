@@ -1,8 +1,6 @@
 Micro Blog
 ------------
 
-Simple blog package developed with Django.
-
 .. image:: https://readthedocs.org/projects/micro-blog/badge/?version=latest
    :target: http://micro-blog.readthedocs.org/en/latest/?badge=latest
 
@@ -16,6 +14,15 @@ Simple blog package developed with Django.
    :target: https://landscape.io/github/MicroPyramid/micro-blog/master
    :alt: Code Health
 
+Simple blog package developed with Django.
+
+Features:
+
+- Dynamic blog articles
+- Blog pages
+- Contact us page (configurable)
+- google analytics
+- SEO compliant
 
 Deploy To Heroku:
 
