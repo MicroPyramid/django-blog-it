@@ -91,7 +91,11 @@ def blog_add(request):
         request.POST = request.POST.copy()
         if request.POST.get('title') == '':
             request.POST['title'] = 'Untitled document ' + str(Post.objects.all().count())
-        form = BlogPostForm(request.POST, is_superuser=request.user.is_superuser, user_role=get_user_role(request.user))
+        form = BlogPostForm(
+                request.POST,
+                is_superuser=request.user.is_superuser,
+                user_role=get_user_role(request.user)
+            )
         if form.is_valid():
             blog_post = form.save(commit=False)
             blog_post.user = request.user
