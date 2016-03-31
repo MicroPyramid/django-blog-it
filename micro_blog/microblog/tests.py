@@ -33,7 +33,15 @@ class tags_models_test(TestCase):
 # models test
 class post_models_test(TestCase):
 
-    def create_post(self, tag="simple page", category="simple page", description="simple page content", title="post", content="content", status="D"):
+    def create_post(
+            self,
+            tag="simple page",
+            category="simple page",
+            description="simple page content",
+            title="post",
+            content="content",
+            status="D"
+            ):
         user = User.objects.create_superuser('mp@mp.com', 'micro-test', 'mp')
         category = Category.objects.create(name=category, description=description, user=user)
         tag = Tags.objects.create(name=tag)
@@ -83,11 +91,22 @@ class micro_blog_forms_test(TestCase):
         self.category = Category.objects.create(
             name='salesforce', description='salesforce desc', user=self.user)
         self.blogppost = Post.objects.create(
-            title='python introduction', user=self.user, content='This is content', category=self.category, status='Published')
+            title='python introduction',
+            user=self.user,
+            content='This is content',
+            category=self.category,
+            status='Published')
 
     def test_blogpostform(self):
-        form = BlogPostForm(data={'title': 'jquery introduction', 'content': 'This is content', 'category': self.category.id,
-                                  'status': 'Published', 'is_superuser': 'True', 'slug': 'jquery-introduction'})
+        form = BlogPostForm(
+            data={
+                'title': 'jquery introduction',
+                'content': 'This is content',
+                'category': self.category.id,
+                'status': 'Published',
+                'is_superuser': 'True',
+                'slug': 'jquery-introduction'
+            })
         self.assertTrue(form.is_valid())
 
     def test_BlogCategoryForm(self):
@@ -126,11 +145,21 @@ class micro_blog_views_get(TestCase):
         self.linuxcategory = Category.objects.create(
             name='linux', description='django desc', user=self.user, is_active=True)
         self.blogppost = Post.objects.create(
-            title='other python introduction', user=self.user, content='This is content', category=self.category, status='Published', slug="other-python-introduction")
+            title='other python introduction',
+            user=self.user,
+            content='This is content',
+            category=self.category,
+            status='Published',
+            slug="other-python-introduction")
         self.tag = Tags.objects.create(name='testtag')
         self.blogppost.tags.add(self.tag)
         self.pythonpost = Post.objects.create(
-            title='decorator', user=self.user, content='This is content', category=self.category, status='Published', slug="decorator")
+            title='decorator',
+            user=self.user,
+            content='This is content',
+            category=self.category,
+            status='Published',
+            slug="decorator")
 
     def test_blog_get(self):
 
@@ -188,7 +217,12 @@ class micro_blog_views_get(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'dashboard/blog/blog_list.html')
 
-        response = self.client.post('/dashboard/blog/', {'select_status': 'Published', 'search_text': str(self.category.id)})
+        response = self.client.post(
+            '/dashboard/blog/',
+            {
+                'select_status': 'Published',
+                'search_text': str(self.category.id)
+            })
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'dashboard/blog/blog_list.html')
 
@@ -212,7 +246,12 @@ class micro_blog_views_get(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'dashboard/category/categories_list.html')
 
-        response = self.client.post('/dashboard/category/', {'select_status': 'Published', 'category': [str(self.category.id)]})
+        response = self.client.post(
+            '/dashboard/category/',
+            {
+                'select_status': 'Published',
+                'category': [str(self.category.id)]
+            })
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'dashboard/category/categories_list.html')
 
@@ -225,7 +264,12 @@ class micro_blog_views_get(TestCase):
         self.assertTemplateUsed(response, 'dashboard/category/category_add.html')
 
         response = self.client.post(
-            '/dashboard/add_category/', {'name': 'python', 'description': 'Python description', 'user': str(self.user.id)})
+            '/dashboard/add_category/',
+            {
+                'name': 'python',
+                'description': 'Python description',
+                'user': str(self.user.id)
+            })
         self.assertEqual(response.status_code, 200)
         self.assertTrue('Successfully added your category' in str(response.content))
 
@@ -275,10 +319,20 @@ class micro_blog_views_get(TestCase):
         response = self.client.get('/dashboard/bulk_actions_blog/', {'blog_ids[]': [str(self.blogppost.id)]})
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.get('/dashboard/bulk_actions_blog/', {'blog_ids[]': [str(self.blogppost.id)], 'action': 'Published'})
+        response = self.client.get(
+            '/dashboard/bulk_actions_blog/',
+            {
+                'blog_ids[]': [str(self.blogppost.id)],
+                'action': 'Published'
+            })
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.get('/dashboard/bulk_actions_blog/', {'blog_ids[]': [str(self.pythonpost.id)], 'action': 'Delete'})
+        response = self.client.get(
+            '/dashboard/bulk_actions_blog/',
+            {
+                'blog_ids[]': [str(self.pythonpost.id)],
+                'action': 'Delete'
+            })
         self.assertEqual(response.status_code, 200)
 
         # bulk actions category
@@ -288,18 +342,38 @@ class micro_blog_views_get(TestCase):
         response = self.client.get('/dashboard/bulk_actions_category/', {'blog_ids[]': [str(self.category.id)]})
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.get('/dashboard/bulk_actions_category/', {'blog_ids[]': [str(self.category.id)], 'action': 'True'})
+        response = self.client.get(
+            '/dashboard/bulk_actions_category/',
+            {
+                'blog_ids[]': [str(self.category.id)],
+                'action': 'True'
+            })
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.get('/dashboard/bulk_actions_category/', {'blog_ids[]': [str(self.linuxcategory.id)], 'action': 'Delete'})
+        response = self.client.get(
+            '/dashboard/bulk_actions_category/',
+            {
+                'blog_ids[]': [str(self.linuxcategory.id)],
+                'action': 'Delete'
+            })
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.get('/dashboard/bulk_actions_category/', {'blog_ids[]': [str(self.category.id)], 'action': 'False'})
+        response = self.client.get(
+            '/dashboard/bulk_actions_category/',
+            {
+                'blog_ids[]': [str(self.category.id)],
+                'action': 'False'
+            })
         self.assertEqual(response.status_code, 200)
 
         # delete category
         response = self.client.post(
-            '/dashboard/add_category/', {'name': 'python', 'description': 'Python description', 'user': str(self.user.id)})
+            '/dashboard/add_category/',
+            {
+                'name': 'python',
+                'description': 'Python description',
+                'user': str(self.user.id)
+            })
         response = self.client.post('/dashboard/delete_category/python/')
         self.assertEqual(response.status_code, 302)
 
@@ -323,13 +397,31 @@ class blog_post_creation(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'dashboard/blog/blog_add.html')
 
-        response = self.client.post('/dashboard/add/', {'title': 'python introduction', 'content': 'This is content', 'category':
-                                                        self.category.id, 'status': 'Published', 'tags': 'django', 'is_superuser': 'True', 'slug': 'python-introduction-1'})
+        response = self.client.post(
+            '/dashboard/add/',
+            {
+                'title': 'python introduction',
+                'content': 'This is content',
+                'category': self.category.id,
+                'status': 'Published',
+                'tags': 'django',
+                'is_superuser': 'True',
+                'slug': 'python-introduction-1'
+            })
         self.assertEqual(response.status_code, 200)
         self.assertTrue('Successfully posted your blog' in str(response.content))
 
-        response = self.client.post('/dashboard/add/', {'title': 'python introduction', 'content': '', 'category':
-                                                        self.category.id, 'status': 'Published', 'tags': 'django', 'is_superuser': 'True', 'slug': 'python-introduction-1'})
+        response = self.client.post(
+            '/dashboard/add/',
+            {
+                'title': 'python introduction',
+                'content': '',
+                'category': self.category.id,
+                'status': 'Published',
+                'tags': 'django',
+                'is_superuser': 'True',
+                'slug': 'python-introduction-1'
+            })
         self.assertEqual(response.status_code, 200)
         self.assertFalse('Successfully posted your blog' in str(response.content))
 
@@ -337,8 +429,17 @@ class blog_post_creation(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertFalse('Successfully posted your blog' in str(response.content))
 
-        response = self.client.post('/dashboard/add/', {'title': 'testing', 'content': 'This is content', 'category':
-                                                        self.category.id, 'status': 'Published', 'tags': 'django', 'is_superuser': 'True', 'slug': 'testing'})
+        response = self.client.post(
+            '/dashboard/add/',
+            {
+                'title': 'testing',
+                'content': 'This is content',
+                'category': self.category.id,
+                'status': 'Published',
+                'tags': 'django',
+                'is_superuser': 'True',
+                'slug': 'testing'
+            })
         self.assertEqual(response.status_code, 200)
         self.assertTrue('Successfully posted your blog' in str(response.content))
 
@@ -346,8 +447,17 @@ class blog_post_creation(TestCase):
         user_login = self.client.login(username='mp@mp.com', password='mp')
         self.assertTrue(user_login)
 
-        response = self.client.post('/dashboard/add/', {'title': 'nginx post', 'content': 'This is content', 'category':
-                                                        self.category.id, 'status': 'Published', 'tags': 'django', 'is_superuser': 'True', 'slug': 'nginx-post'})
+        response = self.client.post(
+            '/dashboard/add/',
+            {
+                'title': 'nginx post',
+                'content': 'This is content',
+                'category': self.category.id,
+                'status': 'Published',
+                'tags': 'django',
+                'is_superuser': 'True',
+                'slug': 'nginx-post'
+            })
         self.assertEqual(response.status_code, 200)
         self.assertTrue('Successfully posted your blog' in str(response.content))
 
@@ -355,13 +465,31 @@ class blog_post_creation(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'dashboard/blog/blog_add.html')
 
-        response = self.client.post('/dashboard/edit/nginx-post/', {'title': 'nginx-post', 'content': 'This is content', 'category':
-                                    self.category.id, 'status': 'Published', 'tags': 'django', 'is_superuser': 'True', 'slug': 'nginx-post'})
+        response = self.client.post(
+            '/dashboard/edit/nginx-post/',
+            {
+                'title': 'nginx-post',
+                'content': 'This is content',
+                'category': self.category.id,
+                'status': 'Published',
+                'tags': 'django',
+                'is_superuser': 'True',
+                'slug': 'nginx-post'
+            })
         self.assertEqual(response.status_code, 200)
         self.assertTrue('Successfully updated your blog post' in str(response.content))
 
-        response = self.client.post('/dashboard/edit/nginx-post-1/', {'title': 'nginx-post', 'content': '', 'category':
-                                    self.category.id, 'status': 'Published', 'tags': 'django', 'is_superuser': 'True', 'slug': 'nginx-post-1'})
+        response = self.client.post(
+            '/dashboard/edit/nginx-post-1/',
+            {
+                'title': 'nginx-post',
+                'content': '',
+                'category': self.category.id,
+                'status': 'Published',
+                'tags': 'django',
+                'is_superuser': 'True',
+                'slug': 'nginx-post-1'
+            })
         self.assertEqual(response.status_code, 200)
         self.assertFalse('Successfully updated your blog post' in str(response.content))
 
@@ -369,13 +497,31 @@ class blog_post_creation(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertFalse('Successfully updated your blog post' in str(response.content))
 
-        response = self.client.post('/dashboard/edit/nginx-post-1/', {'title': 'nginx-post', 'content': 'This is content', 'category':
-                                    self.category.id, 'status': 'Published', 'tags': 'django', 'is_superuser': 'True', 'slug': 'nginx-post-1'})
+        response = self.client.post(
+            '/dashboard/edit/nginx-post-1/',
+            {
+                'title': 'nginx-post',
+                'content': 'This is content',
+                'category': self.category.id,
+                'status': 'Published',
+                'tags': 'django',
+                'is_superuser': 'True',
+                'slug': 'nginx-post-1'
+            })
         self.assertEqual(response.status_code, 200)
         self.assertTrue('Successfully updated your blog post' in str(response.content))
 
-        response = self.client.post('/dashboard/edit/nginx-post-1/', {'title': 'nginx-post', 'content': 'This is content', 'category':
-                                    self.category.id, 'status': 'Published', 'tags': 'nginx', 'is_superuser': 'True', 'slug': 'nginx-post-1'})
+        response = self.client.post(
+            '/dashboard/edit/nginx-post-1/',
+            {
+                'title': 'nginx-post',
+                'content': 'This is content',
+                'category': self.category.id,
+                'status': 'Published',
+                'tags': 'nginx',
+                'is_superuser': 'True',
+                'slug': 'nginx-post-1'
+            })
         self.assertEqual(response.status_code, 200)
         self.assertTrue('Successfully updated your blog post' in str(response.content))
 
@@ -383,8 +529,17 @@ class blog_post_creation(TestCase):
         user_login = self.client.login(username='mp@mp.com', password='mp')
         self.assertTrue(user_login)
 
-        response = self.client.post('/dashboard/add/', {'title': 'haystack post', 'content': 'This is content', 'category':
-                                                        self.category.id, 'status': 'Published', 'tags': 'django', 'is_superuser': 'True', 'slug': 'haystack-post'})
+        response = self.client.post(
+            '/dashboard/add/',
+            {
+                'title': 'haystack post',
+                'content': 'This is content',
+                'category': self.category.id,
+                'status': 'Published',
+                'tags': 'django',
+                'is_superuser': 'True',
+                'slug': 'haystack-post'
+            })
         self.assertEqual(response.status_code, 200)
         self.assertTrue('Successfully posted your blog' in str(response.content))
 
