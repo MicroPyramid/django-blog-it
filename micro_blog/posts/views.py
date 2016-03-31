@@ -33,7 +33,9 @@ def index(request):
 
 def blog_post_view(request, blog_slug):
     blog_name = Post.objects.get(slug=blog_slug)
-    context = list({'blog_name': blog_name}.items()) + list(categories_tags_lists().items()) + list({'disqus_shortname': settings.DISQUS_SHORTNAME}.items())
+    context = list({'blog_name': blog_name}.items()) + \
+        list(categories_tags_lists().items()) + \
+        list({'disqus_shortname': settings.DISQUS_SHORTNAME}.items())
     return render(request, 'posts/blog_view.html', context)
 
 
