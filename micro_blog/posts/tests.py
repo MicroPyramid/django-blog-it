@@ -13,7 +13,12 @@ class posts_views_get(TestCase):
         self.category = Category.objects.create(
             name='django', description='django desc', user=self.user, is_active=True)
         self.blogppost = Post.objects.create(
-            title='other python introduction', user=self.user, content='This is content', category=self.category, status='Published', slug="other-python-introduction")
+            title='other python introduction',
+            user=self.user,
+            content='This is content',
+            category=self.category,
+            status='Published',
+            slug="other-python-introduction")
         self.tag = Tags.objects.create(name='testtag')
         self.blogppost.tags.add(self.tag)
 
