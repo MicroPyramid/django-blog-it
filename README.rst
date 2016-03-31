@@ -1,7 +1,7 @@
 Micro Blog
 ------------
 
-Simple blog package in Django.
+Simple blog package developed with Django.
 
 .. image:: https://readthedocs.org/projects/micro-blog/badge/?version=latest
    :target: http://micro-blog.readthedocs.org/en/latest/?badge=latest
