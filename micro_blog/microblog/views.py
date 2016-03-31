@@ -139,7 +139,12 @@ def edit_blog(request, blog_slug):
         categories_list = Category.objects.filter(is_active=True)
         if request.method == "POST":
             previous_status = blog_name.status
-            form = BlogPostForm(request.POST, instance=blog_name, is_superuser=request.user.is_superuser, user_role=get_user_role(request.user))
+            form = BlogPostForm(
+                    request.POST,
+                    instance=blog_name,
+                    is_superuser=request.user.is_superuser,
+                    user_role=get_user_role(request.user)
+                )
             if form.is_valid():
                 blog_post = form.save(commit=False)
                 blog_post.user = request.user
