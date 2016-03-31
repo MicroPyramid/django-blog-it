@@ -40,6 +40,7 @@ class posts_views_get(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'posts/index.html')
 
-        response = self.client.get('/blog/'+str(self.blogppost.updated_on.year)+'/'+str(self.blogppost.updated_on.month)+'/')
+        response = self.client.get(
+            '/blog/'+str(self.blogppost.updated_on.year)+'/'+str(self.blogppost.updated_on.month)+'/')
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'posts/index.html')
