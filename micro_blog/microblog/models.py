@@ -146,3 +146,27 @@ ROLE_CHOICE = (
 class UserRole(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
     role = models.CharField(max_length=10, choices=STATUS_CHOICE)
+
+
+class Page(models.Model):
+    title = models.CharField(max_length=100)
+    content = models.TextField()
+    slug = models.SlugField()
+    is_active = models.BooleanField(default=True)
+    meta_description = models.TextField()
+    keywords = models.TextField()
+    meta_title = models.TextField()
+
+    def save(self, *args, **kwargs):
+        tempslug = slugify(self.title)
+        if self.id:
+            existed_page = Page.objects.get(pk=self.id)
+            if existed_page.title != self.title:
+                self.slug = create_slug(tempslug)
+        else:
+            self.slug = create_slug(tempslug)
+
+        super(Page, self).save(*args, **kwargs)
+
+    def __unicode__(self):
+        return self.title

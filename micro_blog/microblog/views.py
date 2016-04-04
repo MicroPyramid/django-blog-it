@@ -11,8 +11,8 @@ from django.contrib.auth.decorators import user_passes_test, login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files import File
 
-from .models import Post, PostHistory, Category, Tags, Image_File, STATUS_CHOICE, ROLE_CHOICE, UserRole
-from .forms import BlogCategoryForm, BlogPostForm, AdminLoginForm, UserRoleForm
+from .models import Post, PostHistory, Category, Tags, Image_File, STATUS_CHOICE, ROLE_CHOICE, UserRole, Page
+from .forms import BlogCategoryForm, BlogPostForm, AdminLoginForm, UserRoleForm, PageForm
 from micro_blog import settings
 try:
     from django.contrib.auth import get_user_model
@@ -445,3 +445,93 @@ def edit_user_role(request, pk):
     else:
         data = {'error': True, 'response': validate_user_role.errors}
     return HttpResponse(json.dumps(data))
+
+
+@active_admin_required
+def pages(request):
+    pages_list = Page.objects.all()
+    context = {'pages_list': pages_list}
+
+    if request.method == "POST":
+
+        if request.POST.get('select_status', ''):
+            if request.POST.get('select_status') == "True":
+                pages_list = pages_list.filter(is_active=True)
+            else:
+                pages_list = pages_list.filter(is_active=False)
+
+        context = {'pages_list': pages_list}
+    return render(request, 'dashboard/pages/list.html', context)
+
+
+@active_admin_required
+def add_page(request):
+    form = PageForm()
+    if request.method == 'POST':
+        form = PageForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Successfully added your page')
+            data = {'error': False, 'response': 'Successfully added your page'}
+        else:
+            data = {'error': True, 'response': form.errors}
+        return HttpResponse(json.dumps(data))
+    context = {'form': form}
+    return render(request, 'dashboard/pages/add_page.html', context)
+
+
+@active_admin_required
+def edit_page(request, page_slug):
+    page = Page.objects.get(slug=page_slug)
+
+    if request.user.is_superuser is True:
+        form = PageForm(instance=page)
+
+        if request.method == 'POST':
+            form = PageForm(request.POST, instance=page)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Successfully updated your page')
+                data = {'error': False, 'response': 'Successfully updated your page'}
+            else:
+                data = {'error': True, 'response': form.errors}
+            return HttpResponse(json.dumps(data))
+        context = {'form': form, 'page': page}
+        return render(request, 'dashboard/pages/add_page.html', context)
+
+
+@active_admin_required
+def delete_page(request, page_slug):
+    page = Page.objects.get(slug=page_slug)
+    if request.user.is_superuser is True:
+        page.delete()
+        messages.success(request, 'Page successfully deleted!')
+        return HttpResponseRedirect(reverse('pages'))
+    else:
+        Http404
+
+
+@active_admin_required
+def bulk_actions_pages(request):
+    if request.user.is_superuser:
+        if request.method == 'GET':
+            print (request.GET)
+            if 'page_ids[]' in request.GET:
+                if request.GET.get('action') == 'True':
+                    Page.objects.filter(id__in=request.GET.getlist('page_ids[]')).update(
+                        is_active=True)
+                    messages.success(request, 'Selected Pages successfully updated as Active')
+                elif request.GET.get('action') == 'False':
+                    Page.objects.filter(id__in=request.GET.getlist('page_ids[]')).update(
+                        is_active=False)
+                    messages.success(request, 'Selected Pages successfully updated as Inactive')
+
+                elif request.GET.get('action') == 'Delete':
+                    Page.objects.filter(id__in=request.GET.getlist('page_ids[]')).delete()
+                    messages.success(request, 'Selected Pages successfully deleted!')
+
+                return HttpResponse(json.dumps({'response': True}))
+            else:
+                messages.warning(request, 'Please select at-least one record to perform this action')
+                return HttpResponse(json.dumps({'response': False}))
