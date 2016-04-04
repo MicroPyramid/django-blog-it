@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_list_or_404
-from micro_blog.microblog.models import Post, Category, Tags
+from django_blog_it.django_blog_it.models import Post, Category, Tags
 from django.db.models import Count
 from django.conf import settings
 

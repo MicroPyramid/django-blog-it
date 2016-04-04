@@ -1,17 +1,17 @@
-Micro Blog
+django-blog-it
 ------------
 
-.. image:: https://readthedocs.org/projects/micro-blog/badge/?version=latest
-   :target: http://micro-blog.readthedocs.org/en/latest/?badge=latest
+.. image:: https://readthedocs.org/projects/django-blog-it/badge/?version=latest
+   :target: http://django-blog-it.readthedocs.org/en/latest/?badge=latest
 
-.. image:: https://travis-ci.org/MicroPyramid/micro-blog.svg?branch=master
-   :target: https://travis-ci.org/MicroPyramid/micro-blog
+.. image:: https://travis-ci.org/MicroPyramid/django-blog-it.svg?branch=master
+   :target: https://travis-ci.org/MicroPyramid/django-blog-it
 
-.. image:: https://coveralls.io/repos/github/MicroPyramid/micro-blog/badge.svg?branch=master
-   :target: https://coveralls.io/github/MicroPyramid/micro-blog?branch=master
+.. image:: https://coveralls.io/repos/github/MicroPyramid/django-blog-it/badge.svg?branch=master
+   :target: https://coveralls.io/github/MicroPyramid/django-blog-it?branch=master
 
-.. image:: https://landscape.io/github/MicroPyramid/micro-blog/master/landscape.svg?style=flat
-   :target: https://landscape.io/github/MicroPyramid/micro-blog/master
+.. image:: https://landscape.io/github/MicroPyramid/django-blog-it/master/landscape.svg?style=flat
+   :target: https://landscape.io/github/MicroPyramid/django-blog-it/master
    :alt: Code Health
 
 Simple blog package developed with Django.
@@ -27,15 +27,16 @@ Features:
 Installation
 --------------
 
-1. Install microblog using the following command::
+1. Install django-blog-it using the following command::
 
-    pip install microblog
+    pip install django-blog-it
+
 
             (or)
 
-    git clone git://github.com/micropyramid/microblog.git
+    git clone git://github.com/micropyramid/django-blog-it.git
 
-    cd microblog
+    cd django-blog-it
 
     python setup.py install
 
@@ -59,9 +60,9 @@ You can try it by hosting on your own or deploy to Heroku with a button click.
 Deploy To Heroku:
 
 .. image:: https://www.herokucdn.com/deploy/button.svg
-   :target: https://heroku.com/deploy?template=https://github.com/MicroPyramid/micro-blog
+   :target: https://heroku.com/deploy?template=https://github.com/MicroPyramid/django-blog-it
 
-You can view the complete documentation at http://micro-blog.readthedocs.org/en/latest/?badge=latest
+You can view the complete documentation at http://django-blog-it.readthedocs.org/en/latest/?badge=latest
 
 
 We welcome your feedback and support, raise github ticket if you want to report a bug. Need new features? `Contact us here`_

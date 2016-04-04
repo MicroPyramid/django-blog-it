@@ -1,4 +1,4 @@
-"""micro_blog URL Configuration
+"""django_blog_it URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/1.8/topics/http/urls/
@@ -16,7 +16,7 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 from django.conf.urls.static import static
-from .microblog.views import *
+from .django_blog_it.views import *
 from .posts.views import *
 from .settings import MEDIA_URL, MEDIA_ROOT
 
