@@ -1,8 +1,9 @@
 from django.test import TestCase
 from django.test import Client
-from micro_blog.microblog.models import Category, Post, Tags, PostHistory, UserRole
+from micro_blog.microblog.models import Category, Post, Tags, PostHistory, UserRole, Page
 from django.contrib.auth.models import User
 from micro_blog.microblog.forms import BlogCategoryForm, BlogPostForm, AdminLoginForm
+from django.core.urlresolvers import reverse
 
 
 # models test
@@ -612,3 +613,93 @@ class users_roles(TestCase):
 
         response = self.client.post('/dashboard/user/delete/' + str(self.employee.id+1) + '/')
         self.assertEqual(response.status_code, 404)
+
+
+class Pages(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_superuser(
+            'mp@mp.com', 'mp', 'mp')
+        self.user_role = UserRole.objects.create(user=self.user, role='Admin')
+        self.employee = User.objects.create_user(
+            'mp@micropyramid.com', 'mp', 'mp')
+        self.page = Page.objects.create(
+            title="test", content="test content", meta_description='page desc', keywords='keywords', meta_title="meta title")
+
+    def test_pages_list(self):
+        user_login = self.client.login(username='mp@mp.com', password='mp')
+        self.assertTrue(user_login)
+
+        response = self.client.get(reverse('pages'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'dashboard/pages/list.html')
+
+        response = self.client.post(reverse('pages'), {'select_status': 'True'})
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.post(reverse('pages'), {'select_status': 'False'})
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(reverse('bulk_actions_pages'), {'page_ids[]': [str(self.page.id)]})
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(reverse('bulk_actions_pages'), {'page_ids[]': [str(self.page.id)], 'action': 'True'})
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(reverse('bulk_actions_pages'), {'page_ids[]': [str(self.page.id)], 'action': 'False'})
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(reverse('bulk_actions_pages'), {'page_ids[]': [str(self.page.id)], 'action': 'Delete'})
+        self.assertEqual(response.status_code, 200)
+
+    def test_pages_add(self):
+        user_login = self.client.login(username='mp@mp.com', password='mp')
+        self.assertTrue(user_login)
+
+        response = self.client.post(
+            reverse('add_page'),
+            {
+                'title': 'nginx post',
+                'content': 'This is content',
+                'meta_description': 'page meta data',
+                'meta_title': 'meta title',
+                'keywords': 'django',
+            })
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue('Successfully added your page' in str(response.content))
+
+        response = self.client.post(
+            reverse('add_page'),
+            {
+                'title': '',
+                'content': 'This is content',
+                'meta_description': 'page meta data',
+                'meta_title': 'meta title',
+                'keywords': 'django',
+            })
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse('Successfully added your page' in str(response.content))
+
+        response = self.client.get(reverse('add_page'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'dashboard/pages/add_page.html')
+
+        response = self.client.get(reverse('edit_page', kwargs={'page_slug': self.page.slug}))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'dashboard/pages/add_page.html')
+
+        response = self.client.post(
+            reverse('edit_page', kwargs={'page_slug': self.page.slug}),
+            {
+                'title': '',
+                'content': 'This is content',
+                'meta_description': 'page meta data',
+                'meta_title': 'meta title',
+                'keywords': 'django',
+            })
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse('Successfully added your page' in str(response.content))
+
+        response = self.client.get(reverse('delete_page', kwargs={'page_slug': self.page.slug}))
+        self.assertEqual(response.status_code, 302)

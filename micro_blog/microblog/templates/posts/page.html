@@ -1,0 +1,18 @@
+{% extends 'posts/base.html' %}
+{% block title %} {{ page.title }} {% endblock %}
+
+{% block description %}
+  <meta property="og:title"  content="{{ page.title|capfirst }} | MicroPyramid | Django Web Application Development | Mobile App Development" />
+
+  <meta property="og:description" content="{{ page.meta_description }} - MicroPyramid." />
+
+  <meta name="description" content="{{ page.meta_description }} - MicroPyramid." />
+
+  <meta name="keywords" content="{{ page.keywords }}" />
+{% endblock %}
+{% block blog_content %}
+{% block page_name %}{% endblock %}
+<div class="row col-sm-12 col-md-9 blog-container-left">
+	{{ page.content | safe }}
+</div>
+{% endblock %}

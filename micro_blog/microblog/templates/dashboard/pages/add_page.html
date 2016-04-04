@@ -1,0 +1,55 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}
+{% if page %}
+    Add
+{% else %}
+    Edit
+{% endif %} Page
+{% endblock %}
+{% block content %}
+<div class="row" id="head_style">
+  <h3 id="page_title">{% if page %}Edit Page {{ page.title }}{% else %}Add Page{% endif %}</h3>
+</div>
+<!-- end class of row -->
+<div class="row">
+  <form action="" id="post-form" enctype="multipart/form-data" method="post" role="form">
+    {% csrf_token %}
+    {% for field in form %}
+    <div class="form-group">
+      <label>{{ field.label }} :</label>
+      <div class="controls">
+        {{ field }}
+        {% if field.help_text %}
+        <p class="help-inline"><small>{{ field.help_text }}</small></p>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+    <div class="form-group">
+      <button class="btn btn-primary" type="submit">Submit</button>
+    </div>
+  </form>
+</div>
+<!-- end div row of form -->
+{% endblock %}
+{% block js_script %}
+<script type="text/javascript">
+CKEDITOR.config.allowedContent = true;
+  var editor = CKEDITOR.replace('content', {});
+
+  $('#post-form').submit(function(event){
+      event.preventDefault();
+      $.post(".",$('#post-form').serialize(), function(data){
+          if(data.error){
+              $('p.error_required').remove();
+              for (var key in data.response) {
+                  $('#id_' + key).after('<p class="error_required">* ' + data.response[key] + '</p>');
+              }
+          }else{
+              //alert(data['response']);
+              window.location="{% url 'pages' %}";
+          }
+      }, 'json');
+  });
+</script>
+{% endblock %}

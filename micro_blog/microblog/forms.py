@@ -1,5 +1,5 @@
 from django import forms
-from .models import Post, Category
+from .models import Post, Category, Page
 from django.template.defaultfilters import slugify
 # for authentication
 from django.contrib.auth import authenticate
@@ -75,3 +75,9 @@ class BlogCategoryForm(forms.ModelForm):
 
 class UserRoleForm(forms.Form):
     role = forms.CharField(max_length=10)
+
+
+class PageForm(forms.ModelForm):
+    class Meta:
+        model = Page
+        exclude = ('slug',)
