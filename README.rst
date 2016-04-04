@@ -27,21 +27,17 @@ Features:
 Installation
 --------------
 
-1. Install micro-blog using the following command
+1. Install microblog using the following command::
 
-.. code-block:: bash
+    pip install microblog
 
-	    pip install micro-blog
+		(or)
 
-	    		(or)
+    git clone git://github.com/micropyramid/microblog.git
 
-.. code-block:: bash
+    cd microblog
 
-	    git clone git://github.com/micropyramid/microblog.git
-
-	    cd microblog
-
-	    python setup.py install
+    python setup.py install
 
 
 2. After installing/cloning this, add the following settings in the virtual env/bin/activate file:
