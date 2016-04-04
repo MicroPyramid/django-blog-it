@@ -2,8 +2,6 @@ from django.contrib import admin
 from .models import Post, Category, Tags
 
 
-# Register your models here.
-
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug', 'description', 'is_active')
 

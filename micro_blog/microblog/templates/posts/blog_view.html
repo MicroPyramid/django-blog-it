@@ -1,47 +1,61 @@
 {% extends 'posts/base.html' %}
 {% load blog_tags %}
-
 {% block title %} {{ blog_name.title }} {% endblock %}
+{% block blog_content %}
+<div class="row col-sm-12 col-md-9 blog-container-left">
+  <div class="blogs">
+    <ul class="blog-list">
+      <table align="center" class="table table-bordered">
+        <thead>
+          <th>
+            Title: {{ blog_name.title }}
+          </th>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Author</strong>: {{ blog_name.user }}</td>
+          </tr>
+          <tr>
+            <td><strong>Content</strong>: {{ blog_name.content|safe }}</td>
+          </tr>
+          <tr>
+            <td class="widget tags"><strong>Tags</strong>:
+              {% for tag in blog_name.tags.all %}
+              <a href="{% url 'selected_tag' tag_slug=tag.slug %}" ><i class="fa fa-tags"></i> {{ tag }}</a>
+              {% endfor %}
+            </td>
+          </tr>
+          <tr>
+            <td><strong>Keywords</strong>: {{ blog_name.keywords|safe }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </ul>
+  </div>
+  <div id="disqus_thread"></div>
+<script>
+    /**
+     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+     */
+    var disqus_config = function () {
+        this.page.identifier = '{{ blog_name.slug }}';
+        this.page.title = '{{ blog_name.title }}';
+    };
+    var disqus_shortname = '{{ disqus_shortname }}';
+    (function() {  // REQUIRED CONFIGURATION VARIABLE: EDIT THE SHORTNAME BELOW
+        var d = document, s = d.createElement('script');
 
-    {% block blog_content %}
+        s.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        // IMPORTANT: Replace EXAMPLE with your forum shortname!
 
-                    <div class="row col-sm-12 col-md-9 blog-container-left">
-                        <div class="blogs">
-                            <ul class="blog-list">
-                                <table align="center" class="table table-bordered">
-                                    <thead>
-                                        <th>
-                                            Title: {{ blog_name.title }}
-                                        </th>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td><strong>Author</strong>: {{ blog_name.user }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>Content</strong>: {{ blog_name.content|safe }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="widget tags"><strong>Tags</strong>:
-                                                {% for tag in blog_name.tags.all %}
-                                                    <a href="{% url 'selected_tag' tag_slug=tag.slug %}" ><i class="fa fa-tags"></i> {{ tag }}</a>
-                                                {% endfor %}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>Keywords</strong>: {{ blog_name.keywords|safe }}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </ul>
-                        </div>
-                    </div>
-
-
-    {% endblock %}
-
-    {% block js_script %}
-        <script type="text/javascript">
-
-        </script>
-    {% endblock %}
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+</div>
+{% endblock %}
+{% block js_script %}
+<script type="text/javascript"></script>
+{% endblock %}
