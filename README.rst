@@ -31,7 +31,7 @@ Installation
 
     pip install microblog
 
-    (or)
+            (or)
 
     git clone git://github.com/micropyramid/microblog.git
 
