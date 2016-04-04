@@ -61,9 +61,9 @@ Deploy To Heroku:
 .. image:: https://www.herokucdn.com/deploy/button.svg
    :target: https://heroku.com/deploy?template=https://github.com/MicroPyramid/micro-blog
 
-We welcome your feedback and support, raise issues if you want to see a new feature or report a bug.
-
-    https://github.com/MicroPyramid/micro-blog/issues
-
-
 You can view the complete documentation at http://micro-blog.readthedocs.org/en/latest/?badge=latest
+
+
+We welcome your feedback and support, raise github ticket if you want to report a bug. Need new features? `Contact us here`_
+
+.. _contact us here: https://micropyramid.com/contact-us/
