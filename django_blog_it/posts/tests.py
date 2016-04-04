@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.test import Client
-from micro_blog.microblog.models import Category, Post, Tags
+from django_blog_it.django_blog_it.models import Category, Post, Tags
 from django.contrib.auth.models import User
 
 

@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('microblog', '0004_posthistory'),
+        ('django_blog_it', '0004_posthistory'),
     ]
 
     operations = [

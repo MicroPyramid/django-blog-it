@@ -13,7 +13,7 @@ from django.core.files import File
 
 from .models import Post, PostHistory, Category, Tags, Image_File, STATUS_CHOICE, ROLE_CHOICE, UserRole
 from .forms import BlogCategoryForm, BlogPostForm, AdminLoginForm, UserRoleForm
-from micro_blog import settings
+from django_blog_it import settings
 try:
     from django.contrib.auth import get_user_model
     User = get_user_model()

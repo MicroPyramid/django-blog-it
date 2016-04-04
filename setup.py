@@ -21,13 +21,13 @@ for dirpath, dirnames, filenames in os.walk(PROJECT_NAME):
                 dirpath[len(PROJECT_NAME) + 1:], f))
 
 setup(
-    name='micro-blog',
+    name='django-blog-it',
     version='0.0.4',
     packages=find_packages(exclude=['tests', 'tests.*']),
     include_package_data=True,
     description='A simple installable app for writing blog posts',
     long_description=README,
-    url='https://github.com/MicroPyramid/micro-blog.git',
+    url='https://github.com/MicroPyramid/django-blog-it.git',
     author='Micropyramid',
     author_email='hello@micropyramid.com',
     classifiers=[

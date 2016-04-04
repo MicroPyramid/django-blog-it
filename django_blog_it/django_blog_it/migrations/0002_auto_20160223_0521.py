@@ -7,7 +7,7 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('microblog', '0001_initial'),
+        ('django_blog_it', '0001_initial'),
     ]
 
     operations = [
@@ -18,6 +18,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='post',
             name='tags',
-            field=models.ManyToManyField(related_name='rel_posts', to='microblog.Tags'),
+            field=models.ManyToManyField(related_name='rel_posts', to='django_blog_it.Tags'),
         ),
     ]

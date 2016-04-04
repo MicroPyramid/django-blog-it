@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# MicroSite documentation build configuration file, created by
+# django-blog-it documentation build configuration file, created by
 # sphinx-quickstart on Mon Dec 29 20:41:44 2014.
 #
 # This file is execfile()d with the current directory set to its
@@ -43,7 +43,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'MicroBlog'
+project = u'django-blog-it'
 copyright = u'2016, MicroPyramid'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -176,7 +176,7 @@ html_static_path = ['nstatic']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'MicroBlogdoc'
+htmlhelp_basename = 'djangoblogitdoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -196,8 +196,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'MicroBlog.tex', u'MicroBlog Documentation',
-   u'MicroBlog', 'manual'),
+  ('index', 'django-blog-it.tex', u'django-blog-it Documentation',
+   u'django-blog-it', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -226,8 +226,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'microblog', u'MicroBlog Documentation',
-     [u'MicroBlog'], 1)
+    ('index', 'django-blog-it', u'django-blog-it Documentation',
+     [u'django-blog-it'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -240,8 +240,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'MicroBlog', u'MicroBlog Documentation',
-   u'MicroBlog', 'MicroBlog', 'One line description of project.',
+  ('index', 'django-blog-it', u'django-blog-it Documentation',
+   u'django-blog-it', 'django-blog-it', 'One line description of project.',
    'Miscellaneous'),
 ]
 

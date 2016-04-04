@@ -1,12 +1,12 @@
-MicroBlog's documentation v0.1:
+django-blog-it's documentation v0.1:
 =====================================
 
 Introduction:
 =============
 
-Micro blog is simple and completely customizable blog application. You can integrate it into your project and customise the blog application or just host it to post your articles.
+django-blog-it is simple and completely customizable blog application. You can integrate it into your project and customise the blog application or just host it to post your articles.
 
-Source Code is available in Micropyramid Repository(https://github.com/MicroPyramid/micro-blog).
+Source Code is available in Micropyramid Repository(https://github.com/MicroPyramid/django-blog-it.git).
 
 Modules used:
 	* Pillow
@@ -25,15 +25,15 @@ jQuery  >= 1.7
 Installation Procedure
 ======================
 
-1. Install microblog using the following command::
+1. Install django-blog-it using the following command::
 
-    pip install microblog
+    pip install django-blog-it
 
     		(or)
 
-    git clone git://github.com/micropyramid/microblog.git
+    git clone git://github.com/micropyramid/django-blog-it.git
 
-    cd microblog
+    cd django_blog_it
 
     python setup.py install
 
