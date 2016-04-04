@@ -61,7 +61,7 @@ Deploy To Heroku:
 
 We welcome your feedback and support, raise issues if you want to see a new feature or report a bug.
 
-  https://github.com/MicroPyramid/micro-blog/issues
+    https://github.com/MicroPyramid/micro-blog/issues
 
 
 You can view the complete documentation at http://micro-blog.readthedocs.org/en/latest/?badge=latest
