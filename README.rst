@@ -24,6 +24,42 @@ Features:
 - google analytics
 - SEO compliant
 
+Installation
+--------------
+
+1. Install micro-blog using the following command
+
+.. code-block:: bash
+
+	    pip install micro-blog
+
+	    		(or)
+
+.. code-block:: bash
+
+	    git clone git://github.com/micropyramid/microblog.git
+
+	    cd microblog
+
+	    python setup.py install
+
+
+2. After installing/cloning this, add the following settings in the virtual env/bin/activate file:
+
+.. code-block:: bash
+
+		# Disquss details
+
+	   	DISQUSSHORTNAME="Your Disquss Short Name"
+
+	   	export DISQUSSHORTNAME
+
+3. Use virtualenv to install requirements
+
+.. code-block:: bash
+
+		pip install -r requirements.txt
+
 You can try it by hosting on your own or deploy to Heroku with a button click.
 
 Deploy To Heroku:
@@ -32,5 +68,10 @@ Deploy To Heroku:
    :target: https://heroku.com/deploy?template=https://github.com/MicroPyramid/micro-blog
 
 We welcome your feedback and support, raise issues if you want to see a new feature or report a bug.
+
+.. code-block:: bash
+
+		https://github.com/MicroPyramid/micro-blog/issues
+
 
 You can view the complete documentation at http://micro-blog.readthedocs.org/en/latest/?badge=latest
