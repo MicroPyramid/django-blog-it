@@ -31,7 +31,7 @@ Installation
 
     pip install microblog
 
-    (or)
+            (or)
 
     git clone git://github.com/micropyramid/microblog.git
 
@@ -40,7 +40,9 @@ Installation
     python setup.py install
 
 
-2. After installing/cloning this, add the following settings in the virtual env/bin/activate file::
+2. After installing/cloning this, add the following settings in the virtual env/bin/activate file to start discussions on blog articles ::
+
+    You can create your disqus account at https://disqus.com/profile/login/
 
     # Disquss details
 
@@ -61,7 +63,7 @@ Deploy To Heroku:
 
 We welcome your feedback and support, raise issues if you want to see a new feature or report a bug.
 
-  https://github.com/MicroPyramid/micro-blog/issues
+    https://github.com/MicroPyramid/micro-blog/issues
 
 
 You can view the complete documentation at http://micro-blog.readthedocs.org/en/latest/?badge=latest
