@@ -40,7 +40,9 @@ Installation
     python setup.py install
 
 
-2. After installing/cloning this, add the following settings in the virtual env/bin/activate file::
+2. After installing/cloning this, add the following settings in the virtual env/bin/activate file to start discussions on blog articles ::
+
+    You can create your disqus account at https://disqus.com/profile/login/
 
     # Disquss details
 

@@ -25,11 +25,33 @@ jQuery  >= 1.7
 Installation Procedure
 ======================
 
-* Get code from micropyramid git repository::
+1. Install microblog using the following command::
 
-    https://github.com/MicroPyramid/micro-blog
+    pip install microblog
 
-* Use virtualenv to install requirements  pip install -r requirements.txt
+    (or)
+
+    git clone git://github.com/micropyramid/microblog.git
+
+    cd microblog
+
+    python setup.py install
+
+
+2. After installing/cloning this, add the following settings in the virtual env/bin/activate file to start discussions on blog articles ::
+
+	You can create/get your disqus account at https://disqus.com/profile/login/
+
+    # Disquss details
+
+    DISQUSSHORTNAME="Your Disquss Short Name"
+
+    export DISQUSSHORTNAME
+
+3. Use virtualenv to install requirements::
+
+    pip install -r requirements.txt
+
 
 Working modules
 ===============
