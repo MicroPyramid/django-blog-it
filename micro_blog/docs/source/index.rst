@@ -41,6 +41,10 @@ Working modules
 
 Planned Modules
 ===============
+* Blog pages
+* Contact us page (configurable)
+* google analytics
+* SEO compliant
 * Configurable contact us page.
 * Dynamic Menu.
 * Social Login.
