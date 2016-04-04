@@ -8,7 +8,7 @@ Micro Blog
    :target: https://travis-ci.org/MicroPyramid/micro-blog
 
 .. image:: https://coveralls.io/repos/github/MicroPyramid/micro-blog/badge.svg?branch=master
-   :target: https://coveralls.io/github/MicroPyramid/micro-blog?branch=master
+   :target: https://coveralls.io/github/nikhila05/micro-blog?branch=master
 
 .. image:: https://landscape.io/github/MicroPyramid/micro-blog/master/landscape.svg?style=flat
    :target: https://landscape.io/github/MicroPyramid/micro-blog/master
@@ -62,5 +62,6 @@ Deploy To Heroku:
 We welcome your feedback and support, raise issues if you want to see a new feature or report a bug.
 
   https://github.com/MicroPyramid/micro-blog/issues
+
 
 You can view the complete documentation at http://micro-blog.readthedocs.org/en/latest/?badge=latest
