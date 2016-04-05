@@ -1,7 +1,7 @@
 import datetime
 from django import template
-from micro_blog.microblog.models import Post, Tags, UserRole
-from micro_blog.microblog.views import get_user_role
+from django_blog_it.django_blog_it.models import Post, Tags, UserRole
+from django_blog_it.django_blog_it.views import get_user_role
 
 register = template.Library()
 

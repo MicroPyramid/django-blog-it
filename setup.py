@@ -6,7 +6,7 @@ with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
 
 # allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
-PROJECT_NAME = 'micro_blog'
+PROJECT_NAME = 'django_blog_it'
 
 data_files = []
 for dirpath, dirnames, filenames in os.walk(PROJECT_NAME):
@@ -21,13 +21,13 @@ for dirpath, dirnames, filenames in os.walk(PROJECT_NAME):
                 dirpath[len(PROJECT_NAME) + 1:], f))
 
 setup(
-    name='micro-blog',
-    version='0.0.4',
+    name='django-blog-it',
+    version='0.1',
     packages=find_packages(exclude=['tests', 'tests.*']),
     include_package_data=True,
     description='A simple installable app for writing blog posts',
     long_description=README,
-    url='https://github.com/MicroPyramid/micro-blog.git',
+    url='https://github.com/MicroPyramid/django-blog-it.git',
     author='Micropyramid',
     author_email='hello@micropyramid.com',
     classifiers=[

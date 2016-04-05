@@ -1,8 +1,8 @@
 from django.test import TestCase
 from django.test import Client
-from micro_blog.microblog.models import Category, Post, Tags, PostHistory, UserRole, Page
+from django_blog_it.django_blog_it.models import Category, Post, Tags, PostHistory, UserRole, Page
 from django.contrib.auth.models import User
-from micro_blog.microblog.forms import BlogCategoryForm, BlogPostForm, AdminLoginForm
+from django_blog_it.django_blog_it.forms import BlogCategoryForm, BlogPostForm, AdminLoginForm
 from django.core.urlresolvers import reverse
 
 
@@ -29,6 +29,18 @@ class tags_models_test(TestCase):
         w = self.create_tags()
         self.assertTrue(isinstance(w, Tags))
         self.assertEqual(w.__str__(), w.name)
+
+
+# models test
+class pages_models_test(TestCase):
+
+    def create_pages(self, title="simple page", content="simple content", meta_description="meta description", meta_title="meta title"):
+        return Page.objects.create(title=title, content=content, meta_description=meta_description, meta_title=meta_title)
+
+    def test_page_creation(self):
+        w = self.create_pages()
+        self.assertTrue(isinstance(w, Page))
+        self.assertEqual(w.__str__(), w.title)
 
 
 # models test
@@ -72,7 +84,7 @@ class post_history_models_test(TestCase):
 # class image_file_models_test(TestCase):
 
 #     def create_image_file(self, content="simple content"):
-#         upload_file = open('/microblog/static/favicon.png', 'rb')
+#         upload_file = open('/django_blog_it/static/favicon.png', 'rb')
 #         return Image_File.objects.create(Image_File=upload_file, thumbnail=upload_file, upload=upload_file)
 
 #     def test_category_creation(self):
@@ -81,7 +93,7 @@ class post_history_models_test(TestCase):
 #         self.assertEqual(w.__str__(), str(w.date_created()))
 
 
-class micro_blog_forms_test(TestCase):
+class django_blog_it_forms_test(TestCase):
 
     def setUp(self):
         self.client = Client()
@@ -133,7 +145,7 @@ class micro_blog_forms_test(TestCase):
         self.assertTrue(form.is_valid())
 
 
-class micro_blog_views_get(TestCase):
+class django_blog_it_views_get(TestCase):
 
     def setUp(self):
         self.client = Client()
