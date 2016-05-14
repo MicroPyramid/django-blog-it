@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_list_or_404
 from django_blog_it.django_blog_it.models import Post, Category, Tags, Page
 from django.db.models import Count
-from django.conf import settings
+from django_blog_it import settings
 from django.http import Http404
 
 
@@ -34,7 +34,7 @@ def blog_post_view(request, blog_slug):
     blog_name = Post.objects.get(slug=blog_slug)
     context = list({'blog_name': blog_name}.items()) + \
         list(categories_tags_lists().items()) + \
-        list({'disqus_shortname': settings.DISQUS_SHORTNAME}.items())
+        list({'disqus_shortname': getattr(settings, 'DISQUS_SHORTNAME')}.items())
     return render(request, 'posts/blog_view.html', context)
 
 
