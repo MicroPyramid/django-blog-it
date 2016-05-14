@@ -21,17 +21,17 @@ except ImportError:
     from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 
-admin_required = user_passes_test(lambda user: user.is_active, login_url='/dashboard')
+admin_required = user_passes_test(lambda user: user.is_active, login_url=reverse('admin_login'))
 
 
 def active_admin_required(view_func):
-    decorated_view_func = login_required(admin_required(view_func), login_url='/dashboard')
+    decorated_view_func = login_required(admin_required(view_func), login_url=reverse('admin_login'))
     return decorated_view_func
 
 
 def admin_login(request):
     if request.user.is_active:
-        return HttpResponseRedirect('/')
+        return HttpResponseRedirect(reverse('blog'))
     if request.method == 'POST':
         login_form = AdminLoginForm(request.POST)
         if login_form.is_valid():
@@ -55,7 +55,7 @@ def admin_login(request):
 def admin_logout(request):
     logout(request)
     messages.success(request, 'You are successfully logged out!')
-    return HttpResponseRedirect('/')
+    return HttpResponseRedirect(reverse('admin_login'))
 
 
 @active_admin_required
@@ -77,7 +77,7 @@ def blog(request):
 
 @active_admin_required
 def view_blog(request, blog_slug):
-    blog_name = Post.objects.get(slug=blog_slug)
+    blog_name = get_object_or_404(Post, slug=blog_slug) # Post.objects.get(slug=blog_slug)
     context = {'blog_name': blog_name}
     return render(request, 'dashboard/blog/blog_view.html', context)
 
@@ -128,7 +128,7 @@ def blog_add(request):
 
 @active_admin_required
 def edit_blog(request, blog_slug):
-    blog_name = Post.objects.get(slug=blog_slug)
+    blog_name = get_object_or_404(Post, slug=blog_slug) # Post.objects.get(slug=blog_slug)
     if blog_name.user == request.user or request.user.is_superuser is True or get_user_role(request.user) != 'Author':
         form = BlogPostForm(
                 instance=blog_name,
@@ -219,7 +219,7 @@ def delete_blog(request, blog_slug):
                 raise Http404
         else:
             raise Http404
-    return HttpResponseRedirect('/dashboard/blog/')
+    return HttpResponseRedirect(reverse('blog'))
 
 
 @active_admin_required
@@ -264,7 +264,7 @@ def add_category(request):
 
 @active_admin_required
 def edit_category(request, category_slug):
-    category_name = Category.objects.get(slug=category_slug)
+    category_name = get_object_or_404(Category, slug=category_slug) # Category.objects.get(slug=category_slug)
     if category_name.user == request.user or request.user.is_superuser is True:
         form = BlogCategoryForm(instance=category_name)
 
@@ -283,7 +283,7 @@ def edit_category(request, category_slug):
 
 @active_admin_required
 def delete_category(request, category_slug):
-    category = Category.objects.get(slug=category_slug)
+    category = get_object_or_404(Category, slug=category_slug) # Category.objects.get(slug=category_slug)
     if category.user == request.user or request.user.is_superuser is True:
         category.delete()
         return HttpResponseRedirect('/dashboard/category/')
@@ -483,7 +483,7 @@ def add_page(request):
 
 @active_admin_required
 def edit_page(request, page_slug):
-    page = Page.objects.get(slug=page_slug)
+    page = get_object_or_404(Page, slug=page_slug) # Page.objects.get(slug=page_slug)
 
     if request.user.is_superuser is True:
         form = PageForm(instance=page)
@@ -503,7 +503,7 @@ def edit_page(request, page_slug):
 
 @active_admin_required
 def delete_page(request, page_slug):
-    page = Page.objects.get(slug=page_slug)
+    page = get_object_or_404(Page, slug=page_slug) # Page.objects.get(slug=page_slug)
     if request.user.is_superuser is True:
         page.delete()
         messages.success(request, 'Page successfully deleted!')
