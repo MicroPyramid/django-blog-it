@@ -2,8 +2,7 @@ from django.shortcuts import render, get_list_or_404
 from django_blog_it.django_blog_it.models import Post, Category, Tags, Page
 from django.db.models import Count
 from django.conf import settings
-
-# Create your views here.
+from django.http import Http404
 
 
 def categories_tags_lists():
@@ -71,3 +70,4 @@ def page_view(request, page_slug):
     if pages:
         context = list({'page': pages[0]}.items())
         return render(request, 'posts/page.html', context)
+    raise Http404

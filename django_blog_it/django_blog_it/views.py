@@ -31,7 +31,7 @@ def active_admin_required(view_func):
 
 def admin_login(request):
     if request.user.is_active:
-        return HttpResponseRedirect('/dashboard/blog')
+        return HttpResponseRedirect('/')
     if request.method == 'POST':
         login_form = AdminLoginForm(request.POST)
         if login_form.is_valid():
@@ -55,7 +55,7 @@ def admin_login(request):
 def admin_logout(request):
     logout(request)
     messages.success(request, 'You are successfully logged out!')
-    return HttpResponseRedirect('/dashboard/')
+    return HttpResponseRedirect('/')
 
 
 @active_admin_required
