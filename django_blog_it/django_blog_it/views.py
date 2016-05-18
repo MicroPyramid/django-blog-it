@@ -19,19 +19,19 @@ try:
     User = get_user_model()
 except ImportError:
     from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse_lazy
+from django.core.urlresolvers import reverse
 
-admin_required = user_passes_test(lambda user: user.is_active, login_url=reverse_lazy('admin_login'))
+admin_required = user_passes_test(lambda user: user.is_active, login_url='/')
 
 
 def active_admin_required(view_func):
-    decorated_view_func = login_required(admin_required(view_func), login_url=reverse_lazy('admin_login'))
+    decorated_view_func = login_required(admin_required(view_func), login_url='/')
     return decorated_view_func
 
 
 def admin_login(request):
     if request.user.is_active:
-        return HttpResponseRedirect(reverse_lazy('blog'))
+        return HttpResponseRedirect(reverse('blog'))
     if request.method == 'POST':
         login_form = AdminLoginForm(request.POST)
         if login_form.is_valid():
@@ -55,7 +55,7 @@ def admin_login(request):
 def admin_logout(request):
     logout(request)
     messages.success(request, 'You are successfully logged out!')
-    return HttpResponseRedirect(reverse_lazy('admin_login'))
+    return HttpResponseRedirect(reverse('admin_login'))
 
 
 @active_admin_required
@@ -219,7 +219,7 @@ def delete_blog(request, blog_slug):
                 raise Http404
         else:
             raise Http404
-    return HttpResponseRedirect(reverse_lazy('blog'))
+    return HttpResponseRedirect(reverse('blog'))
 
 
 @active_admin_required
@@ -423,7 +423,7 @@ def delete_user(request, pk):
         user.delete()
     else:
         raise Http404
-    return HttpResponseRedirect(reverse_lazy('users'))
+    return HttpResponseRedirect(reverse('users'))
 
 
 def edit_user_role(request, pk):
@@ -507,7 +507,7 @@ def delete_page(request, page_slug):
     if request.user.is_superuser is True:
         page.delete()
         messages.success(request, 'Page successfully deleted!')
-        return HttpResponseRedirect(reverse_lazy('pages'))
+        return HttpResponseRedirect(reverse('pages'))
     else:
         Http404
 
@@ -516,7 +516,6 @@ def delete_page(request, page_slug):
 def bulk_actions_pages(request):
     if request.user.is_superuser:
         if request.method == 'GET':
-            print (request.GET)
             if 'page_ids[]' in request.GET:
                 if request.GET.get('action') == 'True':
                     Page.objects.filter(id__in=request.GET.getlist('page_ids[]')).update(
