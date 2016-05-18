@@ -25,8 +25,8 @@ before_script:
 
 # command to run tests
 script:
-  - python manage.py test
-  - coverage run --source=django_blog_it.posts,django_blog_it.django_blog_it manage.py test
+  - python test_runner.py test
+  - coverage run --source=django_blog_it.posts,django_blog_it.django_blog_it test_runner.py test
 
 after_success:
   coveralls

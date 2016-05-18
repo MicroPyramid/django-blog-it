@@ -21,11 +21,11 @@ except ImportError:
     from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 
-admin_required = user_passes_test(lambda user: user.is_active, login_url=reverse('admin_login'))
+admin_required = user_passes_test(lambda user: user.is_active, login_url='/')
 
 
 def active_admin_required(view_func):
-    decorated_view_func = login_required(admin_required(view_func), login_url=reverse('admin_login'))
+    decorated_view_func = login_required(admin_required(view_func), login_url='/')
     return decorated_view_func
 
 
@@ -516,7 +516,6 @@ def delete_page(request, page_slug):
 def bulk_actions_pages(request):
     if request.user.is_superuser:
         if request.method == 'GET':
-            print (request.GET)
             if 'page_ids[]' in request.GET:
                 if request.GET.get('action') == 'True':
                     Page.objects.filter(id__in=request.GET.getlist('page_ids[]')).update(
