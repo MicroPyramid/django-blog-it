@@ -11,8 +11,8 @@ from django.contrib.auth.decorators import user_passes_test, login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files import File
 
-from .models import Post, PostHistory, Category, Tags, Image_File, STATUS_CHOICE, ROLE_CHOICE, UserRole
-from .forms import BlogCategoryForm, BlogPostForm, AdminLoginForm, UserRoleForm
+from .models import Post, PostHistory, Category, Tags, Image_File, STATUS_CHOICE, ROLE_CHOICE, UserRole, Page
+from .forms import BlogCategoryForm, BlogPostForm, AdminLoginForm, UserRoleForm, PageForm
 from django_blog_it import settings
 try:
     from django.contrib.auth import get_user_model
@@ -21,17 +21,17 @@ except ImportError:
     from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 
-admin_required = user_passes_test(lambda user: user.is_active, login_url='/dashboard')
+admin_required = user_passes_test(lambda user: user.is_active, login_url='/')
 
 
 def active_admin_required(view_func):
-    decorated_view_func = login_required(admin_required(view_func), login_url='/dashboard')
+    decorated_view_func = login_required(admin_required(view_func), login_url='/')
     return decorated_view_func
 
 
 def admin_login(request):
     if request.user.is_active:
-        return HttpResponseRedirect('/dashboard/blog')
+        return HttpResponseRedirect(reverse('blog'))
     if request.method == 'POST':
         login_form = AdminLoginForm(request.POST)
         if login_form.is_valid():
@@ -55,7 +55,7 @@ def admin_login(request):
 def admin_logout(request):
     logout(request)
     messages.success(request, 'You are successfully logged out!')
-    return HttpResponseRedirect('/dashboard/')
+    return HttpResponseRedirect(reverse('admin_login'))
 
 
 @active_admin_required
@@ -77,7 +77,7 @@ def blog(request):
 
 @active_admin_required
 def view_blog(request, blog_slug):
-    blog_name = Post.objects.get(slug=blog_slug)
+    blog_name = get_object_or_404(Post, slug=blog_slug) # Post.objects.get(slug=blog_slug)
     context = {'blog_name': blog_name}
     return render(request, 'dashboard/blog/blog_view.html', context)
 
@@ -128,7 +128,7 @@ def blog_add(request):
 
 @active_admin_required
 def edit_blog(request, blog_slug):
-    blog_name = Post.objects.get(slug=blog_slug)
+    blog_name = get_object_or_404(Post, slug=blog_slug) # Post.objects.get(slug=blog_slug)
     if blog_name.user == request.user or request.user.is_superuser is True or get_user_role(request.user) != 'Author':
         form = BlogPostForm(
                 instance=blog_name,
@@ -219,7 +219,7 @@ def delete_blog(request, blog_slug):
                 raise Http404
         else:
             raise Http404
-    return HttpResponseRedirect('/dashboard/blog/')
+    return HttpResponseRedirect(reverse('blog'))
 
 
 @active_admin_required
@@ -264,7 +264,7 @@ def add_category(request):
 
 @active_admin_required
 def edit_category(request, category_slug):
-    category_name = Category.objects.get(slug=category_slug)
+    category_name = get_object_or_404(Category, slug=category_slug) # Category.objects.get(slug=category_slug)
     if category_name.user == request.user or request.user.is_superuser is True:
         form = BlogCategoryForm(instance=category_name)
 
@@ -283,7 +283,7 @@ def edit_category(request, category_slug):
 
 @active_admin_required
 def delete_category(request, category_slug):
-    category = Category.objects.get(slug=category_slug)
+    category = get_object_or_404(Category, slug=category_slug) # Category.objects.get(slug=category_slug)
     if category.user == request.user or request.user.is_superuser is True:
         category.delete()
         return HttpResponseRedirect('/dashboard/category/')
@@ -445,3 +445,92 @@ def edit_user_role(request, pk):
     else:
         data = {'error': True, 'response': validate_user_role.errors}
     return HttpResponse(json.dumps(data))
+
+
+@active_admin_required
+def pages(request):
+    pages_list = Page.objects.all()
+    context = {'pages_list': pages_list}
+
+    if request.method == "POST":
+
+        if request.POST.get('select_status', ''):
+            if request.POST.get('select_status') == "True":
+                pages_list = pages_list.filter(is_active=True)
+            else:
+                pages_list = pages_list.filter(is_active=False)
+
+        context = {'pages_list': pages_list}
+    return render(request, 'dashboard/pages/list.html', context)
+
+
+@active_admin_required
+def add_page(request):
+    form = PageForm()
+    if request.method == 'POST':
+        form = PageForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Successfully added your page')
+            data = {'error': False, 'response': 'Successfully added your page'}
+        else:
+            data = {'error': True, 'response': form.errors}
+        return HttpResponse(json.dumps(data))
+    context = {'form': form}
+    return render(request, 'dashboard/pages/add_page.html', context)
+
+
+@active_admin_required
+def edit_page(request, page_slug):
+    page = get_object_or_404(Page, slug=page_slug) # Page.objects.get(slug=page_slug)
+
+    if request.user.is_superuser is True:
+        form = PageForm(instance=page)
+
+        if request.method == 'POST':
+            form = PageForm(request.POST, instance=page)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Successfully updated your page')
+                data = {'error': False, 'response': 'Successfully updated your page'}
+            else:
+                data = {'error': True, 'response': form.errors}
+            return HttpResponse(json.dumps(data))
+        context = {'form': form, 'page': page}
+        return render(request, 'dashboard/pages/add_page.html', context)
+
+
+@active_admin_required
+def delete_page(request, page_slug):
+    page = get_object_or_404(Page, slug=page_slug) # Page.objects.get(slug=page_slug)
+    if request.user.is_superuser is True:
+        page.delete()
+        messages.success(request, 'Page successfully deleted!')
+        return HttpResponseRedirect(reverse('pages'))
+    else:
+        Http404
+
+
+@active_admin_required
+def bulk_actions_pages(request):
+    if request.user.is_superuser:
+        if request.method == 'GET':
+            if 'page_ids[]' in request.GET:
+                if request.GET.get('action') == 'True':
+                    Page.objects.filter(id__in=request.GET.getlist('page_ids[]')).update(
+                        is_active=True)
+                    messages.success(request, 'Selected Pages successfully updated as Active')
+                elif request.GET.get('action') == 'False':
+                    Page.objects.filter(id__in=request.GET.getlist('page_ids[]')).update(
+                        is_active=False)
+                    messages.success(request, 'Selected Pages successfully updated as Inactive')
+
+                elif request.GET.get('action') == 'Delete':
+                    Page.objects.filter(id__in=request.GET.getlist('page_ids[]')).delete()
+                    messages.success(request, 'Selected Pages successfully deleted!')
+
+                return HttpResponse(json.dumps({'response': True}))
+            else:
+                messages.warning(request, 'Please select at-least one record to perform this action')
+                return HttpResponse(json.dumps({'response': False}))

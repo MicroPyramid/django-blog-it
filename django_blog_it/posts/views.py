@@ -1,9 +1,8 @@
-from django.shortcuts import render, get_list_or_404
-from django_blog_it.django_blog_it.models import Post, Category, Tags
+from django.shortcuts import render, get_list_or_404, get_object_or_404
+from django_blog_it.django_blog_it.models import Post, Category, Tags, Page
 from django.db.models import Count
-from django.conf import settings
-
-# Create your views here.
+from django_blog_it import settings
+from django.http import Http404
 
 
 def categories_tags_lists():
@@ -32,10 +31,10 @@ def index(request):
 
 
 def blog_post_view(request, blog_slug):
-    blog_name = Post.objects.get(slug=blog_slug)
+    blog_name =  get_object_or_404(Post, slug=blog_slug) # Post.objects.get(slug=blog_slug)
     context = list({'blog_name': blog_name}.items()) + \
         list(categories_tags_lists().items()) + \
-        list({'disqus_shortname': settings.DISQUS_SHORTNAME}.items())
+        list({'disqus_shortname': getattr(settings, 'DISQUS_SHORTNAME')}.items())
     return render(request, 'posts/blog_view.html', context)
 
 
@@ -64,3 +63,11 @@ def archive_posts(request, year, month):
     blog_posts = [post for post in blog_posts if post.category.is_active]
     context = list({'blog_posts': blog_posts}.items()) + list(categories_tags_lists().items())
     return render(request, 'posts/index.html', context)
+
+
+def page_view(request, page_slug):
+    pages = Page.objects.filter(slug=page_slug)
+    if pages:
+        context = list({'page': pages[0]}.items())
+        return render(request, 'posts/page.html', context)
+    raise Http404
