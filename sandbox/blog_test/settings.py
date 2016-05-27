@@ -75,6 +75,7 @@ WSGI_APPLICATION = 'blog_test.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
+import dj_database_url
 
 DATABASES = {
    'default': dj_database_url.config(
