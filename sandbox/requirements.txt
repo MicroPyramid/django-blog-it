@@ -1,4 +1,3 @@
--markerlib==0.0.0
 boto==2.40.0
 Django==1.9.6
 django-blog-it==0.1
