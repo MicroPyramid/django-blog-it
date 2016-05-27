@@ -3,9 +3,7 @@ Django==1.9.6
 django-blog-it==0.1
 django-simple-pagination==1.1.4
 django-storages==1.4.1
-forex-python==0.2.2
 Pillow==3.2.0
-pkg-resources==0.0.0
 requests==2.10.0
 gunicorn==19.6.0
 whitenoise==3.1
