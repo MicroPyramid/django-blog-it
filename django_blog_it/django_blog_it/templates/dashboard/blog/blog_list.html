@@ -160,8 +160,25 @@
 
         <script type="text/javascript">
         $("#selectAll").change(function() {
-            $(".bulk_button").toggle();
-            $(".bulk_actions:checkbox").attr('checked', this.checked);
+            // $(".bulk_button").toggle();
+            $(".bulk_actions:checkbox").prop('checked', $(this).prop("checked"));
+            if($(this).prop("checked")){
+                $(".bulk_button").show();
+            }else{
+                $(".bulk_button").hide();
+            }
+        });
+
+        $(".bulk_actions:checkbox").change(function() {
+            if ($(this).attr("id") != "selectAll"){
+                if($(".bulk_actions:checkbox:checked").length > 0){
+                    $(".bulk_button").show();
+                }
+                else{
+                    $("#selectAll").prop('checked', false);
+                    $(".bulk_button").hide();
+                }
+            }
         });
 
         $('#published').click(function(){
