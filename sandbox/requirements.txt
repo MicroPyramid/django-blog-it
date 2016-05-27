@@ -7,3 +7,4 @@ Pillow==3.2.0
 requests==2.10.0
 gunicorn==19.6.0
 whitenoise==3.1
+dj-database-url==0.4.1
