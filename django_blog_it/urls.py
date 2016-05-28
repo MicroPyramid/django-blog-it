@@ -5,6 +5,8 @@ from .django_blog_it.views import *
 from .posts.views import *
 from .settings import MEDIA_URL, MEDIA_ROOT
 
+print MEDIA_ROOT
+print MEDIA_URL
 
 urlpatterns = [
     url(r'^$', index, name='index'),
@@ -39,5 +41,9 @@ urlpatterns = [
     url(r'^dashboard/user/edit/(?P<pk>[-\w]+)/$', edit_user_role, name='edit_user_role'),
     url(r'^dashboard/user/delete/(?P<pk>[-\w]+)/$', delete_user, name='delete_user'),
 
+    # menu management
+    url(r'^dashboard/menu/$', menus, name='menus'),
+    url(r'^dashboard/menu/add/$', add_menu, name='add_menu'),
+    url(r'^dashboard/menu/edit/(?P<pk>[-\w]+)/$', edit_menu, name='edit_menu'),
 
 ] + static(MEDIA_URL, document_root=MEDIA_ROOT)

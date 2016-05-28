@@ -170,3 +170,22 @@ class Page(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class Menu(models.Model):
+    parent = models.ForeignKey('self', blank=True, null=True)
+    title = models.CharField(max_length=255)
+    url = models.URLField(max_length=255, blank=True)
+    status = models.BooleanField(default=True)
+    lvl = models.IntegerField(blank=True)
+
+    def __str__(self):
+        return self.title
+
+    def get_children(self):
+        return self.menu_set.all()
+
+    def has_children(self):
+        if self.get_children():
+            return True
+        return False
