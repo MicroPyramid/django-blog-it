@@ -539,7 +539,7 @@ def bulk_actions_pages(request):
 @active_admin_required
 def menus(request):
     menu_list = Menu.objects.filter(parent=None)
-    context = {'menu_list': menu_list, 'menu_choices': menu_choices}
+    context = {'menu_list': menu_list}
 
     if request.method == "POST":
 
