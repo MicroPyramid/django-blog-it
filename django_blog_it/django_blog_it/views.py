@@ -539,23 +539,17 @@ def bulk_actions_pages(request):
 @active_admin_required
 def menus(request):
     menu_list = Menu.objects.filter(parent=None)
-    menu_choices = menu_list
-    context = {'menu_list': menu_list, 'menu_choices': menu_choices}
+    context = {'menu_list': menu_list}
 
     if request.method == "POST":
-        requested_menus = request.POST.getlist('menu')
 
         if request.POST.get('select_status', ''):
             if request.POST.get('select_status') == "True":
-                menu_list = menu_list.filter(is_active=True)
+                menu_list = menu_list.filter(status=True)
             else:
-                menu_list = menu_list.filter(is_active=False)
+                menu_list = menu_list.filter(status=False)
 
-        elif request.POST.getlist('category', []):
-            menu_list = menu_list.filter(id__in=request.POST.getlist('category'))
-
-        context = {'root_menu_items': menu_list, 'requested_menus': requested_menus,
-                   'menu_choices': menu_choices}
+        context = {'root_menu_items': menu_list}
     return render(request, 'dashboard/menu/list.html', context)
 
 

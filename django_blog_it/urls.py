@@ -1,12 +1,9 @@
-from django.conf.urls import include, url
-from django.contrib import admin
+from django.conf.urls import url
 from django.conf.urls.static import static
 from .django_blog_it.views import *
 from .posts.views import *
 from .settings import MEDIA_URL, MEDIA_ROOT
 
-print MEDIA_ROOT
-print MEDIA_URL
 
 urlpatterns = [
     url(r'^$', index, name='index'),

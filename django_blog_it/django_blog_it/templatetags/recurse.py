@@ -50,7 +50,7 @@ class RecurseNode(template.Node):
 def do_recurse(parser, token):
     bits = list(token.split_contents())
     if len(bits) != 6 and bits[2] != 'with' and bits[4] != 'as':
-        raise template.TemplateSyntaxError, "Invalid tag syxtax expected '{% recurse [childVar] with [parents] as [parent] %}'"
+        raise template.TemplateSyntaxError("Invalid tag syxtax expected '{% recurse [childVar] with [parents] as [parent] %}'")
     child = parser.compile_filter(bits[1])
     var = parser.compile_filter(bits[3])
     name = bits[5]
