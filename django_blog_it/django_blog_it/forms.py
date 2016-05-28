@@ -1,5 +1,5 @@
 from django import forms
-from .models import Post, Category, Page
+from .models import Post, Category, Page, Menu
 from django.template.defaultfilters import slugify
 # for authentication
 from django.contrib.auth import authenticate
@@ -81,3 +81,9 @@ class PageForm(forms.ModelForm):
     class Meta:
         model = Page
         exclude = ('slug',)
+
+
+class MenuForm(forms.ModelForm):
+    class Meta:
+        model = Menu
+        exclude = ('lvl',)

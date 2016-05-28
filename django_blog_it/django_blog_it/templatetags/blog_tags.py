@@ -43,3 +43,8 @@ def is_deletable_by(blog_post, user):
 @register.filter
 def get_user_role_name(user):
     return get_user_role(user)
+
+
+@register.filter
+def get_range(value):
+    return range(value)

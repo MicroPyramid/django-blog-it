@@ -2,7 +2,7 @@ import json
 from PIL import Image
 import os
 import requests
-
+from django.db.models.aggregates import Max
 from django.shortcuts import render, render_to_response, get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.contrib import messages
@@ -11,8 +11,8 @@ from django.contrib.auth.decorators import user_passes_test, login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files import File
 
-from .models import Post, PostHistory, Category, Tags, Image_File, STATUS_CHOICE, ROLE_CHOICE, UserRole, Page
-from .forms import BlogCategoryForm, BlogPostForm, AdminLoginForm, UserRoleForm, PageForm
+from .models import Menu, Post, PostHistory, Category, Tags, Image_File, STATUS_CHOICE, ROLE_CHOICE, UserRole, Page
+from .forms import *
 from django_blog_it import settings
 try:
     from django.contrib.auth import get_user_model
@@ -534,3 +534,84 @@ def bulk_actions_pages(request):
             else:
                 messages.warning(request, 'Please select at-least one record to perform this action')
                 return HttpResponse(json.dumps({'response': False}))
+
+
+@active_admin_required
+def menus(request):
+    menu_list = Menu.objects.filter(parent=None)
+    menu_choices = menu_list
+    context = {'menu_list': menu_list, 'menu_choices': menu_choices}
+
+    if request.method == "POST":
+        requested_menus = request.POST.getlist('menu')
+
+        if request.POST.get('select_status', ''):
+            if request.POST.get('select_status') == "True":
+                menu_list = menu_list.filter(is_active=True)
+            else:
+                menu_list = menu_list.filter(is_active=False)
+
+        elif request.POST.getlist('category', []):
+            menu_list = menu_list.filter(id__in=request.POST.getlist('category'))
+
+        context = {'root_menu_items': menu_list, 'requested_menus': requested_menus,
+                   'menu_choices': menu_choices}
+    return render(request, 'dashboard/menu/list.html', context)
+
+
+@active_admin_required
+def add_menu(request):
+    form = MenuForm()
+    if request.method == 'POST':
+        form = MenuForm(request.POST)
+
+        if form.is_valid():
+            menu_obj = form.save(commit=False)
+            menu_count = Menu.objects.filter(parent=menu_obj.parent).count()
+            menu_obj.lvl = menu_count + 1
+            if menu_obj.url[-1] != '/':
+                menu_obj.url = menu_obj.url + '/'
+            menu_obj.save()
+            messages.success(request, 'Successfully added menu.')
+            data = {'error': False, 'response': 'Successfully added menu.'}
+        else:
+            data = {'error': True, 'response': form.errors}
+        return HttpResponse(json.dumps(data))
+    context = {'form': form, 'add_menu': True}
+    return render(request, 'dashboard/menu/manage.html', context)
+
+
+@active_admin_required
+def edit_menu(request, pk):
+    menu_obj = get_object_or_404(Menu, pk=pk)
+    form = MenuForm(instance=menu_obj)
+    current_parent = menu_obj.parent
+    current_lvl = menu_obj.lvl
+
+    if request.method == 'POST':
+        form = MenuForm(request.POST, instance=menu_obj)
+        if form.is_valid():
+            updated_menu_obj = form.save(commit=False)
+            if updated_menu_obj.parent != current_parent:
+                if updated_menu_obj.parent.id == updated_menu_obj.id:
+                    data = {'error': True, 'message': 'you can not choose the same as parent'}
+                    return HttpResponse(json.dumps(data))
+
+                menu_count = Menu.objects.filter(parent=updated_menu_obj.parent).count()
+                updated_menu_obj.lvl = menu_count + 1
+                menu_max_lvl = Menu.objects.filter(parent=current_parent).aggregate(Max('lvl'))['lvl__max']
+                if menu_max_lvl != 1:
+                    for i in Menu.objects.filter(parent=current_parent, lvl__gt=current_lvl, lvl__lte=menu_max_lvl):
+                        i.lvl = i.lvl - 1
+                        i.save()
+            if updated_menu_obj.url[-1] != '/':
+                updated_menu_obj.url = updated_menu_obj.url + '/'
+            updated_menu_obj.save()
+
+            messages.success(request, 'Successfully updated menu')
+            data = {'error': False, 'response': 'Successfully updated menu'}
+        else:
+            data = {'error': True, 'response': form.errors}
+        return HttpResponse(json.dumps(data))
+    context = {'form': form, 'menu_obj': menu_obj}
+    return render(request, 'dashboard/menu/manage.html', context)
