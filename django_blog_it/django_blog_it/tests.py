@@ -338,6 +338,9 @@ class django_blog_it_views_get(TestCase):
 
         response = self.client.get('/dashboard/upload_photos/', {'CKEditorFuncNum': '/dashboard/'})
         self.assertEqual(response.status_code, 200)
+        context = {'CKEditorFuncNum': '/dashboard/'}
+        response = self.client.get('/dashboard/upload_photos/', context)
+        self.assertEqual(response.status_code, 200)
 
         # recent photos
         response = self.client.get('/dashboard/recent_photos/')
@@ -641,6 +644,8 @@ class users_roles(TestCase):
 
         response = self.client.get('/dashboard/users/', {'select_role': 'Author'})
         self.assertEqual(response.status_code, 200)
+        response = self.client.post('/dashboard/users/', {'select_role': 'Admin'})
+        self.assertEqual(response.status_code, 200)
 
     def test_users_edit_delete(self):
         user_login = self.client.login(username='mp@mp.com', password='mp')
@@ -706,6 +711,8 @@ class Pages(TestCase):
 
         response = self.client.get(reverse('bulk_actions_pages'), {'page_ids[]': [str(self.page.id)], 'action': 'Delete'})
         self.assertEqual(response.status_code, 200)
+        response = self.client.get(reverse('bulk_actions_pages'), {'action': 'Delete'})
+        self.assertEqual(response.status_code, 200)
 
     def test_pages_add(self):
         user_login = self.client.login(username='mp@mp.com', password='mp')
@@ -754,9 +761,30 @@ class Pages(TestCase):
             })
         self.assertEqual(response.status_code, 200)
         self.assertFalse('Successfully added your page' in str(response.content))
+        response = self.client.post(
+            reverse('edit_page', kwargs={'page_slug': self.page.slug}),
+            {
+                'title': 'Hello world',
+                'content': 'This is content',
+                'meta_description': 'page meta data',
+                'meta_title': 'meta title',
+                'keywords': 'django',
+            })
+        self.assertEqual(response.status_code, 200)
 
+    def test_delete_page(self):
+        user_login = self.client.login(username='mp@mp.com', password='mp')
+        self.assertTrue(user_login)
         response = self.client.get(reverse('delete_page', kwargs={'page_slug': self.page.slug}))
         self.assertEqual(response.status_code, 302)
+
+    def test_delete_page_404(self):
+        user_login = self.client.login(username='mp@mp.com', password='mp')
+        self.assertTrue(user_login)
+        self.user.is_superuser = False
+        self.user.save()
+        response = self.client.get(reverse('delete_page', kwargs={'page_slug': self.page.slug}))
+        self.assertEqual(response.status_code, 404)
 
 
 class AdminLogin(TestCase):

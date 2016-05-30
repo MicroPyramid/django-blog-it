@@ -503,13 +503,13 @@ def edit_page(request, page_slug):
 
 @active_admin_required
 def delete_page(request, page_slug):
-    page = get_object_or_404(Page, slug=page_slug) # Page.objects.get(slug=page_slug)
+    page = get_object_or_404(Page, slug=page_slug)  # Page.objects.get(slug=page_slug)
     if request.user.is_superuser is True:
         page.delete()
         messages.success(request, 'Page successfully deleted!')
         return HttpResponseRedirect(reverse('pages'))
     else:
-        Http404
+        raise Http404
 
 
 @active_admin_required
