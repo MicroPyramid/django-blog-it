@@ -4,6 +4,7 @@ from django_blog_it.django_blog_it.models import Category, Post, Tags, PostHisto
 from django.contrib.auth.models import User
 from django_blog_it.django_blog_it.forms import BlogCategoryForm, BlogPostForm, AdminLoginForm
 from django.core.urlresolvers import reverse
+from django_blog_it.django_blog_it.models import Menu
 
 
 # models test
@@ -95,6 +96,12 @@ class post_history_models_test(TestCase):
 
 class django_blog_it_forms_test(TestCase):
 
+    def get_category(self):
+        self.category2 = Category.objects.create(name='generators',
+                                                 description='generators',
+                                                 user=self.user)
+        return self.category2
+
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create_superuser(
@@ -111,25 +118,31 @@ class django_blog_it_forms_test(TestCase):
             status='Published')
 
     def test_blogpostform(self):
-        form = BlogPostForm(
-            data={
-                'title': 'jquery introduction',
+        data = {'title': 'jquery introduction',
                 'content': 'This is content',
                 'category': self.category.id,
                 'status': 'Published',
                 'is_superuser': 'True',
-                'slug': 'jquery-introduction'
-            })
+                'slug': 'jquery-introduction'}
+        form = BlogPostForm(data=data)
+        self.assertTrue(form.is_valid())
+        form = BlogPostForm(data=data, user_role='Author')
         self.assertTrue(form.is_valid())
 
     def test_BlogCategoryForm(self):
-        form = BlogCategoryForm(
-            data={'name': 'django form', 'description': 'django', 'user': self.category.id})
+        data = {'name': 'django form',
+                'description': 'django',
+                'user': self.category.id}
+        form = BlogCategoryForm(data=data)
         self.assertTrue(form.is_valid())
-
-        form = BlogCategoryForm(
-            data={'name': 'django form', 'description': 'django', 'user': self.category.id})
+        form = BlogCategoryForm(data=data)
         self.assertTrue(form.is_valid())
+        data['name'] = 'salesforce'
+        form = BlogCategoryForm(data=data)
+        self.assertFalse(form.is_valid())
+        data['name'] = self.category.name
+        form = BlogCategoryForm(data=data, instance=self.get_category())
+        self.assertFalse(form.is_valid())
 
     def test_AdminLoginForm(self):
         form = AdminLoginForm(
@@ -143,6 +156,11 @@ class django_blog_it_forms_test(TestCase):
         form = AdminLoginForm(
             data={'username': 'mp@micropyramid.com', 'password': 'mp'})
         self.assertTrue(form.is_valid())
+
+    def tearDown(self):
+        super(django_blog_it_forms_test, self).tearDown()
+        if hasattr(self, 'category2'):
+            self.category2.delete()
 
 
 class django_blog_it_views_get(TestCase):
@@ -320,6 +338,9 @@ class django_blog_it_views_get(TestCase):
 
         response = self.client.get('/dashboard/upload_photos/', {'CKEditorFuncNum': '/dashboard/'})
         self.assertEqual(response.status_code, 200)
+        context = {'CKEditorFuncNum': '/dashboard/'}
+        response = self.client.get('/dashboard/upload_photos/', context)
+        self.assertEqual(response.status_code, 200)
 
         # recent photos
         response = self.client.get('/dashboard/recent_photos/')
@@ -392,6 +413,9 @@ class django_blog_it_views_get(TestCase):
 
 
 class blog_post_creation(TestCase):
+
+    def get_author_role(self):
+        self.author_role = UserRole.objects.create(user=self.user, role='Author')
 
     def setUp(self):
         self.client = Client()
@@ -538,6 +562,22 @@ class blog_post_creation(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue('Successfully updated your blog post' in str(response.content))
 
+        self.user.is_superuser = False
+        self.user.save()
+        self.get_author_role()
+        response = self.client.post(
+            '/dashboard/edit/nginx-post-1/',
+            {
+                'title': 'nginx-post',
+                'content': 'This is content',
+                'category': self.category.id,
+                'status': 'Published',
+                'tags': 'nginx',
+                'is_superuser': 'True',
+                'slug': 'nginx-post-1'
+            })
+        self.assertEqual(response.status_code, 200)
+
     def test_blog_post_delete(self):
         user_login = self.client.login(username='mp@mp.com', password='mp')
         self.assertTrue(user_login)
@@ -571,6 +611,11 @@ class blog_post_creation(TestCase):
         response = self.client.post('/dashboard/delete/haystack-post/', {'action': 'delete'})
         self.assertEqual(response.status_code, 302)
 
+    def tearDown(self):
+        super(blog_post_creation, self).tearDown()
+        if hasattr(self, 'author_role'):
+            self.author_role.delete()
+
 
 class users_roles(TestCase):
 
@@ -598,6 +643,8 @@ class users_roles(TestCase):
         self.assertEqual(response.status_code, 200)
 
         response = self.client.get('/dashboard/users/', {'select_role': 'Author'})
+        self.assertEqual(response.status_code, 200)
+        response = self.client.post('/dashboard/users/', {'select_role': 'Admin'})
         self.assertEqual(response.status_code, 200)
 
     def test_users_edit_delete(self):
@@ -664,6 +711,8 @@ class Pages(TestCase):
 
         response = self.client.get(reverse('bulk_actions_pages'), {'page_ids[]': [str(self.page.id)], 'action': 'Delete'})
         self.assertEqual(response.status_code, 200)
+        response = self.client.get(reverse('bulk_actions_pages'), {'action': 'Delete'})
+        self.assertEqual(response.status_code, 200)
 
     def test_pages_add(self):
         user_login = self.client.login(username='mp@mp.com', password='mp')
@@ -712,6 +761,120 @@ class Pages(TestCase):
             })
         self.assertEqual(response.status_code, 200)
         self.assertFalse('Successfully added your page' in str(response.content))
+        response = self.client.post(
+            reverse('edit_page', kwargs={'page_slug': self.page.slug}),
+            {
+                'title': 'Hello world',
+                'content': 'This is content',
+                'meta_description': 'page meta data',
+                'meta_title': 'meta title',
+                'keywords': 'django',
+            })
+        self.assertEqual(response.status_code, 200)
 
+    def test_delete_page(self):
+        user_login = self.client.login(username='mp@mp.com', password='mp')
+        self.assertTrue(user_login)
         response = self.client.get(reverse('delete_page', kwargs={'page_slug': self.page.slug}))
         self.assertEqual(response.status_code, 302)
+
+    def test_delete_page_404(self):
+        user_login = self.client.login(username='mp@mp.com', password='mp')
+        self.assertTrue(user_login)
+        self.user.is_superuser = False
+        self.user.save()
+        response = self.client.get(reverse('delete_page', kwargs={'page_slug': self.page.slug}))
+        self.assertEqual(response.status_code, 404)
+
+
+class AdminLogin(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_superuser('mp@mp.com', 'micro-test', 'mp')
+
+    def test_admin_login(self):
+        url = reverse('admin_login')
+        self.client.login(username=self.user.email, password='mp')
+        data = {'username': 'mp@mp.com', 'password': 'mp'}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 200)
+        self.user.is_active = False
+        self.user.save()
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 200)
+        data['email'] = 'not@used.com'
+        response = response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 200)
+
+
+class TestMenu(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_superuser('mp@mp.com',
+                                                  'mp',
+                                                  'mp')
+
+    def get_menu_and_parent(self):
+        menu = Menu.objects.create(title='django',
+                                   url="http://www.django.com",
+                                   lvl=1)
+        parent = Menu.objects.create(title='jquery',
+                                     url="http://www.django.com",
+                                     lvl=2)
+        return menu, parent
+
+    def test_add_menu(self):
+        url = reverse('add_menu')
+        is_logged_in = self.client.login(username='mp@mp.com', password='mp')
+        self.assertTrue(is_logged_in)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 200)
+        data = {'title': 'django', 'url': 'http://django.com'}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 200)
+
+    def test_edit_menu(self):
+        menu, parent = self.get_menu_and_parent()
+        url = reverse('edit_menu', kwargs={'pk': menu.pk})
+        is_logged_in = self.client.login(username='mp@mp.com', password='mp')
+        self.assertTrue(is_logged_in)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 200)
+        context = {'title': 'django',
+                   'url': 'http://django.com'}
+        response = self.client.post(url, context)
+        self.assertEqual(response.status_code, 200)
+        context['parent'] = parent.pk
+        response = self.client.post(url, context)
+        self.assertEqual(response.status_code, 200)
+        context['parent'] = menu.pk
+        response = self.client.post(url, context)
+        self.assertEqual(response.status_code, 200)
+        menu.delete()
+        parent.delete()
+
+
+class Menus(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_superuser('mp@mp.com',
+                                                  'mp',
+                                                  'mp')
+
+    def test_menus(self):
+        url = reverse('menus')
+        is_logged_in = self.client.login(username='mp@mp.com', password='mp')
+        self.assertTrue(is_logged_in)
+        context = {'select_status': 'True'}
+        response = self.client.post(url, context)
+        self.assertEqual(response.status_code, 200)
+        context['select_status'] = 'False'
+        response = self.client.post(url, context)
+        self.assertEqual(response.status_code, 200)
