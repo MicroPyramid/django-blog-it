@@ -92,7 +92,7 @@ def blog_add(request):
         if request.POST.get('title') == '':
             request.POST['title'] = 'Untitled document ' + str(Post.objects.all().count())
         form = BlogPostForm(
-                request.POST,
+                request.POST, request.FILES,
                 is_superuser=request.user.is_superuser,
                 user_role=get_user_role(request.user)
             )
@@ -140,7 +140,7 @@ def edit_blog(request, blog_slug):
         if request.method == "POST":
             previous_status = blog_name.status
             form = BlogPostForm(
-                    request.POST,
+                    request.POST, request.FILES,
                     instance=blog_name,
                     is_superuser=request.user.is_superuser,
                     user_role=get_user_role(request.user)
