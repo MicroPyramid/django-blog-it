@@ -68,6 +68,7 @@ class Post(models.Model):
     tags = models.ManyToManyField(Tags, related_name='rel_posts')
     status = models.CharField(max_length=10, choices=STATUS_CHOICE, default='Drafted')
     keywords = models.TextField(max_length=500, blank=True)
+    featured_image = models.ImageField(upload_to='static/blog/uploads/%Y/%m/%d/', blank=True, null=True)
 
     def save(self, *args, **kwargs):
         tempslug = slugify(self.title)
