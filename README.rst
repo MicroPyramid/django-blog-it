@@ -4,6 +4,14 @@ django-blog-it
 .. image:: https://readthedocs.org/projects/django-blog-it/badge/?version=latest
    :target: http://django-blog-it.readthedocs.org/en/latest/?badge=latest
 
+.. image:: https://img.shields.io/pypi/dm/django-blog-it.svg
+    :target: https://pypi.python.org/pypi/django-blog-it
+    :alt: Downloads
+
+.. image:: https://img.shields.io/pypi/v/django-blog-it.svg
+    :target: https://pypi.python.org/pypi/django-blog-it
+    :alt: Latest Release
+
 .. image:: https://travis-ci.org/MicroPyramid/django-blog-it.svg?branch=master
    :target: https://travis-ci.org/MicroPyramid/django-blog-it
 
