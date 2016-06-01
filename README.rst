@@ -69,9 +69,7 @@ Deploy To Heroku:
 
 .. image:: https://www.herokucdn.com/deploy/button.svg
    :target: https://heroku.com/deploy?template=https://github.com/MicroPyramid/django-blog-it
-
-You can view the complete documentation at http://django-blog-it.readthedocs.org/en/latest/?badge=latest
-
+   
 
 We welcome your feedback and support, raise github ticket if you want to report a bug. Need new features? `Contact us here`_
 
