@@ -1,0 +1,66 @@
+{% extends 'dashboard/base.html' %}
+{% load staticfiles %}
+{% block title %}
+Configure Contact Us.
+{% endblock %}
+{% block extra_css %}
+{% endblock %}
+{% block content %}
+<div class="row" id="head_style">
+  <h3 id="page_title"></h3>
+</div>
+<div class="row">
+  <form action="" method="post" id="contact-us-configure-form" role="form">
+    {% csrf_token %}
+    {% for field in form %}
+    <div class="form-group">
+      <label>{{ field.label }} :</label>
+      <div class="controls">
+        {{ field }}
+        {% if field.help_text %}
+        <p class="help-inline"><small>{{ field.help_text }}</small></p>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+    <div class="form-group">
+      <button class="btn btn-primary" type="submit">Submit</button>
+    </div>
+  </form>
+</div>
+<!-- end of add form div -->
+{% endblock %}
+{% block js_script %}
+
+<script type="text/javascript">
+  $(document).ready(function(){
+
+    // for form submission
+    CKEDITOR.replace('body_user',{
+      filebrowserUploadUrl: '{% url "upload_photos" %}',
+      filebrowserBrowseUrl: '{% url "recent_photos" %}'
+    });
+    CKEDITOR.replace('body_admin',{
+      filebrowserUploadUrl: '{% url "upload_photos" %}',
+      filebrowserBrowseUrl: '{% url "recent_photos" %}'
+    });
+  });
+
+  $('#contact-us-configure-form').submit(function(event){
+      event.preventDefault();
+      $('#id_body_user').val(CKEDITOR.instances.id_body_user.getData());
+      $('#id_body_admin').val(CKEDITOR.instances.id_body_admin.getData());
+      $.post("",$('#contact-us-configure-form').serialize(), function(data){
+          if(data.error){
+              $('p.error_required').remove();
+              for (var key in data.response) {
+                  $('#id_' + key).after('<p class="error_required">* ' + data.response[key] + '</p>');
+              }
+          }else{
+              //alert(data['response']);
+              window.location='/dashboard/';
+          }
+      }, 'json');
+  });
+</script>
+{% endblock %}
