@@ -609,3 +609,28 @@ def edit_menu(request, pk):
         return HttpResponse(json.dumps(data))
     context = {'form': form, 'menu_obj': menu_obj}
     return render(request, 'dashboard/menu/manage.html', context)
+
+
+@active_admin_required
+def configure_contact_us(request):
+    contact_us_settings = ContactUsSettings.objects.all().last()
+    if request.method == 'POST':
+        if contact_us_settings:
+            form = ContactUsSettingsForm(instance=contact_us_settings, data=request.POST)
+        else:
+            form = ContactUsSettingsForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Successfully saved your contact us details.')
+            data = {'error': False, 'response': 'Successfully saved your contact us details.'}
+        else:
+            data = {'error': True, 'response': form.errors}
+        return HttpResponse(json.dumps(data))
+    else:
+        if contact_us_settings:
+            form = ContactUsSettingsForm(instance=contact_us_settings)
+        else:
+            form = ContactUsSettingsForm()
+    context = {'form': form}
+    return render(request, 'dashboard/contact_us_settings.html', context)

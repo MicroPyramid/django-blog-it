@@ -190,3 +190,12 @@ class Menu(models.Model):
         if self.get_children():
             return True
         return False
+
+
+class ContactUsSettings(models.Model):
+    from_email = models.EmailField()
+    reply_to_email = models.EmailField(blank=True, null=True)
+    email_admin = models.EmailField()
+    subject = models.CharField(max_length=500)
+    body_user = models.TextField()
+    body_admin = models.TextField()
