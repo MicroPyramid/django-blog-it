@@ -1,6 +1,6 @@
 import datetime
 from django import template
-from django_blog_it.django_blog_it.models import Post, Tags, UserRole
+from django_blog_it.django_blog_it.models import Post, Tags, Menu
 from django_blog_it.django_blog_it.views import get_user_role
 
 register = template.Library()
@@ -48,3 +48,9 @@ def get_user_role_name(user):
 @register.filter
 def get_range(value):
     return range(value)
+
+
+@register.inclusion_tag('posts/nav_menu.html', takes_context=True)
+def load_menu(context):
+    context['menu'] = Menu.objects.filter(parent=None, status=True).order_by("lvl")
+    return context
