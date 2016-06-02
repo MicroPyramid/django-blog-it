@@ -11,8 +11,11 @@
     {% endblock %}
 
   {% load staticfiles %}
+  {% load blog_tags %}
   <!-- Latest compiled and minified CSS -->
   <link rel="stylesheet" href="{% static 'css/style.css' %}" type="text/css">
+  <link rel="stylesheet" href="{% static 'css/menu/sm-core-css.css' %}" type="text/css">
+  <link rel="stylesheet" href="{% static 'css/menu/sm-blue.css' %}" type="text/css">
   <!-- for online links -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
@@ -21,20 +24,11 @@
   {% endblock %}
 </head>
 <body>
+  {% block menu_block %}
+        {% load_menu %}
+    {% endblock %}
+
   <div class="container">
-    {% if request.user.is_active %}
-      {% block menu_block %}
-        <div class="row" id="top_menu">
-          <div class="container">
-            <div class="row menu_items">
-              <ul class="nav nav-pills pull-left">
-                <li role="presentation" id="home"><a href="/">Home</a></li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      {% endblock %}
-    {% endif %}
 
     {% if messages %}
       {% for message in messages %}
@@ -60,10 +54,17 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
   <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.smartmenus/1.0.0/jquery.smartmenus.js"></script>
 
   <script type="text/javascript">
 
     // for pagination
+    $(function() {
+    $('#main-menu').smartmenus({
+      subMenusSubOffsetX: 1,
+      subMenusSubOffsetY: -8
+    });
+  });
 
     $('.pagination li a.active').each(function(){
         $(this).css('background', '#337AB7');
