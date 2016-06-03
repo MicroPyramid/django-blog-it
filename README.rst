@@ -18,6 +18,9 @@ django-blog-it
 .. image:: https://coveralls.io/repos/github/MicroPyramid/django-blog-it/badge.svg?branch=master
    :target: https://coveralls.io/github/MicroPyramid/django-blog-it?branch=master
 
+.. image:: https://img.shields.io/pypi/l/django-blog-it.svg
+    :target: https://pypi.python.org/pypi/django-blog-it/
+
 .. image:: https://landscape.io/github/MicroPyramid/django-blog-it/master/landscape.svg?style=flat
    :target: https://landscape.io/github/MicroPyramid/django-blog-it/master
    :alt: Code Health
