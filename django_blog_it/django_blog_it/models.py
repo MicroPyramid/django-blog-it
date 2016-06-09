@@ -19,6 +19,9 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+    def category_posts(self):
+        return Post.objects.filter(category=self).count()
+
 
 class Tags(models.Model):
     name = models.CharField(max_length=20, unique=True)

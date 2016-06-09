@@ -1,0 +1,51 @@
+$med_min:992px;
+$med_max:1199px;
+$tab_max:991px;
+$tab_min:768px;
+$smob_max:767px;
+$smob_min:480px;
+$mob_max:479px;
+$mob_min:240px;
+
+$body_bg:#EFF2F4;
+$login_bg:#2A323F;
+$login_block_bg:#30394A;
+$login_btn_bg:#F15151;
+$menu_color:#C6C6C6;
+$menu_drop_bg:#4B5A71;
+$green_bg:#49C17A;
+$blue_bg:#099CBE;
+$filter_bg:#5B636E;
+$yellow_bg:#FFCC00;
+
+$facebook:#215A98;
+$twitter:#00ABF0;
+$google-plus:#F44336;
+$youtube:#b31217;
+$profile_input:#A2B9D8;
+$border_color:#eaeaea;
+
+
+
+
+
+@mixin header-box-shadow($header_box_shadow) {
+	    -webkit-box-shadow: $header_box_shadow ;
+		-moz-box-shadow: $header_box_shadow;
+		box-shadow: $header_box_shadow;
+}
+
+@mixin full_box_shadow($full_box_shadow) {
+	    -webkit-box-shadow: $full_box_shadow ;
+		-moz-box-shadow: $full_box_shadow;
+		box-shadow: $full_box_shadow;
+}
+
+.pad_lr_15{
+	padding-left:15px;
+	padding-right:15px;
+}
+.pad_lr_0{
+	padding-left:0px;
+	padding-right:0px;
+}
