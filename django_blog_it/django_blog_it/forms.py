@@ -17,7 +17,6 @@ class UserForm(ModelForm):
     def clean_email(self):
         email = self.cleaned_data.get('email')
         username = self.cleaned_data.get('username')
-        print self.instance.id
         if self.instance:
             if User.objects.filter(email=email, username=username).exclude(id=self.instance.id).count():
                 raise forms.ValidationError(u'Email addresses must be unique.')

@@ -456,7 +456,6 @@ def add_user(request):
         else:
             form_errors['user_form'] = form.errors
             form_errors['user_role_form'] = validate_user_role.errors
-            print form_errors
             data = {'error': True, 'response': form_errors}
         return HttpResponse(json.dumps(data))
     context = {'form': form, 'roles': ROLE_CHOICE, 'add_user': True}
