@@ -1,5 +1,4 @@
 from django import forms
-from django.forms import ModelForm
 from .models import Post, Category, Page, Menu, ContactUsSettings
 from django.template.defaultfilters import slugify
 # for authentication
@@ -7,7 +6,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 
 
-class UserForm(ModelForm):
+class UserForm(forms.ModelForm):
     password = forms.CharField(required=False, widget=forms.PasswordInput)
 
     class Meta:
