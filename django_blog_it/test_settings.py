@@ -7,7 +7,7 @@ SECRET_KEY = '_nc9_+ntllx!ptq5tzh96nn^$a#81#auhrdw#8t#+n0#4ig(lz'
 TEMPLATE_LOADERS = (
     'django.template.loaders.app_directories.Loader',
 )
-
+DEBUG = True
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
