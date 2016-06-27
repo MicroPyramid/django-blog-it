@@ -132,10 +132,7 @@ class PostCreateView(AdminMixin, CreateView):
         return JsonResponse(data)
 
     def form_invalid(self, form):
-        response = super(PostCreateView, self).form_invalid(form)
-        if self.request.is_ajax():
-            return JsonResponse({'error': True, 'response': form.errors})
-        return response
+        return JsonResponse({'error': True, 'response': form.errors})
 
     def get_context_data(self, **kwargs):
         context = super(PostCreateView, self).get_context_data(**kwargs)
@@ -167,10 +164,7 @@ class PostEditView(UpdateView):
         return response
 
     def form_invalid(self, form):
-        response = super(PostEditView, self).form_invalid(form)
-        if self.request.is_ajax():
-            return JsonResponse({'error': True, 'response': form.errors})
-        return response
+        return JsonResponse({'error': True, 'response': form.errors})
 
     def form_valid(self, form):
         previous_status = self.get_object().status
