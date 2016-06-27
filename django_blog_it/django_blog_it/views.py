@@ -486,7 +486,6 @@ def edit_user(request, pk):
         else:
             form_errors['user_form'] = form.errors
             form_errors['user_role_form'] = validate_user_role.errors
-            print form_errors
             data = {'error': True, 'response': form_errors}
         return HttpResponse(json.dumps(data))
     context = {'user': user, 'user_role': user_role,
