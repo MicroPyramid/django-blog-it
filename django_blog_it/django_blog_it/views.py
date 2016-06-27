@@ -103,10 +103,6 @@ class PostCreateView(AdminMixin, CreateView):
     template_name = "dashboard/blog/blog_add.html"
     success_url = '/dashboard/blog/'
 
-    def get(self, request, *args, **kwargs):
-        response = super(PostCreateView, self).get(request, *args, **kwargs)
-        return response
-
     def form_valid(self, form):
         self.blog_post = form.save(commit=False)
 
@@ -158,10 +154,6 @@ class PostEditView(UpdateView):
 
     def get_object(self):
         return get_object_or_404(Post, slug=self.kwargs['blog_slug'])
-
-    def get(self, request, *args, **kwargs):
-        response = super(PostEditView, self).get(request, *args, **kwargs)
-        return response
 
     def form_invalid(self, form):
         return JsonResponse({'error': True, 'response': form.errors})
