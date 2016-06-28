@@ -16,7 +16,7 @@
           <div class="count_add-new col-md-6 text-right">
             <ul class="list-inline">
               <li><a href="#">All ({{ blog_list|length }}) </a></li>
-              <li><a href="#">Published ({{ blog_list|posts_published_list }}) </a></li>
+              <li><a href="#">Published ({{ published_blogs|length }}) </a></li>
             </ul>
             <span class="add_new"><a href="{% url 'blog_add' %}"><i class="fa fa-plus"></i> Add Blog</a></span>
           </div>

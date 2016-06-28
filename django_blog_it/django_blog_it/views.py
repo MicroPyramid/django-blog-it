@@ -76,6 +76,8 @@ class PostList(AdminMixin, ListView):
         context = super(PostList, self).get_context_data(**kwargs)
         context['blog_choices'] = STATUS_CHOICE
         context['object_list'] = self.model.objects.all()
+        context['published_blogs'] = self.model.objects.filter(
+            status='Published')
         return context
 
     def post(self, request, *args, **kwargs):
