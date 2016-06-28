@@ -11,7 +11,8 @@ from django.contrib.auth.decorators import user_passes_test, login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files import File
 
-from .models import Menu, Post, PostHistory, Category, Tags, Image_File, STATUS_CHOICE, ROLE_CHOICE, UserRole, Page
+from .models import Menu, Post, PostHistory, Category, Tags, Image_File, \
+    STATUS_CHOICE, ROLE_CHOICE, UserRole, Page
 from .forms import *
 from django_blog_it import settings
 try:
@@ -20,6 +21,10 @@ try:
 except ImportError:
     from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.views.generic import ListView, DetailView, CreateView, DeleteView,\
+    UpdateView
+from .mixins import AdminMixin, PostAccessRequiredMixin
+from django.http import JsonResponse
 
 admin_required = user_passes_test(lambda user: user.is_active, login_url='/')
 
@@ -35,13 +40,16 @@ def admin_login(request):
     if request.method == 'POST':
         login_form = AdminLoginForm(request.POST)
         if login_form.is_valid():
-            user = authenticate(username=request.POST['username'], password=request.POST['password'])
+            user = authenticate(username=request.POST['username'],
+                                password=request.POST['password'])
             if user.is_active:
                 login(request, user)
                 messages.success(request, 'You are successfully logged in')
-                response_data = {'error': False, 'response': 'Successfully logged in'}
+                response_data = {'error': False,
+                                 'response': 'Successfully logged in'}
             else:
-                response_data = {'error': True, 'response': 'You are not allowed to this page'}
+                response_data = {'error': True,
+                                 'response': 'You are not allowed to this page'}
             return HttpResponse(json.dumps(response_data))
         else:
             response_data = {'error': True, 'response': login_form.errors}
@@ -58,170 +66,200 @@ def admin_logout(request):
     return HttpResponseRedirect(reverse('admin_login'))
 
 
-@active_admin_required
-def blog(request):
-    blog_list = Post.objects.all()
-    if request.method == "POST":
+class PostList(AdminMixin, ListView):
+    model = Post
+    template_name = 'dashboard/blog/new_blog_list.html'
+    context_object_name = 'blog_list'
+    paginate_by = 10
+
+    def get_context_data(self, **kwargs):
+        context = super(PostList, self).get_context_data(**kwargs)
+        context['blog_choices'] = STATUS_CHOICE
+        context['object_list'] = self.model.objects.all()
+        return context
+
+    def post(self, request, *args, **kwargs):
+        blog_list = self.model.objects.all()
+
         if request.POST.get('select_status', ''):
             blog_list = blog_list.filter(
                 status=request.POST.get('select_status')
             )
-        if request.POST.get('search_text'):
+        if request.POST.get('search_text', ''):
             blog_list = blog_list.filter(
                 title__icontains=request.POST.get('search_text')
             ) | blog_list.filter(
                 tags__name__icontains=request.POST.get('search_text')
             )
-
-    context = {'blog_list': blog_list.distinct(),
-               'blog_choices': STATUS_CHOICE}
-    return render(request, 'dashboard/blog/new_blog_list.html', context)
+        return render(request, self.template_name,
+                      {'blog_list': blog_list, 'blog_choices': STATUS_CHOICE})
 
 
-@active_admin_required
-def view_blog(request, blog_slug):
-    blog_name = get_object_or_404(Post, slug=blog_slug) # Post.objects.get(slug=blog_slug)
-    context = {'blog_name': blog_name}
-    return render(request, 'dashboard/blog/new_blog_view.html', context)
+class PostDetailView(DetailView):
+    model = Post
+    template_name = 'dashboard/blog/new_blog_view.html'
+    slug_field = "slug"
+    context_object_name = 'blog_post'
+
+    def get_object(self):
+        return get_object_or_404(Post, slug=self.kwargs['blog_slug'])
 
 
-@active_admin_required
-def blog_add(request):
-    form = BlogPostForm(request.GET, is_superuser=request.user.is_superuser)
-    tags_list = Tags.objects.all()
-    categories_list = Category.objects.filter(is_active=True)
-    if request.method == "POST":
-        request.POST = request.POST.copy()
-        if request.POST.get('title') == '':
-            request.POST['title'] = 'Untitled document ' + str(Post.objects.all().count())
-        form = BlogPostForm(request.POST, request.FILES,
-                            is_superuser=request.user.is_superuser,
-                            user_role=get_user_role(request.user)
-                            )
-        if form.is_valid():
-            blog_post = form.save(commit=False)
-            blog_post.user = request.user
-            # for autosave
-            if request.user.is_superuser:
-                blog_post.status = request.POST.get('status')
-            blog_post.save()
+class PostCreateView(AdminMixin, CreateView):
+    model = Post
+    form_class = BlogPostForm
+    template_name = "dashboard/blog/new_blog_add.html"
+    success_url = '/dashboard/blog/'
 
-            if request.POST.get('tags', ''):
-                tags = request.POST.get('tags')
-                splitted = tags.split(',')
-                for s in splitted:
-                    blog_tags = Tags.objects.filter(name__iexact=s.strip())
-                    if blog_tags:
-                        blog_tag = blog_tags.first()
-                    else:
-                        blog_tag = Tags.objects.create(name=s.strip())
-                    blog_post.tags.add(blog_tag)
+    def form_valid(self, form):
+        self.blog_post = form.save(commit=False)
+        self.blog_post.user = self.request.user
 
-            blog_post.create_activity(user=request.user, content="added")
-            messages.success(request, 'Successfully posted your blog')
-            data = {'error': False, 'response': 'Successfully posted your blog', 'title': request.POST['title']}
-        else:
-            data = {'error': True, 'response': form.errors, 'title': request.POST['title']}
-        return HttpResponse(json.dumps(data))
-    context = {'form': form, 'status_choices': STATUS_CHOICE, 'categories_list': categories_list,
-               'tags_list': tags_list, 'add_blog': True}
-    return render(request, 'dashboard/blog/new_blog_add.html', context)
+        if self.request.user.is_superuser:
+            self.blog_post.status = self.request.POST.get('status')
+        self.blog_post.save()
 
+        if self.request.POST.get('tags', ''):
+            splitted = self.request.POST.get('tags').split(',')
+            for s in splitted:
+                blog_tags = Tags.objects.filter(name__iexact=s.strip())
+                if blog_tags:
+                    blog_tag = blog_tags.first()
+                else:
+                    blog_tag = Tags.objects.create(name=s.strip())
+                self.blog_post.tags.add(blog_tag)
 
-@active_admin_required
-def edit_blog(request, blog_slug):
-    blog_name = get_object_or_404(Post, slug=blog_slug) # Post.objects.get(slug=blog_slug)
-    if blog_name.user == request.user or request.user.is_superuser is True or get_user_role(request.user) != 'Author':
-        form = BlogPostForm(instance=blog_name,
-                            is_superuser=request.user.is_superuser,
-                            user_role=get_user_role(request.user),
-                            initial={'tags': ','.join([tag.name for tag in blog_name.tags.all()])}
-                            )
+        self.blog_post.create_activity(user=self.request.user, content="added")
+        messages.success(self.request, 'Successfully posted your blog')
+        data = {'error': False, 'response': 'Successfully posted your blog',
+                'title': self.request.POST['title']}
+        return JsonResponse(data)
 
+    def form_invalid(self, form):
+        return JsonResponse({'error': True, 'response': form.errors})
+
+    def get_context_data(self, **kwargs):
+        context = super(PostCreateView, self).get_context_data(**kwargs)
+        form = BlogPostForm(self.request.GET,
+                            is_superuser=self.request.user.is_superuser)
+        tags_list = Tags.objects.all()
         categories_list = Category.objects.filter(is_active=True)
-        if request.method == "POST":
-            previous_status = blog_name.status
-            form = BlogPostForm(request.POST, request.FILES,
-                                instance=blog_name,
-                                is_superuser=request.user.is_superuser,
-                                user_role=get_user_role(request.user)
-                                )
-            if form.is_valid():
-                blog_post = form.save(commit=False)
-                blog_post.user = request.user
-                if request.user.is_superuser or get_user_role(request.user) != 'Author':
-                    blog_post.status = request.POST.get('status')
+
+        context['form'] = form
+        context['status_choices'] = STATUS_CHOICE
+
+        context['categories_list'] = categories_list
+        context['tags_list'] = tags_list
+        context['add_blog'] = True
+        return context
+
+
+class PostEditView(UpdateView):
+    model = Post
+    success_url = '/dashboard/blog/'
+    slug_field = 'slug'
+    template_name = "dashboard/blog/new_blog_add.html"
+    form_class = BlogPostForm
+
+    def get_object(self):
+        return get_object_or_404(Post, slug=self.kwargs['blog_slug'])
+
+    def form_invalid(self, form):
+        return JsonResponse({'error': True, 'response': form.errors})
+
+    def form_valid(self, form):
+        previous_status = self.get_object().status
+        self.blog_post = form.save(commit=False)
+        self.blog_post.user = self.request.user
+        if self.request.user.is_superuser or get_user_role(self.request.user) != 'Author':
+            self.blog_post.status = self.request.POST.get('status')
+        else:
+            self.blog_post.status = previous_status
+        self.blog_post.save()
+        self.blog_post.tags.clear()
+        if self.request.POST.get('tags', ''):
+            splitted = self.request.POST.get('tags').split(',')
+            for s in splitted:
+                blog_tags = Tags.objects.filter(name__iexact=s.strip())
+                if blog_tags:
+                    blog_tag = blog_tags.first()
                 else:
-                    blog_post.status = previous_status
-                blog_post.save()
-                blog_post.tags.clear()
-                if request.POST.get('tags', ''):
-                    tags = request.POST.get('tags')
-                    splitted = tags.split(',')
-                    for s in splitted:
-                        blog_tags = Tags.objects.filter(name__iexact=s.strip())
-                        if blog_tags:
-                            blog_tag = blog_tags.first()
-                        else:
-                            blog_tag = Tags.objects.create(name=s.strip())
-                        blog_post.tags.add(blog_tag)
+                    blog_tag = Tags.objects.create(name=s.strip())
+                self.blog_post.tags.add(blog_tag)
 
-                if blog_post.status == previous_status:
-                    blog_post.create_activity(user=request.user, content="updated")
-                else:
-                    blog_post.create_activity(
-                        user=request.user,
-                        content="changed status from " +
-                        str(previous_status) + " to " + str(blog_post.status)
-                    )
-                messages.success(request, 'Successfully updated your blog post')
-                data = {'error': False, 'response': 'Successfully updated your blog post'}
-            else:
-                data = {'error': True, 'response': form.errors}
-            return HttpResponse(json.dumps(data))
-        context = {'form': form, 'blog_name': blog_name,
-                   'status_choices': STATUS_CHOICE,
-                   'categories_list': categories_list}
-        return render(request, 'dashboard/blog/new_blog_add.html', context)
+        if self.blog_post.status == previous_status:
+            self.blog_post.create_activity(
+                user=self.request.user, content="updated")
+        else:
+            self.blog_post.create_activity(
+                user=self.request.user,
+                content="changed status from " +
+                str(previous_status) + " to " + str(blog_post.status)
+            )
+        messages.success(self.request, 'Successfully updated your blog post')
+        data = {'error': False,
+                'response': 'Successfully updated your blog post'}
+        return JsonResponse(data)
+
+    def get_context_data(self, **kwargs):
+        context = super(PostEditView, self).get_context_data(**kwargs)
+        form = BlogPostForm(instance=self.get_object(),
+                            is_superuser=self.request.user.is_superuser,
+                            user_role=get_user_role(self.request.user),
+                            initial={'tags': ','.join([tag.name for tag in self.get_object().tags.all()])}
+                            )
+        categories_list = Category.objects.filter(is_active=True)
+
+        context['form'] = form
+        context['blog_name'] = self.get_object()
+        context['status_choices'] = STATUS_CHOICE,
+        context['categories_list'] = categories_list
+        return context
 
 
-@active_admin_required
-def delete_blog(request, blog_slug):
-    if request.method == "POST" and request.POST.get("action"):
-        blog_post = get_object_or_404(Post, slug=blog_slug)
-        if blog_post.is_deletable_by(request.user) or request.user.is_superuser is True or get_user_role(request.user) != 'Author':
-            previous_status = blog_post.status
-            if request.POST.get("action") == "trash":
-                blog_post.status = "Trashed"
-                blog_post.save()
-                blog_post.create_activity(
-                    user=request.user,
-                    content="moved to trash from " + str(previous_status)
-                )
-                messages.success(
-                    request,
-                    'Blog "' + str(blog_post.title) + '" has been moved to trash.'
-                )
-            elif request.POST.get("action") == "restore":
-                blog_post.status = "Drafted"
-                blog_post.save()
-                blog_post.create_activity(
-                    user=request.user,
-                    content="restored from trash to " + str(blog_post.status)
-                )
-                messages.success(
-                    request,
-                    'Blog "' + str(blog_post.title) + '" has been restored from trash.'
-                )
-            elif request.POST.get("action") == "delete":
-                blog_post.remove_activity()
-                blog_post.delete()
-                messages.success(request, 'Blog successfully deleted')
-            else:
-                raise Http404
+class PostDeleteView(PostAccessRequiredMixin, DeleteView):
+    model = Post
+    success_url = '/dashboard/blog/'
+    slug_field = 'slug'
+    template_name = "dashboard/blog/new_blog_list.html"
+
+    def get_object(self):
+        return get_object_or_404(Post, slug=self.kwargs['blog_slug'])
+
+    def post(self, request, *args, **kwargs):
+        blog_post = self.get_object()
+        previous_status = blog_post.status
+        if request.POST.get("action") == "trash":
+            blog_post.status = "Trashed"
+            blog_post.save()
+            blog_post.create_activity(
+                user=request.user,
+                content="moved to trash from " + str(previous_status)
+            )
+            messages.success(
+                request,
+                'Blog "' + str(blog_post.title) + '" has been moved to trash.'
+            )
+            return HttpResponseRedirect(self.success_url)
+        elif request.POST.get("action") == "restore":
+            blog_post.status = "Drafted"
+            blog_post.save()
+            blog_post.create_activity(
+                user=request.user,
+                content="restored from trash to " + str(blog_post.status)
+            )
+            messages.success(
+                request,
+                'Blog "' + str(blog_post.title) + '" has been restored from trash.'
+            )
+            return HttpResponseRedirect(self.success_url)
+        elif request.POST.get("action") == "delete":
+            blog_post.remove_activity()
+            blog_post.delete()
+            messages.success(request, 'Blog successfully deleted')
+            return HttpResponseRedirect(self.success_url)
         else:
             raise Http404
-    return HttpResponseRedirect(reverse('blog'))
 
 
 @active_admin_required
@@ -282,12 +320,14 @@ def edit_category(request, category_slug):
             if form.is_valid():
                 form.save()
                 messages.success(request, 'Successfully updated your category')
-                data = {'error': False, 'response': 'Successfully updated your category'}
+                data = {'error': False,
+                        'response': 'Successfully updated your category'}
             else:
                 data = {'error': True, 'response': form.errors}
             return HttpResponse(json.dumps(data))
         context = {'form': form, 'category_name': category_name}
-        return render(request, 'dashboard/category/new_category_add.html', context)
+        return render(request,
+                      'dashboard/category/new_category_add.html', context)
 
 
 @active_admin_required
@@ -327,7 +367,9 @@ def bulk_actions_blog(request):
 
                 return HttpResponse(json.dumps({'response': True}))
             else:
-                messages.warning(request, 'Please select at-least one record to perform this action')
+                messages.warning(
+                    request,
+                    'Please select at-least one record to perform this action')
                 return HttpResponse(json.dumps({'response': False}))
 
 
@@ -340,21 +382,29 @@ def bulk_actions_category(request):
                     Category.objects.filter(
                         id__in=request.GET.getlist('blog_ids[]')).update(
                         is_active=True)
-                    messages.success(request, 'Selected Categories successfully updated as Active')
+                    messages.success(
+                        request,
+                        'Selected Categories successfully updated as Active')
                 elif request.GET.get('action') == 'False':
                     Category.objects.filter(
                         id__in=request.GET.getlist('blog_ids[]')).update(
                         is_active=False)
-                    messages.success(request, 'Selected Categories successfully updated as Inactive')
+                    messages.success(
+                        request,
+                        'Selected Categories successfully updated as Inactive')
 
                 elif request.GET.get('action') == 'Delete':
                     Category.objects.filter(
                         id__in=request.GET.getlist('blog_ids[]')).delete()
-                    messages.success(request, 'Selected Categories successfully deleted!')
+                    messages.success(
+                        request,
+                        'Selected Categories successfully deleted!')
 
                 return HttpResponse(json.dumps({'response': True}))
             else:
-                messages.warning(request, 'Please select at-least one record to perform this action')
+                messages.warning(
+                    request,
+                    'Please select at-least one record to perform this action')
                 return HttpResponse(json.dumps({'response': False}))
 
 

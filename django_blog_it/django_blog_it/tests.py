@@ -597,7 +597,7 @@ class blog_post_creation(TestCase):
         self.assertTrue('Successfully posted your blog' in str(response.content))
 
         response = self.client.get('/dashboard/delete/haystack-post/')
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 200)
 
         response = self.client.post('/dashboard/delete/haystack-post/', {'action': 'trash'})
         self.assertEqual(response.status_code, 302)
