@@ -1,0 +1,35 @@
+{% extends 'dashboard/new_base.html' %}
+    {% block title %}Posts View{% endblock %}
+    {% block content %}
+
+    <div class="row no_row_margin table_row">
+        <div class="container-fluid">
+            <table align="center" class="table table-bordered">
+                <thead>
+                    <th>
+                        Title: {{ blog_post.title }}
+                    </th>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Author</strong>: {{ blog_post.user }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Content</strong>: {{ blog_post.content|safe }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Status</strong>: {{ blog_post.status }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tags</strong>: {% for tag in blog_post.tags.all %}{{ tag }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Keywords</strong>: {{ blog_post.keywords|safe }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- end div of row -->
+
+    {% endblock %}

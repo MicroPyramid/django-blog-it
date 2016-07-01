@@ -11,7 +11,8 @@ from django.contrib.auth.decorators import user_passes_test, login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files import File
 
-from .models import Menu, Post, PostHistory, Category, Tags, Image_File, STATUS_CHOICE, ROLE_CHOICE, UserRole, Page
+from .models import Menu, Post, PostHistory, Category, Tags, Image_File, \
+    STATUS_CHOICE, ROLE_CHOICE, UserRole, Page
 from .forms import *
 from django_blog_it import settings
 try:
@@ -20,7 +21,8 @@ try:
 except ImportError:
     from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.views.generic import ListView, DetailView, CreateView, DeleteView, UpdateView
+from django.views.generic import ListView, DetailView, CreateView, DeleteView,\
+    UpdateView
 from .mixins import AdminMixin, PostAccessRequiredMixin
 from django.http import JsonResponse
 
@@ -38,20 +40,23 @@ def admin_login(request):
     if request.method == 'POST':
         login_form = AdminLoginForm(request.POST)
         if login_form.is_valid():
-            user = authenticate(username=request.POST['username'], password=request.POST['password'])
+            user = authenticate(username=request.POST['username'],
+                                password=request.POST['password'])
             if user.is_active:
                 login(request, user)
                 messages.success(request, 'You are successfully logged in')
-                response_data = {'error': False, 'response': 'Successfully logged in'}
+                response_data = {'error': False,
+                                 'response': 'Successfully logged in'}
             else:
-                response_data = {'error': True, 'response': 'You are not allowed to this page'}
+                response_data = {'error': True,
+                                 'response': 'You are not allowed to this page'}
             return HttpResponse(json.dumps(response_data))
         else:
             response_data = {'error': True, 'response': login_form.errors}
 
         return HttpResponse(json.dumps(response_data))
 
-    return render(request, 'dashboard/admin-login.html')
+    return render(request, 'dashboard/new_admin-login.html')
 
 
 @active_admin_required
@@ -63,7 +68,7 @@ def admin_logout(request):
 
 class PostList(AdminMixin, ListView):
     model = Post
-    template_name = 'dashboard/blog/blog_list.html'
+    template_name = 'dashboard/blog/new_blog_list.html'
     context_object_name = 'blog_list'
     paginate_by = 10
 
@@ -71,25 +76,30 @@ class PostList(AdminMixin, ListView):
         context = super(PostList, self).get_context_data(**kwargs)
         context['blog_choices'] = STATUS_CHOICE
         context['object_list'] = self.model.objects.all()
+        context['published_blogs'] = self.model.objects.filter(
+            status='Published')
         return context
 
     def post(self, request, *args, **kwargs):
         blog_list = self.model.objects.all()
 
         if request.POST.get('select_status', ''):
-            blog_list = blog_list.filter(status=request.POST.get('select_status'))
+            blog_list = blog_list.filter(
+                status=request.POST.get('select_status')
+            )
         if request.POST.get('search_text', ''):
             blog_list = blog_list.filter(
                 title__icontains=request.POST.get('search_text')
             ) | blog_list.filter(
                 tags__name__icontains=request.POST.get('search_text')
             )
-        return render(request, self.template_name, {'blog_list': blog_list, 'blog_choices': STATUS_CHOICE})
+        return render(request, self.template_name,
+                      {'blog_list': blog_list, 'blog_choices': STATUS_CHOICE})
 
 
 class PostDetailView(DetailView):
     model = Post
-    template_name = 'dashboard/blog/blog_view.html'
+    template_name = 'dashboard/blog/new_blog_view.html'
     slug_field = "slug"
     context_object_name = 'blog_post'
 
@@ -100,12 +110,11 @@ class PostDetailView(DetailView):
 class PostCreateView(AdminMixin, CreateView):
     model = Post
     form_class = BlogPostForm
-    template_name = "dashboard/blog/blog_add.html"
+    template_name = "dashboard/blog/new_blog_add.html"
     success_url = '/dashboard/blog/'
 
     def form_valid(self, form):
         self.blog_post = form.save(commit=False)
-
         self.blog_post.user = self.request.user
 
         if self.request.user.is_superuser:
@@ -124,7 +133,8 @@ class PostCreateView(AdminMixin, CreateView):
 
         self.blog_post.create_activity(user=self.request.user, content="added")
         messages.success(self.request, 'Successfully posted your blog')
-        data = {'error': False, 'response': 'Successfully posted your blog', 'title': self.request.POST['title']}
+        data = {'error': False, 'response': 'Successfully posted your blog',
+                'title': self.request.POST['title']}
         return JsonResponse(data)
 
     def form_invalid(self, form):
@@ -132,7 +142,8 @@ class PostCreateView(AdminMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super(PostCreateView, self).get_context_data(**kwargs)
-        form = BlogPostForm(self.request.GET, is_superuser=self.request.user.is_superuser)
+        form = BlogPostForm(self.request.GET,
+                            is_superuser=self.request.user.is_superuser)
         tags_list = Tags.objects.all()
         categories_list = Category.objects.filter(is_active=True)
 
@@ -149,7 +160,7 @@ class PostEditView(UpdateView):
     model = Post
     success_url = '/dashboard/blog/'
     slug_field = 'slug'
-    template_name = "dashboard/blog/blog_add.html"
+    template_name = "dashboard/blog/new_blog_add.html"
     form_class = BlogPostForm
 
     def get_object(self):
@@ -179,7 +190,8 @@ class PostEditView(UpdateView):
                 self.blog_post.tags.add(blog_tag)
 
         if self.blog_post.status == previous_status:
-            self.blog_post.create_activity(user=self.request.user, content="updated")
+            self.blog_post.create_activity(
+                user=self.request.user, content="updated")
         else:
             self.blog_post.create_activity(
                 user=self.request.user,
@@ -187,13 +199,15 @@ class PostEditView(UpdateView):
                 str(previous_status) + " to " + str(blog_post.status)
             )
         messages.success(self.request, 'Successfully updated your blog post')
-        data = {'error': False, 'response': 'Successfully updated your blog post'}
+        data = {'error': False,
+                'response': 'Successfully updated your blog post'}
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
         context = super(PostEditView, self).get_context_data(**kwargs)
         form = BlogPostForm(instance=self.get_object(),
-                            is_superuser=self.request.user.is_superuser, user_role=get_user_role(self.request.user),
+                            is_superuser=self.request.user.is_superuser,
+                            user_role=get_user_role(self.request.user),
                             initial={'tags': ','.join([tag.name for tag in self.get_object().tags.all()])}
                             )
         categories_list = Category.objects.filter(is_active=True)
@@ -209,7 +223,7 @@ class PostDeleteView(PostAccessRequiredMixin, DeleteView):
     model = Post
     success_url = '/dashboard/blog/'
     slug_field = 'slug'
-    template_name = "dashboard/blog/blog_list.html"
+    template_name = "dashboard/blog/new_blog_list.html"
 
     def get_object(self):
         return get_object_or_404(Post, slug=self.kwargs['blog_slug'])
@@ -254,7 +268,8 @@ class PostDeleteView(PostAccessRequiredMixin, DeleteView):
 def categories(request):
     categories_list = Category.objects.all()
     category_choices = categories_list
-    context = {'categories_list': categories_list, 'category_choices': category_choices}
+    context = {'categories_list': categories_list,
+               'category_choices': category_choices}
 
     if request.method == "POST":
         requested_categories = request.POST.getlist('category')
@@ -265,12 +280,17 @@ def categories(request):
             else:
                 categories_list = categories_list.filter(is_active=False)
 
-        elif request.POST.getlist('category', []):
-            categories_list = categories_list.filter(id__in=request.POST.getlist('category'))
+        if request.POST.get('search_text'):
+            categories_list = categories_list.filter(
+                name__icontains=request.POST.get('search_text')
+            )
 
-        context = {'categories_list': categories_list, 'requested_categories': requested_categories,
+        context = {'categories_list': categories_list,
+                   'requested_categories': requested_categories,
                    'category_choices': category_choices}
-    return render(request, 'dashboard/category/categories_list.html', context)
+    return render(request,
+                  'dashboard/category/new_categories_list.html',
+                  context)
 
 
 @active_admin_required
@@ -282,12 +302,13 @@ def add_category(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Successfully added your category')
-            data = {'error': False, 'response': 'Successfully added your category'}
+            data = {'error': False,
+                    'response': 'Successfully added your category'}
         else:
             data = {'error': True, 'response': form.errors}
         return HttpResponse(json.dumps(data))
     context = {'form': form, 'add_category': True}
-    return render(request, 'dashboard/category/category_add.html', context)
+    return render(request, 'dashboard/category/new_category_add.html', context)
 
 
 @active_admin_required
@@ -301,12 +322,14 @@ def edit_category(request, category_slug):
             if form.is_valid():
                 form.save()
                 messages.success(request, 'Successfully updated your category')
-                data = {'error': False, 'response': 'Successfully updated your category'}
+                data = {'error': False,
+                        'response': 'Successfully updated your category'}
             else:
                 data = {'error': True, 'response': form.errors}
             return HttpResponse(json.dumps(data))
         context = {'form': form, 'category_name': category_name}
-        return render(request, 'dashboard/category/category_add.html', context)
+        return render(request,
+                      'dashboard/category/new_category_add.html', context)
 
 
 @active_admin_required
@@ -346,7 +369,9 @@ def bulk_actions_blog(request):
 
                 return HttpResponse(json.dumps({'response': True}))
             else:
-                messages.warning(request, 'Please select at-least one record to perform this action')
+                messages.warning(
+                    request,
+                    'Please select at-least one record to perform this action')
                 return HttpResponse(json.dumps({'response': False}))
 
 
@@ -356,21 +381,32 @@ def bulk_actions_category(request):
         if request.method == 'GET':
             if 'blog_ids[]' in request.GET:
                 if request.GET.get('action') == 'True':
-                    Category.objects.filter(id__in=request.GET.getlist('blog_ids[]')).update(
+                    Category.objects.filter(
+                        id__in=request.GET.getlist('blog_ids[]')).update(
                         is_active=True)
-                    messages.success(request, 'Selected Categories successfully updated as Active')
+                    messages.success(
+                        request,
+                        'Selected Categories successfully updated as Active')
                 elif request.GET.get('action') == 'False':
-                    Category.objects.filter(id__in=request.GET.getlist('blog_ids[]')).update(
+                    Category.objects.filter(
+                        id__in=request.GET.getlist('blog_ids[]')).update(
                         is_active=False)
-                    messages.success(request, 'Selected Categories successfully updated as Inactive')
+                    messages.success(
+                        request,
+                        'Selected Categories successfully updated as Inactive')
 
                 elif request.GET.get('action') == 'Delete':
-                    Category.objects.filter(id__in=request.GET.getlist('blog_ids[]')).delete()
-                    messages.success(request, 'Selected Categories successfully deleted!')
+                    Category.objects.filter(
+                        id__in=request.GET.getlist('blog_ids[]')).delete()
+                    messages.success(
+                        request,
+                        'Selected Categories successfully deleted!')
 
                 return HttpResponse(json.dumps({'response': True}))
             else:
-                messages.warning(request, 'Please select at-least one record to perform this action')
+                messages.warning(
+                    request,
+                    'Please select at-least one record to perform this action')
                 return HttpResponse(json.dumps({'response': False}))
 
 
@@ -437,11 +473,76 @@ def users(request):
     if request.method == 'POST':
         if 'select_role' in request.POST.keys() and request.POST.get('select_role'):
             users_list = []
-            user_roles = UserRole.objects.filter(role=request.POST.get('select_role'))
+            user_roles = UserRole.objects.filter(
+                role=request.POST.get('select_role')
+            )
             for role in user_roles:
                 users_list.append(role.user)
+        if request.POST.get('search_text'):
+            users = User.objects.all()
+            users_list = users.filter(
+                username__icontains=request.POST.get('search_text')
+            ) | users.filter(
+                email__icontains=request.POST.get('search_text')
+            ) | users.filter(
+                first_name__icontains=request.POST.get('search_text')
+            ) | users.filter(
+                last_name__icontains=request.POST.get('search_text')
+            )
     context = {'users_list': users_list, 'roles': ROLE_CHOICE}
-    return render(request, 'dashboard/user/list.html', context)
+    return render(request, 'dashboard/user/new_list.html', context)
+
+
+@active_admin_required
+def add_user(request):
+    form = UserForm()
+    form_errors = {}
+    if request.method == 'POST':
+        form = UserForm(request.POST)
+        validate_user_role = UserRoleForm(request.POST)
+        if form.is_valid() and validate_user_role.is_valid():
+            user = form.save()
+            UserRole.objects.create(user=user, role=request.POST.get('role'))
+            messages.success(request, 'Successfully added your User')
+            data = {'error': False, 'response': 'Successfully added your User'}
+        else:
+            form_errors['user_form'] = form.errors
+            form_errors['user_role_form'] = validate_user_role.errors
+            data = {'error': True, 'response': form_errors}
+        return HttpResponse(json.dumps(data))
+    context = {'form': form, 'roles': ROLE_CHOICE, 'add_user': True}
+    return render(request, 'dashboard/user/new_add_user.html', context)
+
+
+@active_admin_required
+def edit_user(request, pk):
+    user = get_object_or_404(User, pk=pk)
+    user_role = UserRole.objects.filter(user_id=pk)
+    form = UserForm(instance=user)
+    form_errors = {}
+    if request.method == 'POST':
+        form = UserForm(request.POST, instance=user)
+        validate_user_role = UserRoleForm(request.POST)
+        if form.is_valid() and validate_user_role.is_valid():
+            user = form.save()
+            if user_role:
+                user_role = user_role[0]
+                user_role.role = request.POST.get('role')
+                user_role.save()
+            else:
+                user = User.objects.get(pk=pk)
+                UserRole.objects.create(user=user,
+                                        role=request.POST.get('role'))
+            messages.success(request, 'Successfully Updated User "' + str(user) + '"')
+            data = {'error': False, 'response': 'Successfully Updated User "' + str(user) + '"'}
+        else:
+            form_errors['user_form'] = form.errors
+            form_errors['user_role_form'] = validate_user_role.errors
+            data = {'error': True, 'response': form_errors}
+        return HttpResponse(json.dumps(data))
+    context = {'user': user, 'user_role': user_role,
+               'form': form, 'roles': ROLE_CHOICE, 'add_user': True}
+    return render(request, 'dashboard/user/new_add_user.html', context)
 
 
 def delete_user(request, pk):
@@ -454,11 +555,38 @@ def delete_user(request, pk):
     return HttpResponseRedirect(reverse('users'))
 
 
+@active_admin_required
+def bulk_actions_users(request):
+    if request.user.is_superuser:
+        if request.method == 'GET':
+            if 'user_ids[]' in request.GET:
+                if request.GET.get('action') == 'True':
+                    User.objects.filter(
+                        id__in=request.GET.getlist('user_ids[]')).update(
+                        is_active=True)
+                    messages.success(request, 'Selected Users successfully updated as Active')
+                elif request.GET.get('action') == 'False':
+                    User.objects.filter(
+                        id__in=request.GET.getlist('user_ids[]')).update(
+                        is_active=False)
+                    messages.success(request, 'Selected Users successfully updated as Inactive')
+
+                elif request.GET.get('action') == 'Delete':
+                    User.objects.filter(
+                        id__in=request.GET.getlist('user_ids[]')).delete()
+                    messages.success(request, 'Selected Users successfully deleted!')
+
+                return HttpResponse(json.dumps({'response': True}))
+            else:
+                messages.warning(request, 'Please select at-least one record to perform this action')
+                return HttpResponse(json.dumps({'response': False}))
+
+
 def edit_user_role(request, pk):
     user_role = UserRole.objects.filter(user_id=pk)
     if request.method == 'GET':
         context = {'user_role': user_role, 'roles': ROLE_CHOICE}
-        return render(request, 'dashboard/user/user_role.html', context)
+        return render(request, 'dashboard/user/new_user_role.html', context)
     validate_user_role = UserRoleForm(request.POST)
     if validate_user_role.is_valid():
         if user_role:
@@ -487,9 +615,13 @@ def pages(request):
                 pages_list = pages_list.filter(is_active=True)
             else:
                 pages_list = pages_list.filter(is_active=False)
+        if request.POST.get('search_text'):
+            pages_list = pages_list.filter(
+                title__icontains=request.POST.get('search_text')
+            )
 
         context = {'pages_list': pages_list}
-    return render(request, 'dashboard/pages/list.html', context)
+    return render(request, 'dashboard/pages/new_list.html', context)
 
 
 @active_admin_required
@@ -497,7 +629,6 @@ def add_page(request):
     form = PageForm()
     if request.method == 'POST':
         form = PageForm(request.POST)
-
         if form.is_valid():
             form.save()
             messages.success(request, 'Successfully added your page')
@@ -506,7 +637,7 @@ def add_page(request):
             data = {'error': True, 'response': form.errors}
         return HttpResponse(json.dumps(data))
     context = {'form': form}
-    return render(request, 'dashboard/pages/add_page.html', context)
+    return render(request, 'dashboard/pages/new_add_page.html', context)
 
 
 @active_admin_required
@@ -526,7 +657,7 @@ def edit_page(request, page_slug):
                 data = {'error': True, 'response': form.errors}
             return HttpResponse(json.dumps(data))
         context = {'form': form, 'page': page}
-        return render(request, 'dashboard/pages/add_page.html', context)
+        return render(request, 'dashboard/pages/new_add_page.html', context)
 
 
 @active_admin_required
@@ -546,16 +677,19 @@ def bulk_actions_pages(request):
         if request.method == 'GET':
             if 'page_ids[]' in request.GET:
                 if request.GET.get('action') == 'True':
-                    Page.objects.filter(id__in=request.GET.getlist('page_ids[]')).update(
+                    Page.objects.filter(
+                        id__in=request.GET.getlist('page_ids[]')).update(
                         is_active=True)
                     messages.success(request, 'Selected Pages successfully updated as Active')
                 elif request.GET.get('action') == 'False':
-                    Page.objects.filter(id__in=request.GET.getlist('page_ids[]')).update(
+                    Page.objects.filter(
+                        id__in=request.GET.getlist('page_ids[]')).update(
                         is_active=False)
                     messages.success(request, 'Selected Pages successfully updated as Inactive')
 
                 elif request.GET.get('action') == 'Delete':
-                    Page.objects.filter(id__in=request.GET.getlist('page_ids[]')).delete()
+                    Page.objects.filter(
+                        id__in=request.GET.getlist('page_ids[]')).delete()
                     messages.success(request, 'Selected Pages successfully deleted!')
 
                 return HttpResponse(json.dumps({'response': True}))
@@ -576,9 +710,13 @@ def menus(request):
                 menu_list = menu_list.filter(status=True)
             else:
                 menu_list = menu_list.filter(status=False)
+        if request.POST.get('search_text'):
+            menu_list = menu_list.filter(
+                title__icontains=request.POST.get('search_text')
+            )
 
-        context = {'root_menu_items': menu_list}
-    return render(request, 'dashboard/menu/list.html', context)
+        context = {'menu_list': menu_list}
+    return render(request, 'dashboard/menu/new_list.html', context)
 
 
 @active_admin_required
@@ -600,7 +738,7 @@ def add_menu(request):
             data = {'error': True, 'response': form.errors}
         return HttpResponse(json.dumps(data))
     context = {'form': form, 'add_menu': True}
-    return render(request, 'dashboard/menu/manage.html', context)
+    return render(request, 'dashboard/menu/new_manage.html', context)
 
 
 @active_admin_required
@@ -619,9 +757,11 @@ def edit_menu(request, pk):
                     data = {'error': True, 'message': 'you can not choose the same as parent'}
                     return HttpResponse(json.dumps(data))
 
-                menu_count = Menu.objects.filter(parent=updated_menu_obj.parent).count()
+                menu_count = Menu.objects.filter(
+                    parent=updated_menu_obj.parent).count()
                 updated_menu_obj.lvl = menu_count + 1
-                menu_max_lvl = Menu.objects.filter(parent=current_parent).aggregate(Max('lvl'))['lvl__max']
+                menu_max_lvl = Menu.objects.filter(
+                    parent=current_parent).aggregate(Max('lvl'))['lvl__max']
                 if menu_max_lvl != 1:
                     for i in Menu.objects.filter(parent=current_parent, lvl__gt=current_lvl, lvl__lte=menu_max_lvl):
                         i.lvl = i.lvl - 1
@@ -636,7 +776,34 @@ def edit_menu(request, pk):
             data = {'error': True, 'response': form.errors}
         return HttpResponse(json.dumps(data))
     context = {'form': form, 'menu_obj': menu_obj}
-    return render(request, 'dashboard/menu/manage.html', context)
+    return render(request, 'dashboard/menu/new_manage.html', context)
+
+
+@active_admin_required
+def bulk_actions_menu(request):
+    if request.user.is_superuser:
+        if request.method == 'GET':
+            if 'menu_ids[]' in request.GET:
+                if request.GET.get('action') == 'True':
+                    Menu.objects.filter(
+                        id__in=request.GET.getlist('menu_ids[]')).update(
+                        status=True)
+                    messages.success(request, "Selected Menu's successfully updated as Active")
+                elif request.GET.get('action') == 'False':
+                    Menu.objects.filter(
+                        id__in=request.GET.getlist('menu_ids[]')).update(
+                        status=False)
+                    messages.success(request, "Selected Menu's successfully updated as Inactive")
+
+                elif request.GET.get('action') == 'Delete':
+                    Menu.objects.filter(
+                        id__in=request.GET.getlist('menu_ids[]')).delete()
+                    messages.success(request, "Selected Menu's successfully deleted!")
+
+                return HttpResponse(json.dumps({'response': True}))
+            else:
+                messages.warning(request, 'Please select at-least one record to perform this action')
+                return HttpResponse(json.dumps({'response': False}))
 
 
 @active_admin_required
@@ -644,7 +811,9 @@ def configure_contact_us(request):
     contact_us_settings = ContactUsSettings.objects.all().last()
     if request.method == 'POST':
         if contact_us_settings:
-            form = ContactUsSettingsForm(instance=contact_us_settings, data=request.POST)
+            form = ContactUsSettingsForm(instance=contact_us_settings,
+                                         data=request.POST
+                                         )
         else:
             form = ContactUsSettingsForm(request.POST)
 

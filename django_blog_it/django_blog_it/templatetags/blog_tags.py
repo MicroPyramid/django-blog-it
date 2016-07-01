@@ -54,3 +54,20 @@ def get_range(value):
 def load_menu(context):
     context['menu'] = Menu.objects.filter(parent=None, status=True).order_by("lvl")
     return context
+
+
+@register.filter
+def posts_published_list(blogs_list):
+    return len(blogs_list.filter(status='Published'))
+
+
+@register.filter
+def user_drafted_posts(user):
+    return Post.objects.filter(user=user, status='Drafted').count()
+
+
+@register.filter
+def user_published_posts(user):
+    return Post.objects.filter(user=user,
+                               status='Published'
+                               ).count()
