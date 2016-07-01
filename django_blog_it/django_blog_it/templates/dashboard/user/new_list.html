@@ -133,9 +133,9 @@
 
       $.get("{% url 'bulk_actions_users' %}", {'user_ids':user_ids, 'action': action}, function(data){
           if(data.response){
-              window.location='/dashboard/users/';
+              window.location="{% url 'users' %}";
           }else{
-              window.location='/dashboard/users/';
+              window.location="{% url 'users' %}";
           }
       }, 'json');
   })

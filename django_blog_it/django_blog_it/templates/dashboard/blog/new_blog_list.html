@@ -180,9 +180,9 @@
 
             $.get("{% url 'bulk_actions_blog' %}", {'blog_ids':blog_ids, 'action': action}, function(data){
                 if(data.response){
-                    window.location='/dashboard/blog/';
+                    window.location="{% url 'blog' %}";
                 }else{
-                    window.location='/dashboard/blog/';
+                    window.location="{% url 'blog' %}";
                 }
             }, 'json');
         })

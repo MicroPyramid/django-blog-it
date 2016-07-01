@@ -127,9 +127,9 @@
 
             $.get("{% url 'bulk_actions_category' %}", {'blog_ids':blog_ids, 'action': action}, function(data){
                 if(data.response){
-                    window.location='/dashboard/category/';
+                    window.location="{% url 'categories' %}";
                 }else{
-                    window.location='/dashboard/category/';
+                    window.location="{% url 'categories' %}";
                 }
             }, 'json');
         })

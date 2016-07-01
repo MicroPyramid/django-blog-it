@@ -58,7 +58,7 @@
   });
 </script>
 <script type="text/javascript">
-  if(window.location.pathname == '/dashboard/menu/add/'){
+  if(window.location.pathname == "{% url 'add_menu' %}"){
       $('.page_title').text('Add Menu');
   }
   else {

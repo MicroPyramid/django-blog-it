@@ -134,9 +134,9 @@
 
             $.get("{% url 'bulk_actions_menu' %}", {'menu_ids':menu_ids, 'action': action}, function(data){
                 if(data.response){
-                    window.location='/dashboard/menu/';
+                    window.location="{% url 'menus' %}";
                 }else{
-                    window.location='/dashboard/menu/';
+                    window.location="{% url 'menus' %}";
                 }
             }, 'json');
         })
