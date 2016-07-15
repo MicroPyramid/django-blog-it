@@ -10,7 +10,8 @@ def categories_tags_lists():
     tags_list = Tags.objects.annotate(
                     Num=Count('rel_posts')
                 ).filter(Num__gt=0, rel_posts__status='Published', rel_posts__category__is_active=True)[:20]
-    cat_tags = {'categories_list': categories_list, 'tags_list': tags_list}
+    posts = Post.objects.filter(status='Published').order_by('-updated_on')[0:3]
+    cat_tags = {'categories_list': categories_list, 'tags_list': tags_list, 'recent_posts': posts}
     return cat_tags
 
 
@@ -27,21 +28,26 @@ def index(request):
     blog_posts = Post.objects.filter(status='Published', category__is_active=True).order_by('-updated_on')
     # blog_posts = [post for post in blog_posts if post.category.is_active]
     context = list({'blog_posts': blog_posts}.items()) + list(categories_tags_lists().items())
-    return render(request, 'posts/index.html', context)
+    return render(request, 'posts/new_index.html', context)
 
 
 def blog_post_view(request, blog_slug):
     blog_name =  get_object_or_404(Post, slug=blog_slug) # Post.objects.get(slug=blog_slug)
+    print blog_name.tags.all()
+    related_posts = Post.objects.filter(
+        status='Published', category=blog_name.category,
+        tags__in=blog_name.tags.all()).exclude(id=blog_name.id).distinct()[:3]
     context = list({'blog_name': blog_name}.items()) + \
         list(categories_tags_lists().items()) + \
+        list({'related_posts': related_posts}.items()) + \
         list({'disqus_shortname': getattr(settings, 'DISQUS_SHORTNAME')}.items())
-    return render(request, 'posts/blog_view.html', context)
+    return render(request, 'posts/new_blog_view.html', context)
 
 
 def selected_category(request, category_slug):
     blog_posts = Post.objects.filter(category__slug=category_slug, category__is_active=True, status='Published')
     context = list({'blog_posts': blog_posts}.items()) + list(categories_tags_lists().items())
-    return render(request, 'posts/index.html', context)
+    return render(request, 'posts/new_index.html', context)
 
 
 def selected_tag(request, tag_slug):
@@ -50,7 +56,7 @@ def selected_tag(request, tag_slug):
         status='Published', category__is_active=True
     )
     context = list({'blog_posts': blog_posts}.items()) + list(categories_tags_lists().items())
-    return render(request, 'posts/index.html', context)
+    return render(request, 'posts/new_index.html', context)
 
 
 def archive_posts(request, year, month):
@@ -62,7 +68,7 @@ def archive_posts(request, year, month):
         ).order_by('-updated_on')
     blog_posts = [post for post in blog_posts if post.category.is_active]
     context = list({'blog_posts': blog_posts}.items()) + list(categories_tags_lists().items())
-    return render(request, 'posts/index.html', context)
+    return render(request, 'posts/new_index.html', context)
 
 
 def page_view(request, page_slug):
