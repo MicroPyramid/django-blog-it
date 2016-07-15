@@ -179,7 +179,7 @@ class PostEditView(UpdateView):
         return JsonResponse({'error': True, 'response': form.errors})
 
     def form_valid(self, form):
-        # previous_status = self.get_object().status
+        previous_status = self.get_object().status
         previous_content = self.get_object().content
         self.blog_post = form.save(commit=False)
         self.blog_post.user = self.request.user
