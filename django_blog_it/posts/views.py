@@ -9,7 +9,7 @@ def categories_tags_lists():
     categories_list = Category.objects.filter(is_active=True, post__status='Published').distinct()
     tags_list = Tags.objects.annotate(
                     Num=Count('rel_posts')
-                ).filter(Num__gt=0, rel_posts__status='Published')[:20]
+                ).filter(Num__gt=0, rel_posts__status='Published', rel_posts__category__is_active=True)[:20]
     cat_tags = {'categories_list': categories_list, 'tags_list': tags_list}
     return cat_tags
 
