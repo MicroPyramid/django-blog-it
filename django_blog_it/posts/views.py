@@ -34,7 +34,6 @@ def index(request):
 
 def blog_post_view(request, blog_slug):
     blog_name =  get_object_or_404(Post, slug=blog_slug) # Post.objects.get(slug=blog_slug)
-    print blog_name.tags.all()
     related_posts = Post.objects.filter(
         status='Published', category=blog_name.category,
         tags__in=blog_name.tags.all()).exclude(id=blog_name.id).distinct()[:3]
