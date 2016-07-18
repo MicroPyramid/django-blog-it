@@ -12,7 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.files import File
 
 from .models import Menu, Post, PostHistory, Category, Tags, Image_File, \
-    STATUS_CHOICE, ROLE_CHOICE, UserRole, Page
+    STATUS_CHOICE, ROLE_CHOICE, UserRole, Page, Theme
 from .forms import *
 from django_blog_it import settings
 try:
@@ -845,3 +845,180 @@ def configure_contact_us(request):
             form = ContactUsSettingsForm()
     context = {'form': form}
     return render(request, 'dashboard/contact_us_settings.html', context)
+
+
+class ThemesList(AdminMixin, ListView):
+    model = Theme
+    template_name = 'dashboard/themes/themes_list.html'
+    context_object_name = 'themes_list'
+    paginate_by = 10
+
+    def get_context_data(self, **kwargs):
+        context = super(ThemesList, self).get_context_data(**kwargs)
+        context['object_list'] = self.model.objects.all()
+        context['enabled_themes'] = self.model.objects.filter(
+            enabled=True)
+        return context
+
+    def post(self, request, *args, **kwargs):
+        themes_list = self.model.objects.all()
+
+        if request.POST.get('select_status', ''):
+            if request.POST.get('select_status') == 'True':
+                themes_list = themes_list.filter(
+                    enabled=True
+                )
+            else:
+                themes_list = themes_list.filter(
+                    enabled=False
+                )
+        if request.POST.get('search_text', ''):
+            themes_list = themes_list.filter(
+                name__icontains=request.POST.get('search_text')
+            )
+        return render(request, self.template_name,
+                      {'themes_list': themes_list})
+
+
+class ThemeDetailView(AdminMixin, DetailView):
+    model = Theme
+    template_name = 'dashboard/themes/theme_view.html'
+    slug_field = "theme_slug"
+    context_object_name = 'theme'
+
+    def get_object(self):
+        return get_object_or_404(Theme, slug=self.kwargs['theme_slug'])
+
+
+class ThemeCreateView(AdminMixin, CreateView):
+    model = Theme
+    form_class = BlogThemeForm
+    template_name = "dashboard/themes/theme_add.html"
+    success_url = '/dashboard/themes/'
+
+    def form_valid(self, form):
+        self.blog_theme = form.save(commit=False)
+        if self.request.user.is_superuser:
+            self.blog_theme.enabled = self.request.POST.get('enabled')
+        self.blog_theme.save()
+        messages.success(self.request, 'Successfully Created your Theme')
+        data = {'error': False, 'response': 'Successfully Created your Theme',
+                'title': self.request.POST['name']}
+        return JsonResponse(data)
+
+    def form_invalid(self, form):
+        return JsonResponse({'error': True, 'response': form.errors})
+
+    def get_context_data(self, **kwargs):
+        context = super(ThemeCreateView, self).get_context_data(**kwargs)
+        form = BlogThemeForm(self.request.GET)
+        context['form'] = form
+        context['add_theme'] = True
+        return context
+
+
+@active_admin_required
+def add_theme(request):
+    form = BlogThemeForm()
+    if request.method == 'POST':
+        form = BlogThemeForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Successfully added your Theme')
+            data = {'error': False,
+                    'response': 'Successfully added your Theme'}
+        else:
+            data = {'error': True, 'response': form.errors}
+        return HttpResponse(json.dumps(data))
+    context = {'form': form, 'add_theme': True}
+    return render(request, 'dashboard/themes/theme_add.html', context)
+
+
+class ThemeEditView(AdminMixin, UpdateView):
+    model = Theme
+    form_class = BlogThemeForm
+    slug = 'theme_slug'
+    template_name = "dashboard/themes/theme_add.html"
+    success_url = '/dashboard/themes/'
+
+    def form_valid(self, form):
+        self.blog_theme = form.save(commit=False)
+        if self.request.user.is_superuser:
+            self.blog_theme.enabled = self.request.POST.get('enabled')
+        self.blog_theme.save()
+        messages.success(self.request, 'Successfully Updated your Theme')
+        data = {'error': False, 'response': 'Successfully Updated your Theme',
+                'title': self.request.POST['name']}
+        return JsonResponse(data)
+
+    def form_invalid(self, form):
+        return JsonResponse({'error': True, 'response': form.errors})
+
+    def get_context_data(self, **kwargs):
+        context = super(ThemeCreateView, self).get_context_data(**kwargs)
+        form = BlogThemeForm(self.request.GET)
+        context['form'] = form
+        context['edit_theme'] = True
+        return context
+
+
+@active_admin_required
+def edit_theme(request, theme_slug):
+    theme = get_object_or_404(Theme, slug=theme_slug) #  Theme.objects.get(slug=theme_slug)
+    if request.user.is_superuser is True:
+        form = BlogThemeForm(instance=theme)
+
+        if request.method == 'POST':
+            form = BlogThemeForm(request.POST, instance=theme)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Successfully updated your Theme')
+                data = {'error': False,
+                        'response': 'Successfully updated your Theme'}
+            else:
+                data = {'error': True, 'response': form.errors}
+            return HttpResponse(json.dumps(data))
+        context = {'form': form, 'theme': theme}
+        return render(request,
+                      'dashboard/themes/theme_add.html', context)
+
+
+@active_admin_required
+def delete_theme(request, theme_slug):
+    theme = get_object_or_404(Theme, slug=theme_slug) #  Theme.objects.get(slug=theme_slug)
+    if request.user.is_superuser is True:
+        theme.delete()
+        messages.success(request, 'Successfully Deleted Theme')
+        return HttpResponseRedirect('/dashboard/themes/')
+
+
+class DeleteTheme(AdminMixin, ListView):
+    pass
+
+
+@active_admin_required
+def bulk_actions_themes(request):
+    if request.user.is_superuser:
+        if request.method == 'GET':
+            if 'theme_ids[]' in request.GET:
+                if request.GET.get('action') == 'True':
+                    Theme.objects.filter(
+                        id__in=request.GET.getlist('theme_ids[]')).update(
+                        enabled=True)
+                    messages.success(request, "Selected Theme's successfully updated as Enabled")
+                elif request.GET.get('action') == 'False':
+                    Theme.objects.filter(
+                        id__in=request.GET.getlist('theme_ids[]')).update(
+                        enabled=False)
+                    messages.success(request, "Selected Theme's successfully updated as Disabled")
+
+                elif request.GET.get('action') == 'Delete':
+                    Theme.objects.filter(
+                        id__in=request.GET.getlist('theme_ids[]')).delete()
+                    messages.success(request, "Selected Theme's successfully deleted!")
+
+                return HttpResponse(json.dumps({'response': True}))
+            else:
+                messages.warning(request, 'Please select at-least one record to perform this action')
+                return HttpResponse(json.dumps({'response': False}))
