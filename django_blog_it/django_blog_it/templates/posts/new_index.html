@@ -50,16 +50,6 @@
                                 <a href="#" class="author">By {{ blog.user }}</a>
                                 <a href="{% url 'selected_category' category_slug=blog.category.slug %}" class="category">{{ blog.category }}</a>
                               </div>
-                              <div class="share_more">
-                               <!--  <span class="share">
-                                  <ul class="list-inline">
-                                    <li><a href="#"><i class="fa fa-facebook"></i></a></li>
-                                    <li><a href="#"><i class="fa fa-twitter"></i></a></li>
-                                    <li><a href="#"><i class="fa fa-google-plus"></i></a></li>
-                                  </ul>
-                                </span> -->
-                                <span class="more"><a href="{% url 'blog_post_view' blog_slug=blog.slug %}">Continue Reading</a></span>
-                              </div>
                               <div class="blog_title">
                                 <a href="{% url 'blog_post_view' blog_slug=blog.slug %}">{{ blog }}</a>
                               </div>
@@ -71,6 +61,16 @@
                                 <span class="reply"><a href="#"><i class="fa fa-reply"></i>Replies 123 </a></span>
                                 <span class="views"><a href="#"><i class="fa fa-eye"></i> Views 123 </a></span>
                                 <span class="likes"><a href="#"><i class="fa fa-thumbs-up" aria-hidden="true"></i> Likes 23 </a></span>
+                              </div>
+                              <div class="share_more">
+                               <!--  <span class="share">
+                                  <ul class="list-inline">
+                                    <li><a href="#"><i class="fa fa-facebook"></i></a></li>
+                                    <li><a href="#"><i class="fa fa-twitter"></i></a></li>
+                                    <li><a href="#"><i class="fa fa-google-plus"></i></a></li>
+                                  </ul>
+                                </span> -->
+                                <span class="more"><a href="{% url 'blog_post_view' blog_slug=blog.slug %}">Continue Reading</a></span>
                               </div>
                             </div>
                         </div>

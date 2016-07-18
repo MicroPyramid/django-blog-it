@@ -21,6 +21,64 @@
         </div>
       </form>
 
+      {% recurse menu.menu_set.all|dictsort:"lvl" with menu as menu %}
+        <ul class="nav navbar-nav navbar-right">
+          {% loop %}
+            <li>
+              {% if menu.has_children %}
+                <a class="dropdown-toggle" data-toggle='dropdown' href="#">
+                  {{ menu.title }}<span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownMenu">
+                  {% for child in menu.get_children %}
+                    {% if child.has_children %}
+                      <li class="dropdown-submenu">
+                        <a tabindex="-1" href="#" class="dropdown-toggle" data-toggle="dropdown">{{ child.title }}</a>
+                        <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+                          {% for subchild in child.get_children %}
+                            {% if subchild.has_children %}
+                              <li class="dropdown-submenu">
+                                <a tabindex="-1" href="#" class="dropdown-toggle" data-toggle="dropdown">{{ subchild.title }}</a>
+                                <ul class="dropdown-menu">
+                                {% for grandchild in subchild.get_children %}
+                                  {% if grandchild.has_children %}
+                                    <li class="dropdown-submenu">
+                                      <a href="#">{{ grandchild.title }}</a>
+                                      <ul class="dropdown-menu">
+                                        {% for greatgrandchild in grandchild.get_children %}
+                                          <li class="dropdown-submenu"><a tabindex="-1" href="{{ greatgrandchild.url }}">{{ greatgrandchild.title }}</a></li>
+                                        {% endfor %}
+                                      </ul>
+                                    </li>
+                                  {% else %}
+                                    <li><a tabindex="-1" href="{{ grandchild.url }}">{{ grandchild.title }}</a></li>
+                                  {% endif %}
+                                {% endfor %}
+                                </ul>
+                              </li>
+                            {% else %}
+                              <li>
+                                <a tabindex="-1" href="{{ subchild.url }}">{{ subchild.title }}</a>
+                              </li>
+                            {% endif %}
+                          {% endfor %}
+                        </ul>
+                      </li>
+                    {% else %}
+                      <li><a href="{{child.url}}">{{ child.title }}</a></li>
+                    {% endif %}
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <li>
+                  <a href="{{ menu.url }}">{{ menu.title }}</a>
+                </li>
+              {% endif %}
+            </li>
+          {% endloop %}
+        </ul>
+      {% endrecurse %}
+
         <!--
       {% recurse menu.menu_set.all|dictsort:"lvl" with menu as menu %}
         {% loop %}
@@ -37,6 +95,7 @@
         </ul>
       {% endrecurse %}
         -->
+        <!--
         {% recurse menu.menu_set.all|dictsort:"lvl" with menu as menu %}
           <ul {% if menu.count %}id="main-menu" class="sm sm-blue"{% endif %}>
           {% loop %}
@@ -46,6 +105,7 @@
           {% endloop %}
           </ul>
         {% endrecurse %}
+        -->
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->
 </nav>
