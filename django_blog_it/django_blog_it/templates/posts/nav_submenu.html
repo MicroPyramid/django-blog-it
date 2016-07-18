@@ -7,9 +7,9 @@
         <ul class="dropdown-menu">
         {% for submenu in menu.get_children %}
           {% if submenu.has_children %}
-            {% include "posts/nav_submenu.html" with menu=submenu.get_children %}
+            {% include "posts/nav_submenu.html" with menu=submenu %}
           {% else %}
-            <li><a tabindex="-1" href="{{ menu.url }}">{{ menu.title }}</a></li>
+            <li><a tabindex="-1" href="{{ submenu.url }}">{{ submenu.title }}</a></li>
           {% endif %}
         {% endfor %}
         </ul>
