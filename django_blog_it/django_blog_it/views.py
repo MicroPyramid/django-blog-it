@@ -163,6 +163,15 @@ class PostEditView(UpdateView):
     template_name = "dashboard/blog/new_blog_add.html"
     form_class = BlogPostForm
 
+    def dispatch(self, request, *args, **kwargs):
+        if request.POST:
+            instance = self.get_object()
+            if request.POST.get("history_id"):
+                history_post = instance.history.filter(id=request.POST.get("history_id")).last()
+                if history_post:
+                    return JsonResponse({"content": history_post.content})
+        return super(PostEditView, self).dispatch(request, *args, **kwargs)
+
     def get_object(self):
         return get_object_or_404(Post, slug=self.kwargs['blog_slug'])
 
@@ -171,6 +180,7 @@ class PostEditView(UpdateView):
 
     def form_valid(self, form):
         previous_status = self.get_object().status
+        previous_content = self.get_object().content
         self.blog_post = form.save(commit=False)
         self.blog_post.user = self.request.user
         if self.request.user.is_superuser or get_user_role(self.request.user) != 'Author':
@@ -188,16 +198,19 @@ class PostEditView(UpdateView):
                 else:
                     blog_tag = Tags.objects.create(name=s.strip())
                 self.blog_post.tags.add(blog_tag)
+        if previous_content != self.blog_post.content:
+            self.blog_post.create_activity(
+                user=self.request.user, content=previous_content)
+        # if self.blog_post.status == previous_status:
+        #     self.blog_post.create_activity(
+        #         user=self.request.user, content="updated")
+        # else:
+        #     self.blog_post.create_activity(
+        #         user=self.request.user,
+        #         content="changed status from " +
+        #         str(previous_status) + " to " + str(blog_post.status)
+        #     )
 
-        if self.blog_post.status == previous_status:
-            self.blog_post.create_activity(
-                user=self.request.user, content="updated")
-        else:
-            self.blog_post.create_activity(
-                user=self.request.user,
-                content="changed status from " +
-                str(previous_status) + " to " + str(blog_post.status)
-            )
         messages.success(self.request, 'Successfully updated your blog post')
         data = {'error': False,
                 'response': 'Successfully updated your blog post'}
@@ -216,6 +229,7 @@ class PostEditView(UpdateView):
         context['blog_name'] = self.get_object()
         context['status_choices'] = STATUS_CHOICE,
         context['categories_list'] = categories_list
+        context['history_list'] = self.get_object().history.all()
         return context
 
 
