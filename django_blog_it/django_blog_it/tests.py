@@ -234,7 +234,7 @@ class django_blog_it_views_get(TestCase):
         self.assertTrue(user_login)
 
         response = self.client.get('/dashboard/')
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 200)
 
         response = self.client.get('/dashboard/blog/')
         self.assertEqual(response.status_code, 200)
@@ -408,7 +408,7 @@ class django_blog_it_views_get(TestCase):
                 'description': 'Python description',
                 'user': str(self.user.id)
             })
-        response = self.client.post('/dashboard/category/delete/python/')
+        response = self.client.get('/dashboard/category/delete/python/')
         self.assertEqual(response.status_code, 302)
 
 
