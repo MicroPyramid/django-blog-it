@@ -1,0 +1,18 @@
+{% load recurse %}
+
+  {% recurse menu.menu_set.all|dictsort:"lvl" with menu as menu %}
+    {% loop %}
+      <li class="dropdown-submenu">
+        <a tabindex="-1" href="#" class="dropdown-toggle" data-toggle="dropdown">{{ menu.title }}</a>
+        <ul class="dropdown-menu">
+        {% for submenu in menu.get_children %}
+          {% if submenu.has_children %}
+            {% include "posts/nav_submenu.html" with menu=submenu %}
+          {% else %}
+            <li><a tabindex="-1" href="{{ submenu.url }}">{{ submenu.title }}</a></li>
+          {% endif %}
+        {% endfor %}
+        </ul>
+      </li>
+    {% endloop %}
+  {% endrecurse %}
