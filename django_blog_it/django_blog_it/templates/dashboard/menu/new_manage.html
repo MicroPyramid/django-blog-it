@@ -18,14 +18,46 @@
           {% csrf_token %}
           <div class="col-md-12">
             {% for field in form %}
-              <div class="form-group">
-                <label>{{ field.label }} :</label>
-                <div class="controls">
-                  {{ field }}
-                  {% if field.help_text %}
-                  <p class="help-inline"><small>{{ field.help_text }}</small></p>
-                  {% endif %}
-                </div>
+              <div class="form-group col-md-6">
+                {% if field.name == 'title' %}
+                  <label>MENU TITLE</label>
+                  <div class="controls">
+                    {{ field }}
+                    {% if field.help_text %}
+                    <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                    {% endif %}
+                  </div>
+                {% endif %}
+                {% if field.name == 'parent' %}
+                  <label>Parent</label>
+                  <div class="controls">
+                    {{ field }}
+                    {% if field.help_text %}
+                    <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                    {% endif %}
+                  </div>
+                {% endif %}
+                {% if field.name == 'url' %}
+                  <label>URL</label>
+                  <div class="controls">
+                    {{ field }}
+                    {% if field.help_text %}
+                    <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                    {% endif %}
+                  </div>
+                {% endif %}
+                {% if field.name == 'status' %}
+                  <label>STATUS</label>
+                  <div class="controls">
+                    <select class="form-control" id="id_status" name="status">
+                      <option value="True" {% if field.value %}selected{% endif %} >Active</option>
+                      <option value="False" {% if not field.value %}selected{% endif %}>Inactive</option>
+                    </select>
+                    {% if field.help_text %}
+                    <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                    {% endif %}
+                  </div>
+                {% endif %}
               </div>
             {% endfor %}
           </div>

@@ -18,12 +18,12 @@
 }
 
 .dropdown-submenu, .dropdown-menu a {
-    color: #00a97a!important;
+    color: #000!important;
 }
 
-.dropdown-submenu, .dropdown-menu a:hover {
-    color: #fff!important;
-}
+// .dropdown-submenu, .dropdown-menu a:hover {
+//     color: #fff!important;
+// }
 
 .dropdown-submenu>a:after {
     display: block;
