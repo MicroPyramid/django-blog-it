@@ -20,9 +20,10 @@ try:
     User = get_user_model()
 except ImportError:
     from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, DeleteView,\
-    UpdateView
+    UpdateView, FormView, TemplateView, View
+from django.views.generic.edit import ProcessFormView, BaseDeleteView
 from .mixins import AdminMixin, PostAccessRequiredMixin
 from django.http import JsonResponse
 
@@ -34,29 +35,25 @@ def active_admin_required(view_func):
     return decorated_view_func
 
 
-def admin_login(request):
-    if request.user.is_active:
-        return HttpResponseRedirect(reverse('blog'))
-    if request.method == 'POST':
-        login_form = AdminLoginForm(request.POST)
-        if login_form.is_valid():
-            user = authenticate(username=request.POST['username'],
-                                password=request.POST['password'])
-            if user.is_active:
-                login(request, user)
-                messages.success(request, 'You are successfully logged in')
-                response_data = {'error': False,
-                                 'response': 'Successfully logged in'}
-            else:
-                response_data = {'error': True,
-                                 'response': 'You are not allowed to this page'}
-            return HttpResponse(json.dumps(response_data))
+class AdminLoginView(FormView):
+    template_name = "dashboard/new_admin-login.html"
+    form_class = AdminLoginForm
+
+    def form_valid(self, form):
+        user = authenticate(username=form.cleaned_data['username'],
+                            password=form.cleaned_data['password'])
+        if user.is_active:
+            login(self.request, user)
+            messages.success(self.request, 'You are successfully logged in')
+            data = {'error': False,
+                    'response': 'Successfully logged in'}
         else:
-            response_data = {'error': True, 'response': login_form.errors}
+            data = {'error': True,
+                    'response': 'You are not allowed to this page'}
+        return JsonResponse(data)
 
-        return HttpResponse(json.dumps(response_data))
-
-    return render(request, 'dashboard/new_admin-login.html')
+    def form_invalid(self, form):
+        return JsonResponse({"error": True, "errors": form.errors})
 
 
 @active_admin_required
@@ -100,11 +97,8 @@ class PostList(AdminMixin, ListView):
 class PostDetailView(DetailView):
     model = Post
     template_name = 'dashboard/blog/new_blog_view.html'
-    slug_field = "slug"
+    slug_url_kwarg = "blog_slug"
     context_object_name = 'blog_post'
-
-    def get_object(self):
-        return get_object_or_404(Post, slug=self.kwargs['blog_slug'])
 
 
 class PostCreateView(AdminMixin, CreateView):
@@ -278,80 +272,67 @@ class PostDeleteView(PostAccessRequiredMixin, DeleteView):
             raise Http404
 
 
-@active_admin_required
-def categories(request):
-    categories_list = Category.objects.all()
-    category_choices = categories_list
-    context = {'categories_list': categories_list,
-               'category_choices': category_choices}
+class CategoryList(AdminMixin, TemplateView, ProcessFormView):
+    template_name = "dashboard/category/new_categories_list.html"
 
-    if request.method == "POST":
-        requested_categories = request.POST.getlist('category')
+    def post(self, request, *args, **kwargs):
+        return render(request, self.template_name, self.get_context_data())
 
-        if request.POST.get('select_status', ''):
-            if request.POST.get('select_status') == "True":
-                categories_list = categories_list.filter(is_active=True)
+    def get_queryset(self):
+        self.category_choices = Category.objects.all()
+        queryset = self.category_choices
+        if self.request.POST.get('select_status'):
+            if self.request.POST.get('select_status') == "True":
+                queryset = queryset.filter(is_active=True)
             else:
-                categories_list = categories_list.filter(is_active=False)
+                queryset = queryset.filter(is_active=False)
+        if self.request.POST.get('search_text'):
+            queryset = queryset.filter(name__icontains=self.request.POST.get('search_text'))
+        return queryset
 
-        if request.POST.get('search_text'):
-            categories_list = categories_list.filter(
-                name__icontains=request.POST.get('search_text')
-            )
-
-        context = {'categories_list': categories_list,
-                   'requested_categories': requested_categories,
-                   'category_choices': category_choices}
-    return render(request,
-                  'dashboard/category/new_categories_list.html',
-                  context)
-
-
-@active_admin_required
-def add_category(request):
-    form = BlogCategoryForm()
-    if request.method == 'POST':
-        form = BlogCategoryForm(request.POST)
-
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Successfully added your category')
-            data = {'error': False,
-                    'response': 'Successfully added your category'}
-        else:
-            data = {'error': True, 'response': form.errors}
-        return HttpResponse(json.dumps(data))
-    context = {'form': form, 'add_category': True}
-    return render(request, 'dashboard/category/new_category_add.html', context)
+    def get_context_data(self, *args, **kwargs):
+        context = {
+            "categories_list": self.get_queryset(),
+            'requested_categories': self.request.POST.getlist('category'),
+            'category_choices': self.category_choices,
+        }
+        return context
 
 
-@active_admin_required
-def edit_category(request, category_slug):
-    category_name = get_object_or_404(Category, slug=category_slug) # Category.objects.get(slug=category_slug)
-    if category_name.user == request.user or request.user.is_superuser is True:
-        form = BlogCategoryForm(instance=category_name)
+class CategoryCreateView(AdminMixin, CreateView):
+    template_name = "dashboard/category/new_category_add.html"
+    form_class = BlogCategoryForm
 
-        if request.method == 'POST':
-            form = BlogCategoryForm(request.POST, instance=category_name)
-            if form.is_valid():
-                form.save()
-                messages.success(request, 'Successfully updated your category')
-                data = {'error': False,
-                        'response': 'Successfully updated your category'}
-            else:
-                data = {'error': True, 'response': form.errors}
-            return HttpResponse(json.dumps(data))
-        context = {'form': form, 'category_name': category_name}
-        return render(request,
-                      'dashboard/category/new_category_add.html', context)
+    def form_valid(self, form):
+        form.save()
+        messages.success(self.request, 'Successfully added your category')
+        return JsonResponse({'error': False, 'response': 'Successfully added your category'})
+
+    def form_invalid(self, form):
+        return JsonResponse({'error': True, 'response': form.errors})
 
 
-@active_admin_required
-def delete_category(request, category_slug):
-    category = get_object_or_404(Category, slug=category_slug) # Category.objects.get(slug=category_slug)
-    if category.user == request.user or request.user.is_superuser is True:
+class CategoryUpdateView(AdminMixin, UpdateView):
+    template_name = "dashboard/category/new_category_add.html"
+    model = Category
+    slug_url_kwarg = "category_slug"
+    form_class = BlogCategoryForm
+
+    def form_valid(self, form):
+        form.save()
+        messages.success(self.request, 'Successfully updated your category')
+        return JsonResponse({'error': False, 'response': 'Successfully updated your category'})
+
+    def form_invalid(self, form):
+        return JsonResponse({'error': True, 'response': form.errors})
+
+
+class CategoryDeleteView(AdminMixin, View):
+
+    def get(self, request, *args, **kwargs):
+        category = get_object_or_404(Category, slug=kwargs.get("category_slug"))
         category.delete()
-        return HttpResponseRedirect('/dashboard/category/')
+        return HttpResponseRedirect(reverse_lazy("categories"))
 
 
 @active_admin_required
@@ -387,6 +368,8 @@ def bulk_actions_blog(request):
                     request,
                     'Please select at-least one record to perform this action')
                 return HttpResponse(json.dumps({'response': False}))
+
+# class CategoryBulkActions(AdminMixin, Base)
 
 
 @active_admin_required

@@ -16,6 +16,8 @@ class AdminMixin(object):
         user = self.request.user
         if not (user.is_authenticated and user.is_active):
             return HttpResponseRedirect('/dashboard/')
+        if not user.is_superuser:
+            return HttpResponseRedirect("/")
         return super(AdminMixin, self).dispatch(request,
                                                 *args,
                                                 **kwargs)
