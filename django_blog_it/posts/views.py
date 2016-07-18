@@ -28,14 +28,30 @@ def index(request):
     blog_posts = Post.objects.filter(status='Published', category__is_active=True).order_by('-updated_on')
     # blog_posts = [post for post in blog_posts if post.category.is_active]
     context = list({'blog_posts': blog_posts}.items()) + list(categories_tags_lists().items())
+    seo = [
+        ("description", settings.BLOG_DESCRIPTION),
+        ("title", settings.BLOG_TITLE),
+        ("keywords", settings.BLOG_KEYWORDS),
+        ("author", settings.BLOG_AUTHOR),
+    ]
+    context += seo
     return render(request, 'posts/index.html', context)
 
 
 def blog_post_view(request, blog_slug):
-    blog_name =  get_object_or_404(Post, slug=blog_slug) # Post.objects.get(slug=blog_slug)
+    blog_name = get_object_or_404(Post, slug=blog_slug)  # Post.objects.get(slug=blog_slug)
     context = list({'blog_name': blog_name}.items()) + \
         list(categories_tags_lists().items()) + \
         list({'disqus_shortname': getattr(settings, 'DISQUS_SHORTNAME')}.items())
+    user = blog_name.user
+    author = user.first_name if user.first_name else user.username
+    seo = [
+        ("description", blog_name.meta_description if blog_name.meta_description else ""),
+        ("title", blog_name.title),
+        ("keywords", blog_name.keywords),
+        ("author", author),
+    ]
+    context += seo
     return render(request, 'posts/blog_view.html', context)
 
 
@@ -43,6 +59,15 @@ def selected_category(request, category_slug):
     category = get_object_or_404(Category, slug=category_slug)
     blog_posts = Post.objects.filter(category__slug=category_slug, category__is_active=True, status='Published')
     context = list({'blog_posts': blog_posts}.items()) + list(categories_tags_lists().items())
+    user = category.user
+    author = user.first_name if user.first_name else user.username
+    seo = [
+        ("description", category.description),
+        ("title", category.name),
+        ("keywords", category.meta_keywords),
+        ("author", author),
+    ]
+    context += seo
     return render(request, 'posts/index.html', context + [("category", category)])
 
 
@@ -53,19 +78,33 @@ def selected_tag(request, tag_slug):
         status='Published', category__is_active=True
     )
     context = list({'blog_posts': blog_posts}.items()) + list(categories_tags_lists().items()) + [("tag", tag)]
+    seo = [
+        ("description", tag.name),
+        ("title", tag.name),
+        ("keywords", tag.name),
+        ("author", settings.BLOG_AUTHOR),
+    ]
+    context += seo
     return render(request, 'posts/index.html', context)
 
 
 def archive_posts(request, year, month):
     date = datetime(int(year), int(month), 1)
     blog_posts = Post.objects.filter(
-            category__is_active=True,
-            status="Published",
-            updated_on__year=year,
-            updated_on__month=month
-        ).order_by('-updated_on')
+        category__is_active=True,
+        status="Published",
+        updated_on__year=year,
+        updated_on__month=month
+    ).order_by('-updated_on')
     blog_posts = [post for post in blog_posts if post.category.is_active]
     context = list({'blog_posts': blog_posts}.items()) + list(categories_tags_lists().items()) + [("date", date)]
+    seo = [
+        ("description", "Blog Archive - " + date.strftime("%B %Y")),
+        ("title", "Blog Archive - " + date.strftime("%B %Y")),
+        ("keywords", "Blog Archive - " + date.strftime("%B %Y")),
+        ("author", settings.BLOG_AUTHOR),
+    ]
+    context += seo
     return render(request, 'posts/index.html', context)
 
 
