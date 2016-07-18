@@ -51,7 +51,7 @@ def get_range(value):
     return range(value)
 
 
-@register.inclusion_tag('posts/nav_menu.html', takes_context=True)
+@register.inclusion_tag('posts/new_nav_menu.html', takes_context=True)
 def load_menu(context):
     context['menu'] = Menu.objects.filter(parent=None, status=True).order_by("lvl")
     return context
@@ -77,3 +77,8 @@ def user_published_posts(user):
 @register.assignment_tag
 def blog_title():
     return settings.BLOG_TITLE
+
+
+@register.filter
+def category_posts(category):
+    return Post.objects.filter(category=category).count()
