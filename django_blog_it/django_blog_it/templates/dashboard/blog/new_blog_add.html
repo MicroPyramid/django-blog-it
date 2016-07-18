@@ -30,6 +30,18 @@ Edit
               </div>
             </div>
           {% endfor %}
+          <div class="form-group">
+            <label>History:</label>
+            <div class="controls">
+              <select name="history" class="form-control">
+              <option value=""> Please choose previous edit </option>
+              {% for history in history_list %}
+                <option value="{{history.id}}">{{ history.created_at }}</option>
+              {% endfor %}
+              </select>              
+              <p class="help-inline"><small>Revert to previous edits</small></p>
+            </div>
+          </div>
         </div>
         <br clear="all">
         <div class=" col-md-12 buttons_row text-left">
@@ -111,6 +123,20 @@ Edit
     // script for tags ends here
 
 
+  });
+
+  // revert to history
+  $("select[name=history]").change(function(e){
+    var id = $(this).val()
+    if(!id){
+      return false;
+    }
+    $.post("", {"history_id": id, "csrfmiddlewaretoken": "{{ csrf_token }}"}, function(response){
+      if(response.content){
+        $('[name=content]').val(response.content);
+        CKEDITOR.instances.id_content.setData(response.content)
+      }
+    })
   });
 </script>
 {% endblock %}
