@@ -20,9 +20,9 @@ try:
     User = get_user_model()
 except ImportError:
     from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, DeleteView,\
-    UpdateView
+    UpdateView, View
 from .mixins import AdminMixin, PostAccessRequiredMixin
 from django.http import JsonResponse
 
@@ -894,7 +894,7 @@ class ThemeCreateView(AdminMixin, CreateView):
     model = Theme
     form_class = BlogThemeForm
     template_name = "dashboard/themes/theme_add.html"
-    success_url = '/dashboard/themes/'
+    success_url = reverse_lazy('themes')
 
     def form_valid(self, form):
         self.blog_theme = form.save(commit=False)
@@ -940,7 +940,7 @@ class ThemeEditView(AdminMixin, UpdateView):
     form_class = BlogThemeForm
     slug = 'theme_slug'
     template_name = "dashboard/themes/theme_add.html"
-    success_url = '/dashboard/themes/'
+    success_url = reverse_lazy('themes')
 
     def form_valid(self, form):
         self.blog_theme = form.save(commit=False)
@@ -990,11 +990,16 @@ def delete_theme(request, theme_slug):
     if request.user.is_superuser is True:
         theme.delete()
         messages.success(request, 'Successfully Deleted Theme')
-        return HttpResponseRedirect('/dashboard/themes/')
+        return HttpResponseRedirect(reverse_lazy('themes'))
 
 
-class DeleteTheme(AdminMixin, ListView):
-    pass
+class DeleteThemeView(AdminMixin, View):
+
+    def get(self, request, *args, **kwargs):
+        theme = get_object_or_404(Theme, id=kwargs.get('pk'))
+        if theme:
+            theme.delete()
+            return HttpResponseRedirect(reverse_lazy('themes'))
 
 
 @active_admin_required
