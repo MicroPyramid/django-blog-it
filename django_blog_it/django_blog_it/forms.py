@@ -1,5 +1,5 @@
 from django import forms
-from .models import Post, Category, Page, Menu, ContactUsSettings, Theme
+from .models import Post, Category, Page, Menu, ContactUsSettings, ROLE_CHOICE, Theme
 from django.template.defaultfilters import slugify
 # for authentication
 from django.contrib.auth import authenticate
@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 
 class UserForm(forms.ModelForm):
     password = forms.CharField(required=False, widget=forms.PasswordInput)
+    role = forms.ChoiceField(choices=ROLE_CHOICE, required=True)
 
     class Meta:
         model = User
@@ -42,6 +43,7 @@ class UserForm(forms.ModelForm):
         if commit:
             user.save()
         return user
+
 
 class AdminLoginForm(forms.Form):
     username = forms.CharField(max_length=254)
@@ -128,6 +130,16 @@ class PageForm(forms.ModelForm):
                 self.fields[field].widget.attrs.update({
                     'class': 'form-control', "placeholder": "Please enter your Page " + field.capitalize()
                 })
+
+    def clean_title(self):
+        if not self.instance.id:
+            if self.Meta.model.objects.filter(slug=slugify(self.cleaned_data['title'])).exists():
+                raise forms.ValidationError('Page with this title already exists.')
+        else:
+            if self.Meta.model.objects.filter(title__icontains=self.cleaned_data['title']).exclude(id=self.instance.id):
+                raise forms.ValidationError('Page with this title already exists.')
+
+        return self.cleaned_data['title']
 
 
 class MenuForm(forms.ModelForm):

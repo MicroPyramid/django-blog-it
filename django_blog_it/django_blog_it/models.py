@@ -24,6 +24,8 @@ class Category(models.Model):
     slug = models.CharField(max_length=20, unique=True)
     description = models.CharField(max_length=500)
     is_active = models.BooleanField(default=False)
+    meta_description = models.TextField(max_length=160, null=True, blank=True)
+    meta_keywords = models.TextField(max_length=255, null=True, blank=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
 
     def save(self, *args, **kwargs):
@@ -75,10 +77,11 @@ STATUS_CHOICE = (
 
 
 class Post(models.Model):
-    title = models.CharField(max_length=100)
-    slug = models.SlugField(max_length=100)
+    title = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(max_length=100, unique=True)
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateField(auto_now=True)
+    meta_description = models.TextField(max_length=160, null=True, blank=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
     content = models.TextField()
     category = models.ForeignKey(Category)
