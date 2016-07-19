@@ -88,12 +88,12 @@
         {% endif %}
         <!-- end -->
         <!-- blog_list_container starts here -->
-            <div class="blog_list_container">
+            <div class="blog_list_container" itemscope itemtype='https://schema.org/blogPosts'>
                 {% if blog_posts %}
                     {% paginate 5 blog_posts %}
                     {% for blog in blog_posts %}
                         <!-- blog_container starts here -->
-                        <div class="blog_container">
+                        <div class="blog_container" itemprop="liveBlogUpdate" itemscope itemtype="http://schema.org/BlogPosting">
                             <div class="share_more">
                                <!--  <span class="share">
                                   <ul class="list-inline">
@@ -111,17 +111,17 @@
                             {% endif %}
                             <div class="blog_content_container">
                               <div class="author_category">
-                                <a href="#" class="author">By {{ blog.user }}</a>
-                                <a href="{% url 'selected_category' category_slug=blog.category.slug %}" class="category">{{ blog.category }}</a>
+                                <a href="#" class="author" itemprop="author" itemtype="http://schema.org/Person">By <span itemprop="name">{{ blog.user }}</span></a>
+                                <a href="{% url 'selected_category' category_slug=blog.category.slug %}" class="category" itemprop="category" itemtype="http://schema.org/category"><span itemprop="name">{{ blog.category }}</span></a>
                               </div>
-                              <div class="blog_title">
-                                <a href="{% url 'blog_post_view' blog_slug=blog.slug %}">{{ blog }}</a>
+                              <div class="blog_title" itemprop="blog-article">
+                                <a href="{% url 'blog_post_view' blog_slug=blog.slug %}" itemprop="name headline">{{ blog }}</a>
                               </div>
-                              <div class="blog_desc">
+                              <div class="blog_desc" itemprop="description">
                                 {{ blog.content|safe|truncatewords_html:50 }}
                               </div>
                               <div class="blog_detail_options">
-                                <span class="activity">Posted on {{ blog.updated_on|date:"F d, Y" }}</span>
+                                <span class="activity">Posted on <span itemprop="datePublished" itemtype="https://schema.org/datePublished">{{ blog.updated_on|date:"F d, Y" }}</span></span>
                                 <span class="reply"><a href="#"><i class="fa fa-reply"></i>Replies 123 </a></span>
                                 <span class="views"><a href="#"><i class="fa fa-eye"></i> Views 123 </a></span>
                                 <span class="likes"><a href="#"><i class="fa fa-thumbs-up" aria-hidden="true"></i> Likes 23 </a></span>

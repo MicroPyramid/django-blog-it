@@ -25,7 +25,7 @@
 </ol>
 <!-- end -->
   <!-- blog_detail_container starts here -->
-    <div class="blog_detail_container">
+    <div class="blog_detail_container" itemscope itemtype="http://schema.org/BlogPosting">
       <div class="blog_details">
         <div class="panel panel-default blog_panel">
           <div class="panel-body">
@@ -34,12 +34,12 @@
                 <span class="head_line"></span>
                   <span class="heading">{{ blog_name.updated_on|date:"F d, Y" }}</span>
                     </div>
-                    <div class="blog_title">
-                      <a href="{% url 'blog_post_view' blog_slug=blog_name.slug %}">{{ blog_name.title }}</a>
+                    <div class="blog_title" itemprop="blog-article">
+                      <a href="{% url 'blog_post_view' blog_slug=blog_name.slug %}" itemprop="name headline">{{ blog_name.title }}</a>
                     </div>
                     <div class="blog_cat_author text-center">
-                        <a href="#" class="author">By {{ blog_name.user }}</a>
-                        <a href="{% url 'selected_category' category_slug=blog_name.category.slug %}" class="category">{{ blog_name.category }}</a>
+                        <a href="#" class="author" itemprop="author" itemtype="http://schema.org/Person">By <span itemprop="name">{{ blog_name.user }}</span></a>
+                        <a href="{% url 'selected_category' category_slug=blog_name.category.slug %}" class="category" itemprop="category" itemtype="http://schema.org/category"><span itemprop="name">{{ blog_name.category }}</span></a>
                         <br clear="all">
                     </div>
                     {% if blog_name.featured_image %}
@@ -47,13 +47,13 @@
                       <img src="{{ blog_name.featured_image.url }}" />
                       </div>
                     {% endif %}
-                    <div class="blog_description">
+                    <div class="blog_description" itemprop="description">
                       {{ blog_name.content|safe }}
                     </div>
                     <div class="col-md-12">
                       <div class="col-md-6">
                         <span>
-                          <strong>Keywords</strong>: {{ blog_name.keywords|safe }}
+                          <strong>Keywords</strong>: <span itemprop="keywords" itemtype="http://schema.org/keywords">{{ blog_name.keywords|safe }}</span>
                         </span>
                       </div>
                       <div class="col-md-6">

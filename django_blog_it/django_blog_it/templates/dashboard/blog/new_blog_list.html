@@ -200,6 +200,7 @@
 
         $('.pagination li a').click(function(event){
             event.preventDefault();
+            console.log($(this).attr('href'));
             $('#blogs_data').attr('action', $(this).attr('href'));
             $('#blogs_data').submit();
         });

@@ -85,11 +85,11 @@ class PostList(AdminMixin, ListView):
                 status=request.POST.get('select_status')
             )
         if request.POST.get('search_text', ''):
-            blog_list = blog_list.filter(
+            blog_list = list(set(blog_list.filter(
                 title__icontains=request.POST.get('search_text')
             ) | blog_list.filter(
                 tags__name__icontains=request.POST.get('search_text')
-            )
+            )))
         return render(request, self.template_name,
                       {'blog_list': blog_list, 'blog_choices': STATUS_CHOICE})
 
