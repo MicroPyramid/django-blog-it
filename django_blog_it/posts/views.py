@@ -4,16 +4,16 @@ from django_blog_it.django_blog_it.models import Post, Category, Tags, Page
 from django.db.models import Count
 from django_blog_it import settings
 from django.http import Http404
+# cbv
+from django.views.generic import ListView, DetailView
 
 
 def categories_tags_lists():
     categories_list = Category.objects.filter(is_active=True, post__status='Published').distinct()
     tags_list = Tags.objects.annotate(
-                    Num=Count('rel_posts')
-                ).filter(Num__gt=0, rel_posts__status='Published', rel_posts__category__is_active=True)[:20]
+        Num=Count('rel_posts')).filter(Num__gt=0, rel_posts__status='Published', rel_posts__category__is_active=True)[:20]
     posts = Post.objects.filter(status='Published').order_by('-updated_on')[0:3]
-    cat_tags = {'categories_list': categories_list, 'tags_list': tags_list, 'recent_posts': posts}
-    return cat_tags
+    return {'categories_list': categories_list, 'tags_list': tags_list, 'recent_posts': posts}
 
 
 # def seperate_tags():
@@ -25,58 +25,117 @@ def categories_tags_lists():
 #             return real_tags
 
 
-def index(request):
-    blog_posts = Post.objects.filter(status='Published', category__is_active=True).order_by('-updated_on')
-    # blog_posts = [post for post in blog_posts if post.category.is_active]
-    context = list({'blog_posts': blog_posts}.items()) + list(categories_tags_lists().items())
-    return render(request, 'posts/index.html', context)
+class Home(ListView):
+    template_name = "posts/index.html"
+    queryset = Post.objects.filter(status='Published', category__is_active=True).order_by('-updated_on')
+    context_object_name = "blog_posts"
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(Home, self).get_context_data(*args, **kwargs)
+        context.update({
+            "description": settings.BLOG_DESCRIPTION,
+            "title": settings.BLOG_TITLE,
+            "keywords": settings.BLOG_KEYWORDS,
+            "author": settings.BLOG_AUTHOR,
+        })
+        context.update(categories_tags_lists())
+        return context
 
 
-def blog_post_view(request, blog_slug):
-    blog_name =  get_object_or_404(Post, slug=blog_slug) # Post.objects.get(slug=blog_slug)
-    related_posts = Post.objects.filter(
-        status='Published', category=blog_name.category,
-        tags__in=blog_name.tags.all()).exclude(id=blog_name.id).distinct()[:3]
-    context = list({'blog_name': blog_name}.items()) + \
-        list(categories_tags_lists().items()) + \
-        list({'related_posts': related_posts}.items()) + \
-        list({'disqus_shortname': getattr(settings, 'DISQUS_SHORTNAME')}.items())
-    return render(request, 'posts/new_blog_view.html', context)
+class BlogPostView(DetailView):
+    template_name = 'posts/blog_view.html'
+    model = Post
+    slug_url_kwarg = "blog_slug"
+    context_object_name = "blog_name"
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(BlogPostView, self).get_context_data(*args, **kwargs)
+        user = self.object.user
+        author = user.first_name if user.first_name else user.username
+        related_posts = Post.objects.filter(
+            status='Published',
+            category=self.object.category,
+            tags__in=self.object.tags.all()
+        ).exclude(id=self.object.id).distinct()[:3]
+        context.update({
+            "related_posts": related_posts,
+            "disqus_shortname": getattr(settings, 'DISQUS_SHORTNAME'),
+            "description": self.object.meta_description if self.object.meta_description else "",
+            "title": self.object.title,
+            "keywords": self.object.keywords,
+            "author": author,
+        })
+        context.update(categories_tags_lists())
+        return context
 
 
-def selected_category(request, category_slug):
-    category = get_object_or_404(Category, slug=category_slug)
-    blog_posts = Post.objects.filter(category__slug=category_slug, category__is_active=True, status='Published')
-    context = list({'blog_posts': blog_posts}.items()) + list(categories_tags_lists().items())
-    return render(request, 'posts/index.html', context + [("category", category)])
+class SelectedCategoryView(ListView):
+    template_name = "posts/index.html"
+    context_object_name = "blog_posts"
+
+    def get_queryset(self):
+        self.category = get_object_or_404(Category, slug=self.kwargs.get("category_slug"))
+        return Post.objects.filter(category=self.category, category__is_active=True, status='Published')
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(SelectedCategoryView, self).get_context_data(*args, **kwargs)
+        user = self.category.user
+        author = user.first_name if user.first_name else user.username
+        context.update({
+            "description": self.category.description,
+            "title": self.category.name,
+            "keywords": self.category.meta_keywords,
+            "author": author
+        })
+        context.update(categories_tags_lists())
+        return context
 
 
-def selected_tag(request, tag_slug):
-    tag = get_object_or_404(Tags, slug=tag_slug)
-    blog_posts = get_list_or_404(
-        Post, tags__slug=tag_slug,
-        status='Published', category__is_active=True
-    )
-    context = list({'blog_posts': blog_posts}.items()) + list(categories_tags_lists().items()) + [("tag", tag)]
-    return render(request, 'posts/index.html', context)
+class SelectedTagView(ListView):
+    template_name = "posts/index.html"
+    context_object_name = "blog_posts"
+
+    def get_queryset(self):
+        self.tag = get_object_or_404(Tags, slug=self.kwargs.get("tag_slug"))
+        return get_list_or_404(Post, tags=self.tag, status='Published', category__is_active=True)
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(SelectedTagView, self).get_context_data(*args, **kwargs)
+        context.update({
+            "description": self.tag.name,
+            "title": self.tag.name,
+            "keywords": self.tag.name,
+            "author": settings.BLOG_AUTHOR,
+        })
+        context.update(categories_tags_lists())
+        return context
 
 
-def archive_posts(request, year, month):
-    date = datetime(int(year), int(month), 1)
-    blog_posts = Post.objects.filter(
-            category__is_active=True,
-            status="Published",
-            updated_on__year=year,
-            updated_on__month=month
-        ).order_by('-updated_on')
-    blog_posts = [post for post in blog_posts if post.category.is_active]
-    context = list({'blog_posts': blog_posts}.items()) + list(categories_tags_lists().items()) + [("date", date)]
-    return render(request, 'posts/index.html', context)
+class ArchiveView(ListView):
+    template_name = "posts/index.html"
+    context_object_name = "blog_posts"
+
+    def get_queryset(self):
+        year = self.kwargs.get("year")
+        month = self.kwargs.get("month")
+        self.date = datetime(int(year), int(month), 1)
+        return Post.objects.filter(
+            category__is_active=True, status="Published", updated_on__year=year, updated_on__month=month).order_by('-updated_on')
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(ArchiveView, self).get_context_data(*args, **kwargs)
+        context.update({
+            "description": "Blog Archive - " + self.date.strftime("%B %Y"),
+            "title": "Blog Archive - " + self.date.strftime("%B %Y"),
+            "keywords": "Blog Archive - " + self.date.strftime("%B %Y"),
+            "author": settings.BLOG_AUTHOR,
+        })
+        context.update(categories_tags_lists())
+        return context
 
 
-def page_view(request, page_slug):
-    pages = Page.objects.filter(slug=page_slug)
-    if pages:
-        context = list({'page': pages[0]}.items())
-        return render(request, 'posts/page.html', context)
-    raise Http404
+class PageView(DetailView):
+    template_name = "posts/page.html"
+    model = Page
+    slug_url_kwarg = "page_slug"
+    context_object_name = "page"

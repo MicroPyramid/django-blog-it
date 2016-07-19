@@ -1,6 +1,7 @@
 from django.http.response import HttpResponseRedirect
 from .models import UserRole, Post
 from django.shortcuts import render, render_to_response, get_object_or_404
+from django.contrib import messages
 
 
 def get_user_role(user):
@@ -10,12 +11,26 @@ def get_user_role(user):
     return 'No User Role'
 
 
+class AdminOnlyMixin(object):
+
+    def dispatch(self, request, *args, **kwargs):
+        user = self.request.user
+        if not (user.is_authenticated and user.is_active):
+            return HttpResponseRedirect('/dashboard/')
+        if not user.is_superuser:
+            messages.warning(request, "You don't have permission")
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER', "/"))
+        return super(AdminOnlyMixin, self).dispatch(request, *args, **kwargs)
+
+
 class AdminMixin(object):
 
     def dispatch(self, request, *args, **kwargs):
         user = self.request.user
         if not (user.is_authenticated and user.is_active):
             return HttpResponseRedirect('/dashboard/')
+        # if not user.is_superuser:
+        #     return HttpResponseRedirect("/")
         return super(AdminMixin, self).dispatch(request,
                                                 *args,
                                                 **kwargs)

@@ -62,16 +62,6 @@
                   </div>
                 {% endif %}
             {% endfor %}
-            <div class="form-group col-md-12">
-              <label>User Role :</label>
-              <select class='input form-control' id="id_role" name="role">
-                <option value="">Role</option>
-                {% for role in roles %}
-                    <option value="{{ role.0 }}" {% ifequal user_role.0.role role.0 %}Selected{% endifequal %}>{{ role.1 }}</option>
-                {% endfor %}
-              </select>
-            </div>
-          </div>
         </div>
         <br clear="all">
         <div class=" col-md-12 buttons_row text-left">
@@ -100,13 +90,12 @@
   $('#post-form').submit(function(event){
       event.preventDefault();
       $.post(".",$('#post-form').serialize(), function(data){
+          $('p.error').remove();
           if(data.error){
-              $('p.error_required').remove();
-              for (var list in data.response){
-                for (var key in data.response[list]) {
-                    $('#id_' + key).after('<p class="error_required">* ' + data.response[list][key] + '</p>');
-                }
-              }
+              $.each(data.response, function(field_name, error){
+                error = "<p class=\"error\">" + error + "</p>"
+                $("[name=" + field_name + "]").after(error)
+              });
           }else{
               //alert(data['response']);
               window.location="{% url 'users' %}";
