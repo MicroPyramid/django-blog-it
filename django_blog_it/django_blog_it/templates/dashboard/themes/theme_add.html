@@ -1,0 +1,143 @@
+{% extends 'dashboard/new_base.html' %}
+{% load staticfiles %}
+{% block title %}
+{% if add_theme %}
+Add
+{% else %}
+Edit
+{% endif %} Theme
+{% endblock %}
+{% block extra_css %}
+{% endblock %}
+{% block content %}
+<div class="row no_row_margin heading_count">
+  <div class="heading col-md-6" id='page_title'></div>
+</div>
+<div class="row no_row_margin">
+  <div class="container-fluid">
+    <form action="" method="post" enctype="multipart/form-data" id="theme-form" role="form">
+      {% csrf_token %}
+      <div class="row form_row no_row_margin">
+        <div class="col-md-12">
+          <div class="col-md-6">
+            {% for field in form %}
+              {% if field.name != 'description' %}
+                <div class="form-group">
+                  {% if field.name == 'name' %}
+                    <label>Theme Title</label>
+                    <div class="controls">
+                      {{ field }}
+                      {% if field.help_text %}
+                      <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                      {% endif %}
+                    </div>
+                  {% endif %}
+                  {% if field.name == 'enabled' %}
+                    <label>{{ field.label }}</label>
+                    <div class="controls">
+                      <select class="form-control" id="id_enabled" name="enabled">
+                        <option selected="selected">Select A State</option>
+                        <option value="True" {% if theme and field.value %}selected{% endif %} >Enabled</option>
+                        <option value="False" {% if theme and not field.value %}selected{% endif %}>Disabled</option>
+                      </select>
+                      {% if field.help_text %}
+                      <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                      {% endif %}
+                    </div>
+                  {% endif %}
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+          <div class="col-md-6">
+            {% for field in form %}
+              {% if field.name == 'description' %}
+                <div class="form-group">
+                  <label>Description</label>
+                  <div class="controls">
+                    {{ field }}
+                    {% if field.help_text %}
+                    <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                    {% endif %}
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+        <br clear="all">
+        <div class=" col-md-12 buttons_row text-left">
+          <button type="submit" class="btn btn-default green_btn"> <i class="fa fa-floppy-o" aria-hidden="true"></i> Save</button>
+          <button type="reset" class="btn btn-default blue_btn"> <i class="fa fa-refresh" aria-hidden="true"></i> Reset</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<!-- end of add form div -->
+{% endblock %}
+{% block js_script %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/3.51/jquery.form.js"></script>
+
+<script type="text/javascript">
+  $(document).ready(function(){
+
+    // for form submission
+    CKEDITOR.replace('description', {
+      uiColor: '#ffffff',
+      height:100,
+    });
+
+    // $('#theme-form').submit(function(event){
+    //   event.preventDefault();
+    //   $('#id_description').val(CKEDITOR.instances.id_description.getData());
+    //   $.post("",$('#theme-form').serialize(), function(data){
+    //       if(data.error){
+    //           $('p.error_required').remove();
+    //           for (var key in data.response) {
+    //               $('#id_' + key).after('<p class="error_required">* ' + data.response[key] + '</p>');
+    //           }
+    //       }else{
+    //           //alert(data['response']);
+    //           window.location="{% url 'themes' %}";
+    //       }
+    //   }, 'json');
+    // });
+
+    $('form#theme-form').ajaxForm({
+      beforeSerialize: function()
+      {
+        $('#id_description').val(CKEDITOR.instances.id_description.getData());
+      },
+
+      dataType:  'json',
+      success:  function(data){
+        if(data.error)
+        {
+          $('p.error_required').remove();
+          for (var key in data.response){
+            $('#id_'+key).after('<p class="error_required">* '+data.response[key]+'</p>');
+          }
+        }
+        else
+        {
+          window.location="{% url 'themes' %}";
+        }
+      }
+    });
+    //  script for form submission ends here
+
+    // for page title
+        if(window.location.pathname=="{% url 'add_theme' %}"){
+            $('#page_title').text('Add Theme');
+        }
+        else{
+            var theme = '{{ theme.name }}';
+            $('#page_title').text('Edit Theme: '+ theme);
+        }
+    //script for page title ends here
+
+  });
+
+</script>
+{% endblock %}
