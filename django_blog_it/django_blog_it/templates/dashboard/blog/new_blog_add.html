@@ -19,28 +19,47 @@ Edit
       {% csrf_token %}
       <div class="row form_row no_row_margin">
         <div class="col-md-12">
-          {% for field in form %}
+          <div class="col-md-6">
+            {% for field in form %}
+              {% if field.name != 'content' %}
+                <div class="form-group">
+                  <label>{% if field.name == 'title' %}POST TITLE{% else %}{{ field.label }}{% endif %}</label>
+                  <div class="controls">
+                    {{ field }}
+                    {% if field.help_text %}
+                    <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                    {% endif %}
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
             <div class="form-group">
-              <label>{{ field.label }} :</label>
+              <label>History:</label>
               <div class="controls">
-                {{ field }}
-                {% if field.help_text %}
-                <p class="help-inline"><small>{{ field.help_text }}</small></p>
-                {% endif %}
+                <select name="history" class="form-control">
+                <option value=""> Please choose previous edit </option>
+                {% for history in history_list %}
+                  <option value="{{history.id}}">{{ history.created_at }}</option>
+                {% endfor %}
+                </select>
+                <p class="help-inline"><small>Revert to previous edits</small></p>
               </div>
             </div>
-          {% endfor %}
-          <div class="form-group">
-            <label>History:</label>
-            <div class="controls">
-              <select name="history" class="form-control">
-              <option value=""> Please choose previous edit </option>
-              {% for history in history_list %}
-                <option value="{{history.id}}">{{ history.created_at }}</option>
-              {% endfor %}
-              </select>              
-              <p class="help-inline"><small>Revert to previous edits</small></p>
-            </div>
+          </div>
+          <div class="col-md-6">
+            {% for field in form %}
+              {% if field.name == 'content' %}
+                <div class="form-group">
+                  <label>Description</label>
+                  <div class="controls">
+                    {{ field }}
+                    {% if field.help_text %}
+                    <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                    {% endif %}
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
           </div>
         </div>
         <br clear="all">
@@ -63,7 +82,9 @@ Edit
     // for form submission
     CKEDITOR.replace('content',{
       filebrowserUploadUrl: '{% url "upload_photos" %}',
-      filebrowserBrowseUrl: '{% url "recent_photos" %}'
+      filebrowserBrowseUrl: '{% url "recent_photos" %}',
+      uiColor: '#ffffff',
+      height:475,
     });
 
 
