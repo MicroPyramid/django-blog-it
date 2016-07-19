@@ -24,7 +24,7 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, DeleteView,\
     UpdateView, FormView, TemplateView, View
 from django.views.generic.edit import ProcessFormView, BaseDeleteView
-from .mixins import AdminMixin, PostAccessRequiredMixin
+from .mixins import AdminMixin, PostAccessRequiredMixin, AdminOnlyMixin
 from django.http import JsonResponse
 
 admin_required = user_passes_test(lambda user: user.is_active, login_url='/')
@@ -335,76 +335,40 @@ class CategoryDeleteView(AdminMixin, View):
         return HttpResponseRedirect(reverse_lazy("categories"))
 
 
-@active_admin_required
-def bulk_actions_blog(request):
-    if request.user.is_superuser:
-        if request.method == 'GET':
-            if 'blog_ids[]' in request.GET:
-                blog_posts = Post.objects.filter(id__in=request.GET.getlist('blog_ids[]'))
-                if request.GET.get('action') in [status[0] for status in STATUS_CHOICE]:
-                    history_list = []
-                    for blog in blog_posts:
-                        history_list.append(
-                            blog.create_activity_instance(
-                                user=request.user,
-                                content="changed status from " + str(blog.status) +
-                                " to " + str(request.GET.get('action'))
-                            )
-                        )
-                    blog_posts.update(status=request.GET.get('action'))
-                    PostHistory.objects.bulk_create(history_list)
-                    messages.success(
-                        request, 'Selected blog posts' +
-                        ' successfully updated as ' + str(request.GET.get('action'))
-                    )
+class BlogPostBulkActionsView(AdminMixin, View):
 
-                elif request.GET.get('action') == 'Delete':
-                    PostHistory.objects.filter(post__in=blog_posts).delete()
-                    blog_posts.delete()
-
-                return HttpResponse(json.dumps({'response': True}))
-            else:
-                messages.warning(
-                    request,
-                    'Please select at-least one record to perform this action')
-                return HttpResponse(json.dumps({'response': False}))
-
-# class CategoryBulkActions(AdminMixin, Base)
+    def get(self, request, *args, **kwargs):
+        if 'blog_ids[]' in request.GET:
+            blog_posts = Post.objects.filter(id__in=request.GET.getlist('blog_ids[]'))
+            if request.GET.get('action') in [status[0] for status in STATUS_CHOICE]:
+                blog_posts.update(status=request.GET.get('action'))
+                messages.success(request, "successfully updated status to " + request.GET.get('action'))
+            elif request.GET.get('action') == 'Delete':
+                PostHistory.objects.filter(post__in=blog_posts).delete()
+                blog_posts.delete()
+            return HttpResponse(json.dumps({'response': True}))
+        else:
+            messages.warning(request, 'Please select a record to perform action')
+            return HttpResponse(json.dumps({'response': False}))
 
 
-@active_admin_required
-def bulk_actions_category(request):
-    if request.user.is_superuser:
-        if request.method == 'GET':
-            if 'blog_ids[]' in request.GET:
-                if request.GET.get('action') == 'True':
-                    Category.objects.filter(
-                        id__in=request.GET.getlist('blog_ids[]')).update(
-                        is_active=True)
-                    messages.success(
-                        request,
-                        'Selected Categories successfully updated as Active')
-                elif request.GET.get('action') == 'False':
-                    Category.objects.filter(
-                        id__in=request.GET.getlist('blog_ids[]')).update(
-                        is_active=False)
-                    messages.success(
-                        request,
-                        'Selected Categories successfully updated as Inactive')
+class CategoryBulkActionsView(AdminMixin, View):
 
-                elif request.GET.get('action') == 'Delete':
-                    Category.objects.filter(
-                        id__in=request.GET.getlist('blog_ids[]')).delete()
-                    messages.success(
-                        request,
-                        'Selected Categories successfully deleted!')
-
-                return HttpResponse(json.dumps({'response': True}))
-            else:
-                messages.warning(
-                    request,
-                    'Please select at-least one record to perform this action')
-                return HttpResponse(json.dumps({'response': False}))
+    def get(self, request, *args, **kwargs):
+        if 'blog_ids[]' in request.GET:
+            if request.GET.get('action') == 'True':
+                Category.objects.filter(id__in=request.GET.getlist('blog_ids[]')).update(is_active=True)
+                messages.success(request, 'Selected Categories successfully updated as Active')
+            elif request.GET.get('action') == 'False':
+                Category.objects.filter(id__in=request.GET.getlist('blog_ids[]')).update(is_active=False)
+                messages.success(request, 'Selected Categories successfully updated as Inactive')
+            elif request.GET.get('action') == 'Delete':
+                Category.objects.filter(id__in=request.GET.getlist('blog_ids[]')).delete()
+                messages.success(request, 'Selected Categories successfully deleted!')
+            return JsonResponse({'response': True})
+        else:
+            messages.warning(request, 'Please select a record to perform this action')
+            return JsonResponse({'response': False})
 
 
 @csrf_exempt
@@ -464,92 +428,77 @@ def recent_photos(request):
     return render_to_response('dashboard/browse.html', {'files': imgs})
 
 
-@active_admin_required
-def users(request):
-    users_list = User.objects.all()
-    if request.method == 'POST':
-        if 'select_role' in request.POST.keys() and request.POST.get('select_role'):
-            users_list = []
-            user_roles = UserRole.objects.filter(
-                role=request.POST.get('select_role')
+class UserListView(AdminMixin, ListView):
+    template_name = "dashboard/user/new_list.html"
+    context_object_name = "users_list"
+
+    def get_queryset(self):
+        queryset = User.objects.all()
+        if self.request.GET.get('select_role'):
+            queryset = queryset.filter(userrole__role=self.request.GET.get('select_role'))
+        if self.request.GET.get('search_text'):
+            queryset = queryset.filter(
+                username__icontains=self.request.GET.get('search_text')
+            ) | queryset.filter(
+                email__icontains=self.request.GET.get('search_text')
+            ) | queryset.filter(
+                first_name__icontains=self.request.GET.get('search_text')
+            ) | queryset.filter(
+                last_name__icontains=self.request.GET.get('search_text')
             )
-            for role in user_roles:
-                users_list.append(role.user)
-        if request.POST.get('search_text'):
-            users = User.objects.all()
-            users_list = users.filter(
-                username__icontains=request.POST.get('search_text')
-            ) | users.filter(
-                email__icontains=request.POST.get('search_text')
-            ) | users.filter(
-                first_name__icontains=request.POST.get('search_text')
-            ) | users.filter(
-                last_name__icontains=request.POST.get('search_text')
-            )
-    context = {'users_list': users_list, 'roles': ROLE_CHOICE}
-    return render(request, 'dashboard/user/new_list.html', context)
+        return queryset
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(UserListView, self).get_context_data(*args, **kwargs)
+        context['roles'] = ROLE_CHOICE
+        return context
 
 
-@active_admin_required
-def add_user(request):
-    form = UserForm()
-    form_errors = {}
-    if request.method == 'POST':
-        form = UserForm(request.POST)
-        validate_user_role = UserRoleForm(request.POST)
-        if form.is_valid() and validate_user_role.is_valid():
-            user = form.save()
-            UserRole.objects.create(user=user, role=request.POST.get('role'))
-            messages.success(request, 'Successfully added your User')
-            data = {'error': False, 'response': 'Successfully added your User'}
+class UserCreateView(AdminOnlyMixin, CreateView):
+    template_name = "dashboard/user/new_add_user.html"
+    form_class = UserForm
+
+    def form_valid(self, form):
+        user = form.save()
+        UserRole.objects.create(user=user, role=form.cleaned_data.get('role'))
+        messages.success(self.request, 'Successfully added your User')
+        return JsonResponse({"error": False, "response": "Successfully added your User"})
+
+    def form_invalid(self, form):
+        return JsonResponse({"error": True, "response": form.errors})
+
+
+class UserUpdateView(AdminOnlyMixin, UpdateView):
+    template_name = "dashboard/user/new_add_user.html"
+    model = User
+    form_class = UserForm
+    pk = "pk"
+
+    def get_initial(self):
+        return {'role': self.object.userrole_set.last().role}
+
+    def form_valid(self, form):
+        user = form.save()
+        urole = UserRole.objects.filter(user=user).last()
+        if urole:
+            urole.role = form.cleaned_data.get('role')
+            urole.save()
         else:
-            form_errors['user_form'] = form.errors
-            form_errors['user_role_form'] = validate_user_role.errors
-            data = {'error': True, 'response': form_errors}
-        return HttpResponse(json.dumps(data))
-    context = {'form': form, 'roles': ROLE_CHOICE, 'add_user': True}
-    return render(request, 'dashboard/user/new_add_user.html', context)
+            UserRole.objects.create(user=user, role=form.cleaned_data.get('role'))
+        messages.success(self.request, 'Successfully Updated User "' + str(user) + '"')
+        return JsonResponse({'error': False, 'response': 'Successfully Updated User "' + str(user) + '"'})
+
+    def form_invalid(self, form):
+        return JsonResponse({'error': True, 'response': form.errors})
 
 
-@active_admin_required
-def edit_user(request, pk):
-    user = get_object_or_404(User, pk=pk)
-    user_role = UserRole.objects.filter(user_id=pk)
-    form = UserForm(instance=user)
-    form_errors = {}
-    if request.method == 'POST':
-        form = UserForm(request.POST, instance=user)
-        validate_user_role = UserRoleForm(request.POST)
-        if form.is_valid() and validate_user_role.is_valid():
-            user = form.save()
-            if user_role:
-                user_role = user_role[0]
-                user_role.role = request.POST.get('role')
-                user_role.save()
-            else:
-                user = User.objects.get(pk=pk)
-                UserRole.objects.create(user=user,
-                                        role=request.POST.get('role'))
-            messages.success(request, 'Successfully Updated User "' + str(user) + '"')
-            data = {'error': False, 'response': 'Successfully Updated User "' + str(user) + '"'}
-        else:
-            form_errors['user_form'] = form.errors
-            form_errors['user_role_form'] = validate_user_role.errors
-            data = {'error': True, 'response': form_errors}
-        return HttpResponse(json.dumps(data))
-    context = {'user': user, 'user_role': user_role,
-               'form': form, 'roles': ROLE_CHOICE, 'add_user': True}
-    return render(request, 'dashboard/user/new_add_user.html', context)
+class UserDeleteView(AdminOnlyMixin, View):
 
-
-def delete_user(request, pk):
-    users = User.objects.filter(pk=pk)
-    if users:
-        user = users[0]
+    def get(self, request, *args, **kwargs):
+        user = get_object_or_404(User, id=kwargs.get("pk"))
         user.delete()
-    else:
-        raise Http404
-    return HttpResponseRedirect(reverse('users'))
+        messages.success(request, 'User successfully deleted!')
+        return HttpResponseRedirect(reverse_lazy("users"))
 
 
 @active_admin_required
@@ -579,6 +528,25 @@ def bulk_actions_users(request):
                 return HttpResponse(json.dumps({'response': False}))
 
 
+class UserBulkActionsView(AdminOnlyMixin, View):
+
+    def get(self, request, *args, **kwargs):
+        if 'user_ids[]' in request.GET:
+            if request.GET.get('action') == 'True':
+                User.objects.filter(id__in=request.GET.getlist('user_ids[]')).update(is_active=True)
+                messages.success(request, 'Selected Users successfully updated as Active')
+            elif request.GET.get('action') == 'False':
+                User.objects.filter(id__in=request.GET.getlist('user_ids[]')).update(is_active=False)
+                messages.success(request, 'Selected Users successfully updated as Inactive')
+            elif request.GET.get('action') == 'Delete':
+                User.objects.filter(id__in=request.GET.getlist('user_ids[]')).delete()
+                messages.success(request, 'Selected Users successfully deleted!')
+            return JsonResponse({'response': True})
+        else:
+            messages.warning(request, 'Please select a record to perform the action')
+            return JsonResponse({'response': False})
+
+
 def edit_user_role(request, pk):
     user_role = UserRole.objects.filter(user_id=pk)
     if request.method == 'GET':
@@ -600,207 +568,160 @@ def edit_user_role(request, pk):
     return HttpResponse(json.dumps(data))
 
 
-@active_admin_required
-def pages(request):
-    pages_list = Page.objects.all()
-    context = {'pages_list': pages_list}
+class PagesListView(AdminMixin, ListView):
+    template_name = "dashboard/pages/new_list.html"
+    context_object_name = "pages_list"
 
-    if request.method == "POST":
-
-        if request.POST.get('select_status', ''):
-            if request.POST.get('select_status') == "True":
-                pages_list = pages_list.filter(is_active=True)
+    def get_queryset(self):
+        queryset = Page.objects.all()
+        if self.request.GET.get('select_status'):
+            if self.request.GET.get('select_status') == "True":
+                queryset = queryset.filter(is_active=True)
             else:
-                pages_list = pages_list.filter(is_active=False)
-        if request.POST.get('search_text'):
-            pages_list = pages_list.filter(
-                title__icontains=request.POST.get('search_text')
-            )
-
-        context = {'pages_list': pages_list}
-    return render(request, 'dashboard/pages/new_list.html', context)
+                queryset = queryset.filter(is_active=False)
+        if self.request.GET.get('search_text'):
+            queryset = queryset.filter(title__icontains=self.request.GET.get('search_text'))
+        return queryset
 
 
-@active_admin_required
-def add_page(request):
-    form = PageForm()
-    if request.method == 'POST':
-        form = PageForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Successfully added your page')
-            data = {'error': False, 'response': 'Successfully added your page'}
-        else:
-            data = {'error': True, 'response': form.errors}
-        return HttpResponse(json.dumps(data))
-    context = {'form': form}
-    return render(request, 'dashboard/pages/new_add_page.html', context)
+class PageCreateView(AdminMixin, CreateView):
+    template_name = "dashboard/pages/new_add_page.html"
+    form_class = PageForm
+
+    def form_valid(self, form):
+        form.save()
+        messages.success(self.request, 'Successfully added your page')
+        return JsonResponse({'error': False, 'response': 'Successfully added your page'})
+
+    def form_invalid(self, form):
+        return JsonResponse({'error': True, 'response': form.errors})
 
 
-@active_admin_required
-def edit_page(request, page_slug):
-    page = get_object_or_404(Page, slug=page_slug) # Page.objects.get(slug=page_slug)
+class PageUpdateView(AdminMixin, UpdateView):
+    template_name = "dashboard/pages/new_add_page.html"
+    model = Page
+    form_class = PageForm
+    slug_url_kwarg = "page_slug"
 
-    if request.user.is_superuser is True:
-        form = PageForm(instance=page)
+    def form_valid(self, form):
+        form.save()
+        messages.success(self.request, 'Successfully updated your page')
+        return JsonResponse({'error': False, 'response': 'Successfully updated your page'})
 
-        if request.method == 'POST':
-            form = PageForm(request.POST, instance=page)
-            if form.is_valid():
-                form.save()
-                messages.success(request, 'Successfully updated your page')
-                data = {'error': False, 'response': 'Successfully updated your page'}
-            else:
-                data = {'error': True, 'response': form.errors}
-            return HttpResponse(json.dumps(data))
-        context = {'form': form, 'page': page}
-        return render(request, 'dashboard/pages/new_add_page.html', context)
+    def form_invalid(self, form):
+        return JsonResponse({'error': True, 'response': form.errors})
 
 
-@active_admin_required
-def delete_page(request, page_slug):
-    page = get_object_or_404(Page, slug=page_slug)  # Page.objects.get(slug=page_slug)
-    if request.user.is_superuser is True:
+class PageDeleteView(AdminMixin, View):
+
+    def get(self, request, *args, **kwargs):
+        page = get_object_or_404(Page, slug=kwargs.get("page_slug"))
         page.delete()
         messages.success(request, 'Page successfully deleted!')
-        return HttpResponseRedirect(reverse('pages'))
-    else:
-        raise Http404
+        return HttpResponseRedirect(reverse_lazy("pages"))
 
 
-@active_admin_required
-def bulk_actions_pages(request):
-    if request.user.is_superuser:
-        if request.method == 'GET':
-            if 'page_ids[]' in request.GET:
-                if request.GET.get('action') == 'True':
-                    Page.objects.filter(
-                        id__in=request.GET.getlist('page_ids[]')).update(
-                        is_active=True)
-                    messages.success(request, 'Selected Pages successfully updated as Active')
-                elif request.GET.get('action') == 'False':
-                    Page.objects.filter(
-                        id__in=request.GET.getlist('page_ids[]')).update(
-                        is_active=False)
-                    messages.success(request, 'Selected Pages successfully updated as Inactive')
+class BulkActionsPageView(AdminMixin, View):
 
-                elif request.GET.get('action') == 'Delete':
-                    Page.objects.filter(
-                        id__in=request.GET.getlist('page_ids[]')).delete()
-                    messages.success(request, 'Selected Pages successfully deleted!')
-
-                return HttpResponse(json.dumps({'response': True}))
-            else:
-                messages.warning(request, 'Please select at-least one record to perform this action')
-                return HttpResponse(json.dumps({'response': False}))
-
-
-@active_admin_required
-def menus(request):
-    menu_list = Menu.objects.filter(parent=None)
-    context = {'menu_list': menu_list}
-
-    if request.method == "POST":
-
-        if request.POST.get('select_status', ''):
-            if request.POST.get('select_status') == "True":
-                menu_list = menu_list.filter(status=True)
-            else:
-                menu_list = menu_list.filter(status=False)
-        if request.POST.get('search_text'):
-            menu_list = menu_list.filter(
-                title__icontains=request.POST.get('search_text')
-            )
-
-        context = {'menu_list': menu_list}
-    return render(request, 'dashboard/menu/new_list.html', context)
-
-
-@active_admin_required
-def add_menu(request):
-    form = MenuForm()
-    if request.method == 'POST':
-        form = MenuForm(request.POST)
-
-        if form.is_valid():
-            menu_obj = form.save(commit=False)
-            menu_count = Menu.objects.filter(parent=menu_obj.parent).count()
-            menu_obj.lvl = menu_count + 1
-            if menu_obj.url[-1] != '/':
-                menu_obj.url = menu_obj.url + '/'
-            menu_obj.save()
-            messages.success(request, 'Successfully added menu.')
-            data = {'error': False, 'response': 'Successfully added menu.'}
+    def get(self, request, *args, **kwargs):
+        if 'page_ids[]' in request.GET:
+            if request.GET.get('action') == 'True':
+                Page.objects.filter(id__in=request.GET.getlist('page_ids[]')).update(is_active=True)
+                messages.success(request, 'Selected Pages successfully updated as Active')
+            elif request.GET.get('action') == 'False':
+                Page.objects.filter(id__in=request.GET.getlist('page_ids[]')).update(is_active=False)
+                messages.success(request, 'Selected Pages successfully updated as Inactive')
+            elif request.GET.get('action') == 'Delete':
+                Page.objects.filter(id__in=request.GET.getlist('page_ids[]')).delete()
+                messages.success(request, 'Selected Pages successfully deleted!')
+            return JsonResponse({'response': True})
         else:
-            data = {'error': True, 'response': form.errors}
-        return HttpResponse(json.dumps(data))
-    context = {'form': form, 'add_menu': True}
-    return render(request, 'dashboard/menu/new_manage.html', context)
+            messages.warning(request, 'Please select a record to perform this action')
+            return JsonResponse({'response': False})
 
 
-@active_admin_required
-def edit_menu(request, pk):
-    menu_obj = get_object_or_404(Menu, pk=pk)
-    form = MenuForm(instance=menu_obj)
-    current_parent = menu_obj.parent
-    current_lvl = menu_obj.lvl
+class MenuListView(AdminMixin, ListView):
+    template_name = "dashboard/menu/new_list.html"
+    context_object_name = "menu_list"
 
-    if request.method == 'POST':
-        form = MenuForm(request.POST, instance=menu_obj)
-        if form.is_valid():
-            updated_menu_obj = form.save(commit=False)
-            if updated_menu_obj.parent != current_parent:
-                if updated_menu_obj.parent.id == updated_menu_obj.id:
-                    data = {'error': True, 'message': 'you can not choose the same as parent'}
-                    return HttpResponse(json.dumps(data))
-
-                menu_count = Menu.objects.filter(
-                    parent=updated_menu_obj.parent).count()
-                updated_menu_obj.lvl = menu_count + 1
-                menu_max_lvl = Menu.objects.filter(
-                    parent=current_parent).aggregate(Max('lvl'))['lvl__max']
-                if menu_max_lvl != 1:
-                    for i in Menu.objects.filter(parent=current_parent, lvl__gt=current_lvl, lvl__lte=menu_max_lvl):
-                        i.lvl = i.lvl - 1
-                        i.save()
-            if updated_menu_obj.url[-1] != '/':
-                updated_menu_obj.url = updated_menu_obj.url + '/'
-            updated_menu_obj.save()
-
-            messages.success(request, 'Successfully updated menu')
-            data = {'error': False, 'response': 'Successfully updated menu'}
-        else:
-            data = {'error': True, 'response': form.errors}
-        return HttpResponse(json.dumps(data))
-    context = {'form': form, 'menu_obj': menu_obj}
-    return render(request, 'dashboard/menu/new_manage.html', context)
-
-
-@active_admin_required
-def bulk_actions_menu(request):
-    if request.user.is_superuser:
-        if request.method == 'GET':
-            if 'menu_ids[]' in request.GET:
-                if request.GET.get('action') == 'True':
-                    Menu.objects.filter(
-                        id__in=request.GET.getlist('menu_ids[]')).update(
-                        status=True)
-                    messages.success(request, "Selected Menu's successfully updated as Active")
-                elif request.GET.get('action') == 'False':
-                    Menu.objects.filter(
-                        id__in=request.GET.getlist('menu_ids[]')).update(
-                        status=False)
-                    messages.success(request, "Selected Menu's successfully updated as Inactive")
-
-                elif request.GET.get('action') == 'Delete':
-                    Menu.objects.filter(
-                        id__in=request.GET.getlist('menu_ids[]')).delete()
-                    messages.success(request, "Selected Menu's successfully deleted!")
-
-                return HttpResponse(json.dumps({'response': True}))
+    def get_queryset(self):
+        queryset = Menu.objects.filter(parent=None)
+        if self.request.GET.get('select_status'):
+            if self.request.GET.get('select_status') == "True":
+                queryset = queryset.filter(status=True)
             else:
-                messages.warning(request, 'Please select at-least one record to perform this action')
-                return HttpResponse(json.dumps({'response': False}))
+                queryset = queryset.filter(status=False)
+        if self.request.GET.get('search_text'):
+            queryset = queryset.filter(title__icontains=self.request.GET.get('search_text'))
+        return queryset
+
+
+class MenuCreateView(AdminMixin, CreateView):
+    template_name = "dashboard/menu/new_manage.html"
+    form_class = MenuForm
+
+    def form_valid(self, form):
+        menu_obj = form.save(commit=False)
+        menu_count = Menu.objects.filter(parent=menu_obj.parent).count()
+        menu_obj.lvl = menu_count + 1
+        if menu_obj.url[-1] != '/':
+            menu_obj.url = menu_obj.url + '/'
+        menu_obj.save()
+        messages.success(self.request, 'Successfully added menu.')
+        return JsonResponse({'error': False, 'response': 'Successfully added menu.'})
+
+    def form_invalid(self, form):
+        return JsonResponse({'error': True, 'response': form.errors})
+
+
+class MenuUpdateView(AdminMixin, UpdateView):
+    template_name = "dashboard/menu/new_manage.html"
+    model = Menu
+    pk = "pk"
+    form_class = MenuForm
+
+    def form_valid(self, form):
+        current_parent = self.object.parent
+        current_lvl = self.object.lvl
+        updated_menu_obj = form.save(commit=False)
+        if updated_menu_obj.parent != current_parent:
+            if updated_menu_obj.parent.id == updated_menu_obj.id:
+                return JsonResponse({'error': True, 'message': 'you can not choose the same as parent'})
+            menu_count = Menu.objects.filter(parent=updated_menu_obj.parent).count()
+            updated_menu_obj.lvl = menu_count + 1
+            menu_max_lvl = Menu.objects.filter(parent=current_parent).aggregate(Max('lvl'))['lvl__max']
+            if menu_max_lvl != 1:
+                for i in Menu.objects.filter(parent=current_parent, lvl__gt=current_lvl, lvl__lte=menu_max_lvl):
+                    i.lvl = i.lvl - 1
+                    i.save()
+        if updated_menu_obj.url[-1] != '/':
+            updated_menu_obj.url = updated_menu_obj.url + '/'
+        updated_menu_obj.save()
+
+        messages.success(self.request, 'Successfully updated menu')
+        return JsonResponse({'error': False, 'response': 'Successfully updated menu'})
+
+    def form_invalid(self, form):
+        return JsonResponse({'error': True, 'response': form.errors})
+
+
+class MenuBulkActionsView(AdminMixin, View):
+
+    def get(self, request, *args, **kwargs):
+        if 'menu_ids[]' in request.GET:
+            if request.GET.get('action') == 'True':
+                Menu.objects.filter(id__in=request.GET.getlist('menu_ids[]')).update(status=True)
+                messages.success(request, "Selected Menu's successfully updated as Active")
+            elif request.GET.get('action') == 'False':
+                Menu.objects.filter(id__in=request.GET.getlist('menu_ids[]')).update(status=False)
+                messages.success(request, "Selected Menu's successfully updated as Inactive")
+            elif request.GET.get('action') == 'Delete':
+                Menu.objects.filter(id__in=request.GET.getlist('menu_ids[]')).delete()
+                messages.success(request, "Selected Menu's successfully deleted!")
+            return JsonResponse({'response': True})
+        else:
+            messages.warning(request, 'Please select a record to perform this action')
+            return JsonResponse({'response': False})
 
 
 @active_admin_required
