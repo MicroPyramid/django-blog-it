@@ -935,18 +935,18 @@ def add_theme(request):
     return render(request, 'dashboard/themes/theme_add.html', context)
 
 
-class ThemeEditView(AdminMixin, UpdateView):
+class ThemeUpdateView(AdminMixin, UpdateView):
+    pk = 'pk'
     model = Theme
     form_class = BlogThemeForm
-    slug = 'theme_slug'
     template_name = "dashboard/themes/theme_add.html"
     success_url = reverse_lazy('themes')
 
     def form_valid(self, form):
-        self.blog_theme = form.save(commit=False)
+        blog_theme = form.save(commit=False)
         if self.request.user.is_superuser:
-            self.blog_theme.enabled = self.request.POST.get('enabled')
-        self.blog_theme.save()
+            blog_theme.enabled = self.request.POST.get('enabled')
+        blog_theme.save()
         messages.success(self.request, 'Successfully Updated your Theme')
         data = {'error': False, 'response': 'Successfully Updated your Theme',
                 'title': self.request.POST['name']}
@@ -954,13 +954,6 @@ class ThemeEditView(AdminMixin, UpdateView):
 
     def form_invalid(self, form):
         return JsonResponse({'error': True, 'response': form.errors})
-
-    def get_context_data(self, **kwargs):
-        context = super(ThemeCreateView, self).get_context_data(**kwargs)
-        form = BlogThemeForm(self.request.GET)
-        context['form'] = form
-        context['edit_theme'] = True
-        return context
 
 
 @active_admin_required
@@ -997,9 +990,10 @@ class DeleteThemeView(AdminMixin, View):
 
     def get(self, request, *args, **kwargs):
         theme = get_object_or_404(Theme, id=kwargs.get('pk'))
-        if theme:
-            theme.delete()
-            return HttpResponseRedirect(reverse_lazy('themes'))
+        if request.user.is_superuser is True:
+            if theme:
+                theme.delete()
+                return HttpResponseRedirect(reverse_lazy('themes'))
 
 
 @active_admin_required
