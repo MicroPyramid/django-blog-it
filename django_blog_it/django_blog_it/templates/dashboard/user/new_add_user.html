@@ -19,17 +19,49 @@
       {% csrf_token %}
       <div class="row form_row no_row_margin">
         <div class="col-md-12">
-          {% for field in form %}
-            <div class="form-group">
-              <label>{{ field.label }} :</label>
-              <div class="controls">
-                {{ field }}
-                {% if field.help_text %}
-                <p class="help-inline"><small>{{ field.help_text }}</small></p>
+          <div class="col-md-6">
+            {% for field in form %}
+              {% if field.name != 'email' and field.name != 'is_active' %}
+                <div class="form-group col-md-12">
+                  <label>{{ field.label }} :</label>
+                  <div class="controls">
+                    {{ field }}
+                    {% if field.help_text %}
+                    <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                    {% endif %}
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+          <div class="col-md-6">
+            {% for field in form %}
+                {% if field.name == 'email' %}
+                  <div class="form-group col-md-12">
+                    <label>{{ field.label }} :</label>
+                    <div class="controls">
+                      {{ field }}
+                      {% if field.help_text %}
+                      <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                      {% endif %}
+                    </div>
+                  </div>
                 {% endif %}
-              </div>
-            </div>
-          {% endfor %}
+                {% if field.name == 'is_active' %}
+                  <div class="form-group col-md-12">
+                    <label>{{ field.label }}</label>
+                    <div class="controls">
+                      <select class="form-control" id="id_is_active" name="is_active">
+                        <option value="True" {% if field.value %}selected{% endif %} >Active</option>
+                        <option value="False" {% if not field.value %}selected{% endif %}>Inactive</option>
+                      </select>
+                      {% if field.help_text %}
+                      <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                      {% endif %}
+                    </div>
+                  </div>
+                {% endif %}
+            {% endfor %}
         </div>
         <br clear="all">
         <div class=" col-md-12 buttons_row text-left">

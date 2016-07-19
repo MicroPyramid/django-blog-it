@@ -1,5 +1,5 @@
 from django import forms
-from .models import Post, Category, Page, Menu, ContactUsSettings, ROLE_CHOICE
+from .models import Post, Category, Page, Menu, ContactUsSettings, ROLE_CHOICE, Theme
 from django.template.defaultfilters import slugify
 # for authentication
 from django.contrib.auth import authenticate
@@ -155,8 +155,27 @@ class MenuForm(forms.ModelForm):
                     'class': 'form-control', "placeholder": "Please enter your Menu " + field.capitalize()
                 })
 
+
 class ContactUsSettingsForm(forms.ModelForm):
 
     class Meta:
         model = ContactUsSettings
         exclude = ()
+
+
+class BlogThemeForm(forms.ModelForm):
+
+    class Meta:
+        model = Theme
+        exclude = ('slug',)
+        widgets = {
+            'description': forms.Textarea(attrs={'class': 'form-control'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(BlogThemeForm, self).__init__(*args, **kwargs)
+        for field in iter(self.fields):
+            self.fields[field].widget.attrs.update({
+                'class': 'form-control',
+                "placeholder": "Please enter your Theme " + field.capitalize()
+            })

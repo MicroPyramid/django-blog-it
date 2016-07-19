@@ -5,6 +5,20 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 
 
+class Theme(models.Model):
+    name = models.CharField(max_length=20, unique=True)
+    slug = models.CharField(max_length=20, unique=True)
+    description = models.CharField(max_length=500)
+    enabled = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.name)
+        super(Theme, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
+
+
 class Category(models.Model):
     name = models.CharField(max_length=20, unique=True)
     slug = models.CharField(max_length=20, unique=True)
