@@ -118,7 +118,12 @@
             placeholder: "Select an option"
         }
       );
-
+      {% block delete_confirmation %}
+        // for delete confirmation
+        $('*[data-confirm="true"]').on('click', function() {
+            return confirm("Are you sure?");
+        });
+      {% endblock delete_confirmation %}
       // for pagination
       $('.pagination li a.active').each(function(){
           $(this).css('background', '#337AB7');

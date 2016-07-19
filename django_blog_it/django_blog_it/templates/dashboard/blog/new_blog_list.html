@@ -105,7 +105,7 @@
                                     {% if request.user.is_superuser or request.user|get_user_role_name != 'Author' %}
                                     {% ifequal blog.status "Trashed" %}
                                       <a href='#' class="restore manage_blog" action="restore" title="Restore from trash"><i class="fa fa-refresh"></i> Restore</a>
-                                      <a href='#' class="delete manage_blog" action="delete" title="Permanently delete from trash"><i class="fa fa-trash-o"></i> Delete</a>
+                                      <a href='#' class="delete manage_blog" action="delete" title="Permanently delete from trash" data-confirm="true"><i class="fa fa-trash-o"></i> Delete</a>
                                     {% else %}
                                       <a href='#' class="trash manage_blog" action="trash" title="Move to Trash"><i class="fa fa-times"></i> Trash</a>
                                     {% endifequal %}
@@ -131,13 +131,24 @@
         </div>
 
     {% endblock %}
+    {% block delete_confirmation %}
+    {% endblock delete_confirmation %}
     {% block js_script %}
         <script type="text/javascript">
 
             $('.dashboard').addClass('active');
             $('.manage_blog').click(function(e){
               e.preventDefault();
-              $(this).siblings("form.blog_trash_form").children("input[name='action']").val($(this).attr('action'));
+              if ($(this).attr('action') == 'delete'){
+                var confirmation = confirm("Are you sure?");
+                if (confirmation){
+                    $(this).siblings("form.blog_trash_form").children("input[name='action']").val($(this).attr('action'));
+                }else {
+                    return
+                }
+              }else{
+                $(this).siblings("form.blog_trash_form").children("input[name='action']").val($(this).attr('action'));
+              }
               $(this).siblings("form.blog_trash_form").submit();
             });
 

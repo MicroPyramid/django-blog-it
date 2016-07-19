@@ -88,7 +88,7 @@
                         {% if request.user.is_superuser %}
                         <td class="actions">
                             <a href="{% url 'edit_menu' menu_list.id %}" class="edit"><i class="fa fa-edit"></i> Edit</a>
-                            <a href="#" class="delete"><i class="fa fa-trash"></i> Delete</a>
+                            <a href="#" class="delete" data-confirm="true"><i class="fa fa-trash"></i> Delete</a>
                         </td>
                         {% endif %}
                     </tr>

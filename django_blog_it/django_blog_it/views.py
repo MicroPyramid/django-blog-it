@@ -899,7 +899,12 @@ class ThemeCreateView(AdminMixin, CreateView):
     def form_valid(self, form):
         self.blog_theme = form.save(commit=False)
         if self.request.user.is_superuser:
-            self.blog_theme.enabled = self.request.POST.get('enabled')
+            if self.request.POST.get('enabled') == 'True':
+                Theme.objects.filter(
+                    enabled=True).update(enabled=False)
+                self.blog_theme.enabled = True
+            elif self.request.POST.get('enabled') == 'False':
+                self.blog_theme.enabled = False
         self.blog_theme.save()
         messages.success(self.request, 'Successfully Created your Theme')
         data = {'error': False, 'response': 'Successfully Created your Theme',
@@ -924,7 +929,14 @@ def add_theme(request):
         form = BlogThemeForm(request.POST)
 
         if form.is_valid():
-            form.save()
+            blog_theme = form.save(commit=False)
+            if self.request.POST.get('enabled') == 'True':
+                Theme.objects.filter(
+                    enabled=True).update(enabled=False)
+                blog_theme.enabled = True
+            elif self.request.POST.get('enabled') == 'False':
+                blog_theme.enabled = False
+            blog_theme.save()
             messages.success(request, 'Successfully added your Theme')
             data = {'error': False,
                     'response': 'Successfully added your Theme'}
@@ -945,7 +957,12 @@ class ThemeUpdateView(AdminMixin, UpdateView):
     def form_valid(self, form):
         blog_theme = form.save(commit=False)
         if self.request.user.is_superuser:
-            blog_theme.enabled = self.request.POST.get('enabled')
+            if self.request.POST.get('enabled') == 'True':
+                Theme.objects.filter(
+                    enabled=True).update(enabled=False)
+                blog_theme.enabled = True
+            elif self.request.POST.get('enabled') == 'False':
+                blog_theme.enabled = False
         blog_theme.save()
         messages.success(self.request, 'Successfully Updated your Theme')
         data = {'error': False, 'response': 'Successfully Updated your Theme',
@@ -965,7 +982,14 @@ def edit_theme(request, theme_slug):
         if request.method == 'POST':
             form = BlogThemeForm(request.POST, instance=theme)
             if form.is_valid():
-                form.save()
+                blog_theme = form.save(commit=False)
+                if self.request.POST.get('enabled') == 'True':
+                    Theme.objects.filter(
+                        enabled=True).update(enabled=False)
+                    blog_theme.enabled = True
+                elif self.request.POST.get('enabled') == 'False':
+                    blog_theme.enabled = False
+                blog_theme.save()
                 messages.success(request, 'Successfully updated your Theme')
                 data = {'error': False,
                         'response': 'Successfully updated your Theme'}
@@ -1001,12 +1025,7 @@ def bulk_actions_themes(request):
     if request.user.is_superuser:
         if request.method == 'GET':
             if 'theme_ids[]' in request.GET:
-                if request.GET.get('action') == 'True':
-                    Theme.objects.filter(
-                        id__in=request.GET.getlist('theme_ids[]')).update(
-                        enabled=True)
-                    messages.success(request, "Selected Theme's successfully updated as Enabled")
-                elif request.GET.get('action') == 'False':
+                if request.GET.get('action') == 'False':
                     Theme.objects.filter(
                         id__in=request.GET.getlist('theme_ids[]')).update(
                         enabled=False)

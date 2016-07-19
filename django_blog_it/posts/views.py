@@ -29,7 +29,7 @@ def index(request):
     blog_posts = Post.objects.filter(status='Published', category__is_active=True).order_by('-updated_on')
     # blog_posts = [post for post in blog_posts if post.category.is_active]
     context = list({'blog_posts': blog_posts}.items()) + list(categories_tags_lists().items())
-    return render(request, 'posts/index.html', context)
+    return render(request, 'posts/new_index.html', context)
 
 
 def blog_post_view(request, blog_slug):
@@ -48,7 +48,7 @@ def selected_category(request, category_slug):
     category = get_object_or_404(Category, slug=category_slug)
     blog_posts = Post.objects.filter(category__slug=category_slug, category__is_active=True, status='Published')
     context = list({'blog_posts': blog_posts}.items()) + list(categories_tags_lists().items())
-    return render(request, 'posts/index.html', context + [("category", category)])
+    return render(request, 'posts/new_index.html', context + [("category", category)])
 
 
 def selected_tag(request, tag_slug):
@@ -58,7 +58,7 @@ def selected_tag(request, tag_slug):
         status='Published', category__is_active=True
     )
     context = list({'blog_posts': blog_posts}.items()) + list(categories_tags_lists().items()) + [("tag", tag)]
-    return render(request, 'posts/index.html', context)
+    return render(request, 'posts/new_index.html', context)
 
 
 def archive_posts(request, year, month):
@@ -69,9 +69,10 @@ def archive_posts(request, year, month):
             updated_on__year=year,
             updated_on__month=month
         ).order_by('-updated_on')
+    print blog_posts
     blog_posts = [post for post in blog_posts if post.category.is_active]
     context = list({'blog_posts': blog_posts}.items()) + list(categories_tags_lists().items()) + [("date", date)]
-    return render(request, 'posts/index.html', context)
+    return render(request, 'posts/new_index.html', context)
 
 
 def page_view(request, page_slug):
