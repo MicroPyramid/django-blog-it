@@ -90,7 +90,7 @@
             <td class="text-center post_count"><a href="#"><span data-toggle="tooltip" data-placement="bottom" title="Drafted">{{ user|user_drafted_posts }}</span> / <span data-toggle="tooltip" data-placement="bottom" title="Published">{{ user|user_published_posts }}</span></a></td>
             <td class="actions">
               <a href="{% url 'edit_user' user.id %}" class="edit"><i class="fa fa-edit"></i> Edit</a>
-              <a href="{% url 'delete_user' user.id %}" class="delete"><i class="fa fa-trash-o"></i> Delete</a>
+              <a href="{% url 'delete_user' user.id %}" class="delete" data-confirm="true"><i class="fa fa-trash-o"></i> Delete</a>
             </td>
             {% endif %}
           </tr>
@@ -139,10 +139,10 @@
       }, 'json');
   })
 
-  $('.pagination li a').click(function(event){
-      event.preventDefault();
-      $('#users_data').attr('action', $(this).attr('href'));
-      $('#users_data').submit();
-  });
+  // $('.pagination li a').click(function(event){
+  //     event.preventDefault();
+  //     $('#users_data').attr('action', $(this).attr('href'));
+  //     $('#users_data').submit();
+  // });
 </script>
 {% endblock %}

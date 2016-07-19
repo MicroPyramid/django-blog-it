@@ -19,17 +19,51 @@
       {% csrf_token %}
       <div class="row form_row no_row_margin">
         <div class="col-md-12">
-          {% for field in form %}
-            <div class="form-group">
-              <label>{{ field.label }} :</label>
-              <div class="controls">
-                {{ field }}
-                {% if field.help_text %}
-                <p class="help-inline"><small>{{ field.help_text }}</small></p>
+          <div class="col-md-6">
+            {% for field in form %}
+              {% if field.name != 'content' %}
+                {% if field.name == 'is_active' %}
+                  <div class="form-group">
+                    <label>{{ field.label }}</label>
+                    <div class="controls">
+                      <select class="form-control" id="id_is_active" name="is_active">
+                        <option value="True" {% if field.value %}selected{% endif %} >Active</option>
+                        <option value="False" {% if not field.value %}selected{% endif %}>Inactive</option>
+                      </select>
+                      {% if field.help_text %}
+                      <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                      {% endif %}
+                    </div>
+                  </div>
+                {% else %}
+                  <div class="form-group">
+                    <label>{{ field.label }}</label>
+                    <div class="controls">
+                      {{ field }}
+                      {% if field.help_text %}
+                      <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                      {% endif %}
+                    </div>
+                  </div>
                 {% endif %}
-              </div>
-            </div>
-          {% endfor %}
+              {% endif %}
+            {% endfor %}
+          </div>
+          <div class="col-md-6">
+            {% for field in form %}
+              {% if field.name == 'content' %}
+                <div class="form-group">
+                  <label>Description</label>
+                  <div class="controls">
+                    {{ field }}
+                    {% if field.help_text %}
+                    <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                    {% endif %}
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
         </div>
         <div class=" col-md-12 buttons_row text-left">
           <div class="form-group">
@@ -46,7 +80,10 @@
 {% block js_script %}
 <script type="text/javascript">
 CKEDITOR.config.allowedContent = true;
-  var editor = CKEDITOR.replace('content', {});
+  var editor = CKEDITOR.replace('content', {
+    uiColor: '#ffffff',
+    height:260,
+  });
 
   $('#post-form').submit(function(event){
       event.preventDefault();

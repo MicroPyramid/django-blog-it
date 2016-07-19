@@ -94,4 +94,26 @@ urlpatterns = [
     url(r'^dashboard/bulk_actions_themes/$',
         bulk_actions_themes, name='bulk_actions_themes'),
 
+    # themes management
+    url(r'^dashboard/themes/$', ThemesList.as_view(), name='themes'),
+    # url(r'^dashboard/themes/add/$', add_theme, name='add_theme'),
+    url(r'^dashboard/themes/add/$',
+        ThemeCreateView.as_view(),
+        name='add_theme'),
+    url(r'^dashboard/themes/(?P<theme_slug>[-\w]+)/$',
+        ThemeDetailView.as_view(),
+        name='view_theme'),
+    url(r'^dashboard/themes/edit/(?P<pk>[0-9]+)/$',
+        ThemeUpdateView.as_view(),
+        name='edit_theme'),
+    # url(r'^dashboard/themes/edit/(?P<theme_slug>[-\w]+)/$',
+    #     edit_theme, name='edit_theme'),
+    url(r'^dashboard/themes/delete/(?P<pk>[-\w]+)/$',
+        DeleteThemeView.as_view(),
+        name='delete_theme'),
+    # url(r'^dashboard/themes/delete/(?P<theme_slug>[-\w]+)/$',
+    #     delete_theme, name='delete_theme'),
+    url(r'^dashboard/bulk_actions_themes/$',
+        bulk_actions_themes, name='bulk_actions_themes'),
+
 ] + static(MEDIA_URL, document_root=MEDIA_ROOT)
