@@ -2,9 +2,11 @@ import os
 from datetime import datetime
 from django.shortcuts import render, get_list_or_404, get_object_or_404
 from django_blog_it.django_blog_it.models import Post, Category, Tags, Page
+from django_blog_it.django_blog_it.forms import ContactForm
 from django.db.models import Count
 from django_blog_it import settings
-from django.http import Http404
+from django.contrib import messages
+from django.http import Http404, JsonResponse
 from django.views.generic import ListView, DetailView
 from microurl import google_mini
 
@@ -154,3 +156,26 @@ class PageView(DetailView):
     model = Page
     slug_url_kwarg = "page_slug"
     context_object_name = "page"
+
+
+def contact_us(request):
+    form = ContactForm()
+    if request.POST:
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            # email sending
+            messages.success(
+                request, 'Successfully Sent your contact us details.')
+            data = {'error': False,
+                    'response': 'Successfully Sent your contact us details.'}
+        else:
+            data = {'error': True, 'response': form.errors}
+        return JsonResponse(data)
+
+    context = {"description": settings.BLOG_DESCRIPTION,
+               "title": settings.BLOG_TITLE,
+               "keywords": settings.BLOG_KEYWORDS,
+               "author": settings.BLOG_AUTHOR,
+               "contact_form": form}
+    context.update(categories_tags_lists())
+    return render(request, 'posts/contact.html', context)

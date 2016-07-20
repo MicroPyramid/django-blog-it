@@ -735,15 +735,16 @@ def configure_contact_us(request):
     if request.method == 'POST':
         if contact_us_settings:
             form = ContactUsSettingsForm(instance=contact_us_settings,
-                                         data=request.POST
-                                         )
+                                         data=request.POST)
         else:
             form = ContactUsSettingsForm(request.POST)
 
         if form.is_valid():
             form.save()
-            messages.success(request, 'Successfully saved your contact us details.')
-            data = {'error': False, 'response': 'Successfully saved your contact us details.'}
+            messages.success(
+                request, 'Successfully saved your contact us details.')
+            data = {'error': False,
+                    'response': 'Successfully saved your contact us details.'}
         else:
             data = {'error': True, 'response': form.errors}
         return HttpResponse(json.dumps(data))
@@ -753,7 +754,7 @@ def configure_contact_us(request):
         else:
             form = ContactUsSettingsForm()
     context = {'form': form}
-    return render(request, 'dashboard/contact_us_settings.html', context)
+    return render(request, 'dashboard/new_contact_us_settings.html', context)
 
 
 class ThemesList(AdminMixin, ListView):
