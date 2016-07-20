@@ -1,8 +1,10 @@
+{% load staticfiles %}
+{% load blog_tags %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Blog - {% block title %}Home{% endblock %}</title>
+  <title{% blog_title as blogtitle %}{{ blogtitle }} - {% block title %}Home{% endblock %}</title>
     {% block description %}
     <link rel="canonical" href="{{ request.build_absolute_uri }}"/>
     <meta property="og:url" content="{{ request.build_absolute_uri }}" />
@@ -16,9 +18,6 @@
     <meta name="author" content="{{ author }}" />
     <meta name="robots" content="index, follow">
     {% endblock %}
-
-  {% load staticfiles %}
-  {% load blog_tags %}
   <!-- Latest compiled and minified CSS -->
   <link href='https://fonts.googleapis.com/css?family=Poppins:400,300,500,600,700' rel='stylesheet' type='text/css'>
   <link rel="stylesheet" href="{% static 'css/style.css' %}" type="text/css">
