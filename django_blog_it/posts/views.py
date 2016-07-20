@@ -8,9 +8,13 @@ from django_blog_it.django_blog_it.forms import ContactForm
 from django.db.models import Count
 from django_blog_it import settings
 from django.contrib import messages
-from django.http import Http404, JsonResponse
+from django.http import JsonResponse
+from django.core.mail import EmailMultiAlternatives
+from django.template import Context
 from django.views.generic import ListView, DetailView
+from django.shortcuts import render_to_response
 from microurl import google_mini
+from django_blog_it.django_blog_it.models import ContactUsSettings
 
 
 def categories_tags_lists():
@@ -173,6 +177,34 @@ def contact_us(request):
                 if not json.loads(r.text)['success']:
                     return JsonResponse({'error': True, 'response': {"captcha": "Invalid captcha"}})
             # email sending
+            contact_us = ContactUsSettings.objects.last()
+            # email to admin
+            subject = 'Blog Suggestions - ' + form.cleaned_data.get("contact_name")
+            from_email = form.cleaned_data.get("contact_email")
+            context = Context({
+                "NAME_OF_USER": form.cleaned_data.get("contact_name"),
+                "WEBSITE_OF_USER": form.cleaned_data.get("contact_website"),
+                "USER_DESCRIPTION": form.cleaned_data.get("content"),
+                "BLOG_TITLE": settings.BLOG_TITLE
+            })
+            html_content = render_to_response('emails/email_to_admin.html', context).content.decode("utf-8")
+            msg = EmailMultiAlternatives(subject, subject, from_email, [contact_us.email_admin])
+            # msg.attach(html_content, 'text/html')
+            msg.attach_alternative(html_content, "text/html")
+            msg.send()
+            # email to user
+            subject = 'Thank you for contacting us - ' + settings.BLOG_TITLE
+            from_email = contact_us.from_email
+            context = Context({
+                "BODY_USER": contact_us.body_user,
+                "BLOG_TITLE": settings.BLOG_TITLE
+            })
+            html_content = render_to_response('emails/email_to_user.html', context).content.decode("utf-8")
+            headers = {'Reply-To': contact_us.reply_to_email}
+            msg = EmailMultiAlternatives(subject, subject, from_email, [form.cleaned_data.get("contact_email")], headers=headers)
+            msg.attach_alternative(html_content, "text/html")
+            msg.send()
+            # end
             messages.success(
                 request, 'Successfully Sent your contact us details.')
             data = {'error': False,
