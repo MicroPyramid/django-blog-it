@@ -1,4 +1,5 @@
 import datetime
+import os
 from django import template
 from django_blog_it.django_blog_it.models import Post, Tags, Menu
 from django_blog_it.django_blog_it.views import get_user_role
@@ -82,3 +83,8 @@ def blog_title():
 @register.filter
 def category_posts(category):
     return Post.objects.filter(category=category).count()
+
+
+@register.assignment_tag
+def google_analytics_id():
+    return os.getenv("GOOGLE_ANALYTICS_ID")
