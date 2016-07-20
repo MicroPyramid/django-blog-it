@@ -44,6 +44,7 @@ class UserForm(forms.ModelForm):
             user.save()
         return user
 
+
 class AdminLoginForm(forms.Form):
     username = forms.CharField(max_length=254)
     password = forms.CharField(label="Password", widget=forms.PasswordInput)

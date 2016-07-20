@@ -8,7 +8,6 @@ MEDIA_ROOT = settings.MEDIA_ROOT if settings.MEDIA_ROOT else os.path.join(BASE_D
 
 DISQUS_SHORTNAME = getattr(settings, 'DISQUS_SHORTNAME', '')
 
-
 BLOG_TITLE = "My Django Blog"
 BLOG_DESCRIPTION = "Rapid development of web applications"
 BLOG_KEYWORDS = "django, python, webframework"

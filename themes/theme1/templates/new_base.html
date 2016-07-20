@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Blog - {% block title %}Home{% endblock %}</title>
+    {% block description %}
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:title"  content="Home - micro-blog - simple blog package - MicroPyramid." />
+    <meta property="og:description" content="micro-blog - simple blog package - MicroPyramid." />
+    <meta name="description" content="micro-blog - simple blog package - MicroPyramid." />
+    <meta name="keywords" content="simple" />
+    {% endblock %}
+
+  {% load staticfiles %}
+  {% load blog_tags %}
+  <!-- Latest compiled and minified CSS -->
+  <link href='https://fonts.googleapis.com/css?family=Poppins:400,300,500,600,700' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" type="text/css">
+  <link rel="stylesheet" href="{% static 'css/frontend_main.css' %}" type="text/css">
+  <!--
+  -->
+  <link rel="stylesheet" href="{% static 'css/menu/sm-core-css.css' %}" type="text/css">
+  <link rel="stylesheet" href="{% static 'css/menu/sm-blue.css' %}" type="text/css">
+  <!-- for online links -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="{% static 'css/menu/dropdown_submenu.css' %}" type="text/css">
+  {% block extra_css %}
+  {% endblock %}
+</head>
+<body>
+  <header>
+  {% block menu_block %}
+    {% load_menu %}
+  {% endblock %}
+  </header>
+  <div class="main_container">
+    <div class="container">
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{% if message.tags %}{{ message.tags }}{% endif %} alert-dismissible my_alert" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <strong>{% if message.tags %}{{ message.tags|title }} !{% endif %}</strong> {{ message }}.
+          </div>
+        {% endfor %}
+      {% endif %}
+      {% block main_content %}
+      <div class="row" id="head_style">
+        {% block content %}
+        {% endblock content %}
+      </div>
+      {% endblock main_content %}
+
+      <footer class="my_footer">
+      </footer>
+
+    </div>
+  </div>
+  <!-- end div container -->
+
+  <!-- for online links  -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.smartmenus/1.0.0/jquery.smartmenus.js"></script> -->
+
+  <script type="text/javascript">
+
+    // for pagination
+    // $(function() {
+    //   $('#main-menu').smartmenus({
+    //     subMenusSubOffsetX: 1,
+    //     subMenusSubOffsetY: -8
+    //   });
+    // });
+    $( document ).ready(function() {
+      $('#myModal').modal('hide');
+      $('#myModal').on('hidden', function () {
+        // Load up a new modal...
+        $('#myModal1').modal('show')
+      })
+    });
+
+    $('.pagination li a.active').each(function(){
+        $(this).css('background', '#337AB7');
+        $(this).css('color', '#fff');
+    });
+
+   if($('.pagination li:first').find('a span').text() == '<<'){
+        $('.pagination li:first').find('a span').text('First');
+    }
+
+    if($('.pagination li:nth-child(2)').find('a span').text() == '<'){
+        $('.pagination li:nth-child(2)').find('a span').text('Prev');
+    }
+
+    if($('.pagination li:last').find('a span').text() == '>>'){
+        $('.pagination li:last').find('a span').text('Last');
+    }
+    if($('.pagination li:nth-last-child(2)').find('a span').text() == '>'){
+        $('.pagination li:nth-last-child(2)').find('a span').text('Next');
+    }
+
+  </script>
+
+  <script type="text/javascript">
+    $(document).ready(function() {
+            setTimeout(function() {
+                  $('.my_alert').fadeOut(2000, function(){
+                });
+                  }, 3000);
+
+    });
+    //window.setTimeout(function() {
+    //    $(".alert-message").fadeTo(500, 0).slideUp(500, function(){
+    //        $(this).remove();
+    //    });
+    //}, 5000);
+  </script>
+
+  {% block js_script %}
+
+  {% endblock %}
+
+</body>
+</html>

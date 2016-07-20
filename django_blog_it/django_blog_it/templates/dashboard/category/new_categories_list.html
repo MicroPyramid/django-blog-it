@@ -81,7 +81,7 @@
                             </td>
                             {% if request.user.is_superuser or request.user == category.user or request.user|get_user_role_name != 'Author' %}
                                 <td class="actions">
-                                    <a href="{% url 'edit_category' category_slug=category.slug %}" class="edit"><i class="fa fa-edit"></i> Edit</a><a href="{% url 'delete_category' category_slug=category.slug %}" class="delete"><i class="fa fa-trash-o"></i> Delete</a>
+                                    <a href="{% url 'edit_category' category_slug=category.slug %}" class="edit"><i class="fa fa-edit"></i> Edit</a><a href="{% url 'delete_category' category_slug=category.slug %}" class="delete" data-confirm="true"><i class="fa fa-trash-o"></i> Delete</a>
                                 </td>
                             {% endif %}
                         </tr>

@@ -85,7 +85,8 @@ class SelectedCategoryView(ListView):
             "description": self.category.description,
             "title": self.category.name,
             "keywords": self.category.meta_keywords,
-            "author": author
+            "author": author,
+            "category": self.category,
         })
         context.update(categories_tags_lists())
         return context
@@ -106,6 +107,7 @@ class SelectedTagView(ListView):
             "title": self.tag.name,
             "keywords": self.tag.name,
             "author": settings.BLOG_AUTHOR,
+            "tag": self.tag,
         })
         context.update(categories_tags_lists())
         return context
@@ -129,6 +131,7 @@ class ArchiveView(ListView):
             "title": "Blog Archive - " + self.date.strftime("%B %Y"),
             "keywords": "Blog Archive - " + self.date.strftime("%B %Y"),
             "author": settings.BLOG_AUTHOR,
+            "date": self.date,
         })
         context.update(categories_tags_lists())
         return context
