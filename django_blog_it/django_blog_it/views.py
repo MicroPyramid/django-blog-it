@@ -39,6 +39,11 @@ class AdminLoginView(FormView):
     template_name = "dashboard/new_admin-login.html"
     form_class = AdminLoginForm
 
+    def dispatch(self, request, *args, **kwargs):
+        if(request.user.is_authenticated and request.user.is_active):
+            return HttpResponseRedirect(reverse("blog"))
+        return super(AdminLoginView, self).dispatch(request, *args, **kwargs)
+
     def form_valid(self, form):
         user = authenticate(username=form.cleaned_data['username'],
                             password=form.cleaned_data['password'])
