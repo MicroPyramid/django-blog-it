@@ -163,6 +163,15 @@ class ContactUsSettingsForm(forms.ModelForm):
         model = ContactUsSettings
         exclude = ()
 
+    def __init__(self, *args, **kwargs):
+        super(ContactUsSettingsForm, self).__init__(*args, **kwargs)
+        for field in iter(self.fields):
+            if max(enumerate(iter(self.fields)))[0] != field:
+                self.fields[field].widget.attrs.update({
+                    'class': 'form-control',
+                    "placeholder": "Please enter your " + field.replace('_', ' ').capitalize()
+                })
+
 
 class BlogThemeForm(forms.ModelForm):
 
@@ -179,4 +188,36 @@ class BlogThemeForm(forms.ModelForm):
             self.fields[field].widget.attrs.update({
                 'class': 'form-control',
                 "placeholder": "Please enter your Theme " + field.capitalize()
+            })
+
+
+class ContactForm(forms.Form):
+    contact_name = forms.CharField(max_length=128, required=True)
+    contact_email = forms.EmailField(required=True)
+    contact_website = forms.URLField(
+        max_length=200, required=True, help_text="Enter Your Website URL here")
+    content = forms.CharField(
+        required=True,
+        widget=forms.Textarea
+    )
+
+    def clean(self):
+        cleaned_data = super(ContactForm, self).clean()
+        contact_website = cleaned_data.get('contact_website')
+
+        if contact_website and not contact_website.startswith('http://'):
+            contact_website = 'http://' + contact_website
+            cleaned_data['contact_website'] = contact_website
+
+        return cleaned_data
+
+    def __init__(self, *args, **kwargs):
+        super(ContactForm, self).__init__(*args, **kwargs)
+        self.fields['contact_name'].widget.attrs['placeholder'] = "Enter Your Name (Required)"
+        self.fields['contact_email'].widget.attrs['placeholder'] = "Enter Your Email (Required)"
+        self.fields['contact_website'].widget.attrs['placeholder'] = "Enter Your Website (Required)"
+        self.fields['content'].widget.attrs['placeholder'] = "What do you want to say?"
+        for field in iter(self.fields):
+            self.fields[field].widget.attrs.update({
+                'class': 'form-control'
             })

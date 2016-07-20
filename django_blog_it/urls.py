@@ -7,6 +7,7 @@ from .settings import MEDIA_URL, MEDIA_ROOT
 
 urlpatterns = [
     url(r'^$', Home.as_view(), name='index'),
+    url(r'^blog/contact/$', contact_us, name='contact_us'),
     url(r'^blog/category/(?P<category_slug>[-\w]+)/$', SelectedCategoryView.as_view(), name='selected_category'),
     url(r'^blog/tags/(?P<tag_slug>[-\w]+)/$', SelectedTagView.as_view(), name='selected_tag'),
     url(r'^blog/(?P<year>\w{0,})/(?P<month>\w{0,})/$', ArchiveView.as_view(), name='archive_posts'),
@@ -115,5 +116,8 @@ urlpatterns = [
     #     delete_theme, name='delete_theme'),
     url(r'^dashboard/bulk_actions_themes/$',
         bulk_actions_themes, name='bulk_actions_themes'),
+
+    url(r'^dashboard/contactUs/$',
+        configure_contact_us, name='configure_contact_us'),
 
 ] + static(MEDIA_URL, document_root=MEDIA_ROOT)
