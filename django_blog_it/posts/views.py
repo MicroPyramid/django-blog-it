@@ -1,11 +1,12 @@
+import os
 from datetime import datetime
 from django.shortcuts import render, get_list_or_404, get_object_or_404
 from django_blog_it.django_blog_it.models import Post, Category, Tags, Page
 from django.db.models import Count
 from django_blog_it import settings
 from django.http import Http404
-# cbv
 from django.views.generic import ListView, DetailView
+from microurl import google_mini
 
 
 def categories_tags_lists():
@@ -48,6 +49,15 @@ class BlogPostView(DetailView):
     slug_url_kwarg = "blog_slug"
     context_object_name = "blog_name"
 
+    def get_mini_url(self, request):
+        url = request.build_absolute_uri()
+        try:
+            api_key = os.getenv('API_KEY')
+            url = google_mini(url, api_key)
+        except Exception:
+            pass
+        return url
+
     def get_context_data(self, *args, **kwargs):
         context = super(BlogPostView, self).get_context_data(*args, **kwargs)
         user = self.object.user
@@ -64,6 +74,8 @@ class BlogPostView(DetailView):
             "title": self.object.title,
             "keywords": self.object.keywords,
             "author": author,
+            "short_url": self.get_mini_url(self.request),
+            "blog_title": settings.BLOG_TITLE
         })
         context.update(categories_tags_lists())
         return context
