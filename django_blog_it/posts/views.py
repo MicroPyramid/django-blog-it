@@ -1,4 +1,6 @@
 import os
+import requests
+import json
 from datetime import datetime
 from django.shortcuts import render, get_list_or_404, get_object_or_404
 from django_blog_it.django_blog_it.models import Post, Category, Tags, Page
@@ -163,6 +165,13 @@ def contact_us(request):
     if request.POST:
         form = ContactForm(request.POST)
         if form.is_valid():
+            if os.getenv("GOOGLE_CAPTCHA_SECRET_KEY"):
+                payload = {'secret': os.getenv("GOOGLE_CAPTCHA_SECRET_KEY"),
+                           'response': request.POST.get('g-recaptcha-response'),
+                           'remoteip': request.META.get('REMOTE_ADDR')}
+                r = requests.get('https://www.google.com/recaptcha/api/siteverify', params=payload)
+                if not json.loads(r.text)['success']:
+                    return JsonResponse({'error': True, 'response': {"captcha": "Invalid captcha"}})
             # email sending
             messages.success(
                 request, 'Successfully Sent your contact us details.')
@@ -177,5 +186,7 @@ def contact_us(request):
                "keywords": settings.BLOG_KEYWORDS,
                "author": settings.BLOG_AUTHOR,
                "contact_form": form}
+    if os.getenv("GOOGLE_CAPTCHA_SITE_KEY"):
+        context.update({"GOOGLE_CAPTCHA_SITE_KEY": os.getenv("GOOGLE_CAPTCHA_SITE_KEY")})
     context.update(categories_tags_lists())
     return render(request, 'posts/contact.html', context)

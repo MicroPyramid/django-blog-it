@@ -4,11 +4,17 @@
   <meta charset="UTF-8">
   <title>Blog - {% block title %}Home{% endblock %}</title>
     {% block description %}
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta property="og:title"  content="Home - micro-blog - simple blog package - MicroPyramid." />
-    <meta property="og:description" content="micro-blog - simple blog package - MicroPyramid." />
-    <meta name="description" content="micro-blog - simple blog package - MicroPyramid." />
-    <meta name="keywords" content="simple" />
+    <link rel="canonical" href="{{ request.build_absolute_uri }}"/>
+    <meta property="og:url" content="{{ request.build_absolute_uri }}" />
+    <meta property="og:image" content="{{ og_image }}" />
+    <meta property="og:title"  content="{{ title }}" />
+    <meta property="og:description" content="{{ description|truncatechars:160 }}" />
+
+    <meta name="title" content="{{ title }}" />
+    <meta name="description" content="{{ description|truncatechars:160 }}" />
+    <meta name="keywords" content="{{ keywords }}" />
+    <meta name="author" content="{{ author }}" />
+    <meta name="robots" content="index, follow">
     {% endblock %}
 
   {% load staticfiles %}
