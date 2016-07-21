@@ -480,7 +480,9 @@ class UserUpdateView(AdminOnlyMixin, UpdateView):
     pk = "pk"
 
     def get_initial(self):
-        return {'role': self.object.userrole_set.last().role}
+        if self.object.userrole_set.last():
+            return {'role': self.object.userrole_set.last().role}
+        return {}
 
     def form_valid(self, form):
         user = form.save()
