@@ -1,4 +1,5 @@
 include README.rst
+include loaders.py
 recursive-include django_blog_it/django_blog_it/templates *
 recursive-include django_blog_it/django_blog_it/static *
 recursive-include django_blog_it/posts/templates *
