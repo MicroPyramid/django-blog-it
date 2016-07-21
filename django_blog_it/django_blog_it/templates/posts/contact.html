@@ -12,9 +12,6 @@
                 <span class="head_line"></span>
                 <span class="heading">Contact Us</span>
               </div>
-              <div class="contact_title">
-                <p href="#">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry’s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled </p>
-              </div>
               <form action="" method="post" id="contact_form" role="form">
                 {% csrf_token %}
                   <div class="contact_form">
@@ -30,6 +27,9 @@
                             </div>
                           </div>
                         {% endfor %}
+                        {% if GOOGLE_CAPTCHA_SITE_KEY %}
+                        <div id="id_captcha" class="g-recaptcha" data-sitekey="{{GOOGLE_CAPTCHA_SITE_KEY}}"></div>
+                        {% endif %}
                       </div>
                       <br clear="all">
                       <div class=" col-md-12 buttons_row text-left">
@@ -47,6 +47,9 @@
   <!-- blog_detail_container ends here -->
 {% endblock %}
 {% block js_script %}
+{% if GOOGLE_CAPTCHA_SITE_KEY %}
+<script src='https://www.google.com/recaptcha/api.js'></script>
+{% endif %}
    <script>
     $( document ).ready(function() {
       $('#myModal').modal('hide');

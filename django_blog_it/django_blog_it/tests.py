@@ -234,7 +234,7 @@ class django_blog_it_views_get(TestCase):
         self.assertTrue(user_login)
 
         response = self.client.get('/dashboard/')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 302)
 
         response = self.client.get('/dashboard/blog/')
         self.assertEqual(response.status_code, 200)
