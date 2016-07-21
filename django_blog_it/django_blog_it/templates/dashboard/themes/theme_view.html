@@ -1,0 +1,26 @@
+{% extends 'dashboard/new_base.html' %}
+    {% block title %}Theme View{% endblock %}
+    {% block content %}
+
+    <div class="row no_row_margin table_row">
+        <div class="container-fluid">
+            <table align="center" class="table table-bordered">
+                <thead>
+                    <th>
+                        Title: {{ theme.name }}
+                    </th>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Description</strong>: {{ theme.description|safe }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Status</strong>: {% if theme.enabled %}Enabled{% else %}Disabled{% endif %}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- end div of row -->
+
+    {% endblock %}

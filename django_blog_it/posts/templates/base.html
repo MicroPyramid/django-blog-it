@@ -1,8 +1,9 @@
+{% load blog_tags %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8">
-    <title>Blog - {% block title %}Home{% endblock %}</title>
+    <title>{% blog_title as blogtitle %}{{ blogtitle }}- {% block title %}Home{% endblock %}</title>
     {% load staticfiles %}
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}" type="text/css">

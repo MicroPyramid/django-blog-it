@@ -1,7 +1,9 @@
 import datetime
+import os
 from django import template
 from django_blog_it.django_blog_it.models import Post, Tags, Menu
 from django_blog_it.django_blog_it.views import get_user_role
+from django_blog_it import settings
 
 register = template.Library()
 
@@ -50,7 +52,7 @@ def get_range(value):
     return range(value)
 
 
-@register.inclusion_tag('posts/nav_menu.html', takes_context=True)
+@register.inclusion_tag('posts/new_nav_menu.html', takes_context=True)
 def load_menu(context):
     context['menu'] = Menu.objects.filter(parent=None, status=True).order_by("lvl")
     return context
@@ -71,3 +73,18 @@ def user_published_posts(user):
     return Post.objects.filter(user=user,
                                status='Published'
                                ).count()
+
+
+@register.assignment_tag
+def blog_title():
+    return settings.BLOG_TITLE
+
+
+@register.filter
+def category_posts(category):
+    return Post.objects.filter(category=category).count()
+
+
+@register.assignment_tag
+def google_analytics_id():
+    return os.getenv("GOOGLE_ANALYTICS_ID")

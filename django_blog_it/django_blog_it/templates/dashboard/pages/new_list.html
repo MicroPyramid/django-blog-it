@@ -35,13 +35,12 @@
       {% endif %}
     </div>
     <div class="col-md-6 filter_right">
-      <form action="" method="post" id="pages_data" class="form-inline">
-          {% csrf_token %}
-          <input type="text" placeholder="Filter By Title" value="{% if request.POST %}{{ request.POST.search_text }}{% endif %}" name='search_text' class="form-control" />
+      <form action="" method="GET" id="pages_data" class="form-inline">
+          <input type="text" placeholder="Filter By Title" value="{{ request.GET.search_text }}" name='search_text' class="form-control" />
           <select class="form-control" id="select_status" name="select_status">
               <option value="" default>Status</option>
-              <option value="True" {% ifequal request.POST.select_status "True" %}Selected{% endifequal %}>Active</option>
-              <option value="False" {% ifequal request.POST.select_status "False" %}Selected{% endifequal %}>Inactive</option>
+              <option value="True" {% ifequal request.GET.select_status "True" %}Selected{% endifequal %}>Active</option>
+              <option value="False" {% ifequal request.GET.select_status "False" %}Selected{% endifequal %}>Inactive</option>
           </select>
           <button class="btn btn-default" type="submit">Apply Filter</button>
       </form>
@@ -81,7 +80,7 @@
             <td class="actions">
               <a href="{% url 'page_view' page_slug=page.slug %}" class="view"><i class="fa fa-eye"></i> View</a>
               <a href="{% url 'edit_page' page_slug=page.slug %}" class="edit"><i class="fa fa-edit"></i> Edit</a>
-              <a href="{% url 'delete_page' page_slug=page.slug %}" class="delete"><i class="fa fa-trash-o"></i> Delete</a>
+              <a href="{% url 'delete_page' page_slug=page.slug %}" class="delete" data-confirm="true"><i class="fa fa-trash-o"></i> Delete</a>
             </td>
             {% endif %}
           </tr>
@@ -131,10 +130,10 @@
       }, 'json');
   })
 
-  $('.pagination li a').click(function(event){
-      event.preventDefault();
-      $('#pages_data').attr('action', $(this).attr('href'));
-      $('#pages_data').submit();
-  });
+  // $('.pagination li a').click(function(event){
+  //     event.preventDefault();
+  //     $('#pages_data').attr('action', $(this).attr('href'));
+  //     $('#pages_data').submit();
+  // });
 </script>
 {% endblock %}

@@ -38,7 +38,7 @@ DATABASES = {
         'NAME': BASE_DIR + 'sqlite3.db'
     }
 }
-
+ALLOWED_HOSTS = ["127.0.0", "localhost"]
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
@@ -75,3 +75,4 @@ TEMPLATES = [
 
     },
 ]
+DEBUG = True
