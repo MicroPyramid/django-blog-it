@@ -5,6 +5,7 @@
 <head>
   <meta charset="UTF-8">
   <title{% blog_title as blogtitle %}{{ blogtitle }} - {% block title %}Home{% endblock %}</title>
+  <link rel="shortcut icon" href="{% static 'images/favicon.png' %}">
     {% block description %}
     <link rel="canonical" href="{{ request.build_absolute_uri }}"/>
     <meta property="og:url" content="{{ request.build_absolute_uri }}" />
