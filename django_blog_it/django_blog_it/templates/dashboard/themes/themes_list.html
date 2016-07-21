@@ -68,11 +68,7 @@
                             <td class="text-center"><input name="bulk_actions" class="bulk_actions" value="{{ theme.id }}" type="checkbox"></td>
                             <td><a href="{% url 'view_theme' theme_slug=theme.slug %}">{{ theme.name }}</a></td>
                             <td class="status_on_off text-center">
-                                {% if theme.enabled %}
-                                    <a href="#" class="status_on" data-toggle="tooltip" data-placement="bottom" title="Enabled"><i class="fa fa-circle" aria-hidden="true"></i></a>
-                                {% else %}
-                                    <a href="#" class="status_off" data-toggle="tooltip" data-placement="bottom" title="Disabled"><i class="fa fa-circle" aria-hidden="true"></i></a>
-                                {% endif %}
+                                <a href="{% url 'theme_status_update' theme.slug %}" {% if theme.enabled %}class="status_on" title="Enabled"{% else %}class="status_off" title="Disabled"{% endif %} data-toggle="tooltip" data-placement="bottom"><i class="fa fa-circle" aria-hidden="true"></i></a>
                             </td>
                             {% if request.user.is_superuser or request.user|get_user_role_name != 'Author' %}
                                 <td class="actions">
