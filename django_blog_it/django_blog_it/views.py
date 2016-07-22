@@ -1009,3 +1009,91 @@ def bulk_actions_themes(request):
             else:
                 messages.warning(request, 'Please select at-least one record to perform this action')
                 return HttpResponse(json.dumps({'response': False}))
+
+
+# social login
+def google_login(request):
+    if 'code' in request.GET:
+        params = {
+            'grant_type': 'authorization_code',
+            'code': request.GET.get('code'),
+            'redirect_uri': request.scheme + "://" + request.META['HTTP_HOST'] + reverse('google_login'),
+            'client_id': os.getenv("GP_CLIENT_ID"),
+            'client_secret': os.getenv("GP_CLIENT_SECRET")
+        }
+
+        info = requests.post("https://accounts.google.com/o/oauth2/token", data=params)
+        info = info.json()
+        url = 'https://www.googleapis.com/oauth2/v1/userinfo'
+        params = {'access_token': info['access_token']}
+        kw = dict(params=params, headers={}, timeout=60)
+        response = requests.request('GET', url, **kw)
+        user_document = response.json()
+        link = "https://plus.google.com/" + user_document['id']
+        picture = user_document['picture'] if 'picture' in user_document.keys() else ""
+        dob = user_document['birthday'] if 'birthday' in user_document.keys() else ""
+        gender = user_document['gender'] if 'gender' in user_document.keys() else ""
+        link = user_document['link'] if 'link' in user_document.keys() else link
+
+        name = urlparse(picture).path.split('/')[-1]
+        # content = urllib.urlretrieve(picture)
+        content = urllib.request.urlretrieve(picture)
+        if request.user.is_authenticated():
+            user = request.user
+        else:
+            user = User.objects.filter(email=user_document['email']).first()
+        if user:
+            user.first_name = user_document['name']
+            user.last_name = user_document['family_name']
+            user.dob = dob
+            user.save()
+        else:
+            username = user_document['email'].split('@')[0]
+            if User.objects.filter(username=username):
+                username = user_document['email'].split('@')[0] + '-' + get_random_string(length=3)
+            user = User.objects.create(
+                username=username,
+                email=user_document['email'],
+                first_name=user_document['name'],
+                last_name=user_document['family_name'],
+            )
+            user.set_password(get_random_string())
+        # user.profile_pic.save(name, File(open(content[0])), save=True)
+        user.profile_pic.save(name, File(open(content[0], 'rb')), save=True)
+
+        user.save()
+        google, created = Google.objects.get_or_create(user=user)
+        google.user = user
+        google.google_url = link
+        google.verified_email = user_document['verified_email']
+        google.google_id = user_document['id']
+        google.family_name = user_document['family_name']
+        google.name = user_document['name']
+        google.given_name = user_document['given_name']
+        google.dob = dob
+        google.email = user_document['email']
+        google.gender = gender
+        google.picture = picture
+        google.save()
+        if request.user.is_authenticated():
+            return HttpResponseRedirect(reverse('organization:index'))
+        else:
+            user = auth.authenticate(username=user_document['email'])
+            auth.login(request, user)
+            user_org = UserOrganization.objects.filter(user=user)
+            user_org.update(status='active', user_confirmed=True)
+
+            if request.user.is_authenticated:
+                user_login.send(sender=None, request=request, user=request.user)
+            if not user.user_first_login:
+                return HttpResponseRedirect(reverse('user:change_password'))
+            else:
+                return HttpResponseRedirect('/')
+    else:
+        rty = "https://accounts.google.com/o/oauth2/auth?client_id=" + os.getenv("GP_CLIENT_ID")\
+              + "&response_type=code"
+        rty += "&scope=https://www.googleapis.com/auth/userinfo.profile \
+               https://www.googleapis.com/auth/userinfo.email&redirect_uri=" + request.scheme\
+               + "://" + request.META['HTTP_HOST'] + reverse('google_login')\
+               + "&state=1235dfghjkf123"
+        return HttpResponseRedirect(rty)
