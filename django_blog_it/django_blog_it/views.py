@@ -14,7 +14,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.files import File
 
 from .models import Menu, Post, PostHistory, Category, Tags, Image_File, \
-    STATUS_CHOICE, ROLE_CHOICE, UserRole, Page, Theme, Google
+    STATUS_CHOICE, ROLE_CHOICE, UserRole, Page, Theme, Google, Facebook
 from .forms import *
 # from django_blog_it import settings
 from django.conf import settings
@@ -1093,4 +1093,86 @@ def google_login(request):
                https://www.googleapis.com/auth/userinfo.email&redirect_uri=" + request.scheme\
                + "://" + request.META['HTTP_HOST'] + reverse('google_login')\
                + "&state=1235dfghjkf123"
+        return HttpResponseRedirect(rty)
+
+
+def facebook_login(request):
+    if 'code' in request.GET:
+        accesstoken = get_access_token_from_code(request.GET['code'], 'https://' + request.META['HTTP_HOST'] + reverse('facebook_login'), os.getenv("FB_APP_ID"), os.getenv("FB_SECRET"))
+        if 'error' in accesstoken.keys():
+            messages.error(request, "Sorry, Your session has been expired")
+            return render(request, '404.html')
+        graph = GraphAPI(accesstoken['access_token'])
+        accesstoken = graph.extend_access_token(os.getenv("FB_APP_ID"), os.getenv("FB_SECRET"))['accesstoken']
+        hometown = profile['hometown']['name'] if 'hometown' in profile.keys() else ''
+        location = profile['location']['name'] if 'location' in profile.keys() else ''
+        bday = datetime.strptime(profile['birthday'], '%m/%d/%Y').strftime('%Y-%m-%d') if 'birthday' in profile.keys() else '1970-09-09'
+
+        if 'email' in profile.keys():
+            user, created = User.objects.get_or_create(
+                username=profile['email'],
+                email=profile['email'],
+                first_name=profile['first_name'],
+                last_name=profile['last_name'],
+                last_login=timezone.now()
+            )
+            if created:
+                role = UserRole.objects.filter(user=user).last()
+                if not role and user.is_superuser:
+                    UserRole.objects.create(user=user, role="Admin")
+                elif not role:
+                    UserRole.objects.create(user=user, role="Author")
+            fb = Facebook.objects.filter(user=user).last()
+            if not fb:
+                Facebook.objects.create(
+                    user=user,
+                    facebook_url=profile['link'],
+                    facebook_id=profile['id'],
+                    first_name=profile['first_name'],
+                    last_name=profile['last_name'],
+                    verified=profile['verified'],
+                    name=profile['name'],
+                    language=profile['locale'],
+                    hometown=hometown,
+                    email=profile['email'],
+                    gender=profile['gender'],
+                    dob=bday,
+                    location=location,
+                    timezone=profile['timezone'],
+                    accesstoken=accesstoken
+                )
+            else:
+                fb.user = user,
+                fb.facebook_url = profile['link'],
+                fb.facebook_id = profile['id'],
+                fb.first_name = profile['first_name'],
+                fb.last_name = profile['last_name'],
+                fb.verified = profile['verified'],
+                fb.name = profile['name'],
+                fb.language = profile['locale'],
+                fb.hometown = hometown,
+                fb.email = profile['email'],
+                fb.gender = profile['gender'],
+                fb.dob = bday,
+                fb.location = location,
+                fb.timezone = profile['timezone'],
+                fb.accesstoken = accesstoken
+                fb.save()
+            if not request.user.is_authenticated():
+                if not hasattr(user, 'backend'):
+                    for backend in settings.AUTHENTICATION_BACKENDS:
+                        if user == load_backend(backend).get_user(user.pk):
+                            user.backend = backend
+                            break
+                if hasattr(user, 'backend'):
+                    auth.login(request, user)
+            messages.success(request, "Loggedin successfully")
+            return HttpResponseRedirect(reverse('blog'))
+        else:
+            message.error(request, "Sorry, We didnt find your email id through facebook")
+            return render(request, '404.html')
+    elif 'error' in request.GET:
+        print(request.GET)
+    else:
+        rty = "https://graph.facebook.com/oauth/authorize?client_id=" + os.getenv("FB_APP_ID") + "&redirect_uri=" + 'https://' + request.META['HTTP_HOST'] + reverse('facebook_login') + "&scope=manage_pages,read_stream, user_about_me, user_birthday, user_location, user_work_history, user_hometown, user_website, email, user_likes, user_groups"
         return HttpResponseRedirect(rty)
