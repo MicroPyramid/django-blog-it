@@ -102,7 +102,7 @@
                                     {% if blog|is_deletable_by:request.user or request.user|get_user_role_name != 'Author' %}
                                         <a href="{% url 'edit_blog' blog_slug=blog.slug %}" class="edit"><i class="fa fa-edit"></i> Edit</a>
                                     {% endif %}
-                                    {% if request.user.is_superuser or request.user|get_user_role_name != 'Author' %}
+                                    {% if request.user.is_superuser or request.user|get_user_role_name != 'Author' or blog.user == request.user %}
                                     {% ifequal blog.status "Trashed" %}
                                       <a href='#' class="restore manage_blog" action="restore" title="Restore from trash"><i class="fa fa-refresh"></i> Restore</a>
                                       <a href='#' class="delete manage_blog" action="delete" title="Permanently delete from trash" data-confirm="true"><i class="fa fa-trash-o"></i> Delete</a>

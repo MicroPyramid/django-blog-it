@@ -33,6 +33,7 @@ Edit
                 </div>
               {% endif %}
             {% endfor %}
+            {% if form.instance.id %}
             <div class="form-group">
               <label>History:</label>
               <div class="controls">
@@ -45,6 +46,7 @@ Edit
                 <p class="help-inline"><small>Revert to previous edits</small></p>
               </div>
             </div>
+            {% endif %}
           </div>
           <div class="col-md-6">
             {% for field in form %}
