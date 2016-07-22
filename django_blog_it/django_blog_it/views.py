@@ -115,6 +115,13 @@ class PostCreateView(AdminMixin, CreateView):
     template_name = "dashboard/blog/new_blog_add.html"
     success_url = '/dashboard/blog/'
 
+    def get_form_kwargs(self):
+        kwargs = super(PostCreateView, self).get_form_kwargs()
+        role = get_user_role(self.request.user)
+        role = role if role in dict(ROLE_CHOICE).keys() else None
+        kwargs["user_role"] = role
+        return kwargs
+
     def form_valid(self, form):
         self.blog_post = form.save(commit=False)
         self.blog_post.user = self.request.user
@@ -144,26 +151,22 @@ class PostCreateView(AdminMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super(PostCreateView, self).get_context_data(**kwargs)
-        form = BlogPostForm(self.request.GET,
-                            is_superuser=self.request.user.is_superuser)
         tags_list = Tags.objects.all()
         categories_list = Category.objects.filter(is_active=True)
-
-        context['form'] = form
         context['status_choices'] = STATUS_CHOICE
-
         context['categories_list'] = categories_list
         context['tags_list'] = tags_list
         context['add_blog'] = True
         return context
 
 
-class PostEditView(UpdateView):
+class PostEditView(AdminMixin, UpdateView):
     model = Post
     success_url = '/dashboard/blog/'
-    slug_field = 'slug'
+    slug_url_kwarg = 'blog_slug'
     template_name = "dashboard/blog/new_blog_add.html"
     form_class = BlogPostForm
+    context_object_name = "blog_name"
 
     def dispatch(self, request, *args, **kwargs):
         if request.POST:
@@ -174,8 +177,12 @@ class PostEditView(UpdateView):
                     return JsonResponse({"content": history_post.content})
         return super(PostEditView, self).dispatch(request, *args, **kwargs)
 
-    def get_object(self):
-        return get_object_or_404(Post, slug=self.kwargs['blog_slug'])
+    def get_form_kwargs(self):
+        kwargs = super(PostEditView, self).get_form_kwargs()
+        role = get_user_role(self.request.user)
+        role = role if role in dict(ROLE_CHOICE).keys() else None
+        kwargs["user_role"] = role
+        return kwargs
 
     def form_invalid(self, form):
         return JsonResponse({'error': True, 'response': form.errors})
@@ -184,7 +191,7 @@ class PostEditView(UpdateView):
         previous_status = self.get_object().status
         previous_content = self.get_object().content
         self.blog_post = form.save(commit=False)
-        self.blog_post.user = self.request.user
+        # self.blog_post.user = self.request.user
         if self.request.user.is_superuser or get_user_role(self.request.user) != 'Author':
             self.blog_post.status = self.request.POST.get('status')
         else:
@@ -220,15 +227,7 @@ class PostEditView(UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super(PostEditView, self).get_context_data(**kwargs)
-        form = BlogPostForm(instance=self.get_object(),
-                            is_superuser=self.request.user.is_superuser,
-                            user_role=get_user_role(self.request.user),
-                            initial={'tags': ','.join([tag.name for tag in self.get_object().tags.all()])}
-                            )
         categories_list = Category.objects.filter(is_active=True)
-
-        context['form'] = form
-        context['blog_name'] = self.get_object()
         context['status_choices'] = STATUS_CHOICE,
         context['categories_list'] = categories_list
         context['history_list'] = self.get_object().history.all()

@@ -1,8 +1,29 @@
 import datetime
+import os
 from django.db import models
 from django.template.defaultfilters import slugify
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.mail import send_mail
+
+
+ROLE_CHOICE = (
+    ('Admin', 'Admin'),
+    ('Publisher', 'Publisher'),
+    ('Author', 'Author'),
+)
+
+STATUS_CHOICE = (
+    ('Drafted', 'Drafted'),
+    ('Published', 'Published'),
+    ('Rejected', 'Rejected'),
+    ('Trashed', 'Trashed'),
+)
+
+
+class UserRole(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL)
+    role = models.CharField(max_length=10, choices=STATUS_CHOICE)
 
 
 class Theme(models.Model):
@@ -68,14 +89,6 @@ def create_tag_slug(tempslug):
             return tempslug
 
 
-STATUS_CHOICE = (
-    ('Drafted', 'Drafted'),
-    ('Published', 'Published'),
-    ('Rejected', 'Rejected'),
-    ('Trashed', 'Trashed'),
-)
-
-
 class Post(models.Model):
     title = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=100, unique=True)
@@ -98,6 +111,7 @@ class Post(models.Model):
                 self.slug = create_slug(tempslug)
         else:
             self.slug = create_slug(tempslug)
+            self.email_to_admins_on_post_create()
 
         super(Post, self).save(*args, **kwargs)
 
@@ -121,6 +135,22 @@ class Post(models.Model):
 
     def remove_activity(self):
         self.history.all().delete()
+
+    def email_to_admins_on_post_create(self):
+        email = os.getenv("DEFAULT_EMAIL")
+        if not self.id and email:
+            admin_roles = UserRole.objects.select_related().filter(role="Admin")
+            admin_emails = [admin_role.user.email for admin_role in admin_roles]
+            user = self.user
+            author_name = user.first_name + user.last_name if user.first_name else user.email
+            text = "New blog post has been created by {0} with the name {1} in the category {2}.".format(author_name, self.title, self.category.name)
+            print(send_mail(
+                subject="New Blog Post created",
+                message=text,
+                from_email=email,
+                recipient_list=admin_emails,
+                fail_silently=False,
+            ))
 
 
 def create_slug(tempslug):
@@ -156,17 +186,6 @@ class Image_File(models.Model):
 
     def __str__(self):
         return self.date_created
-
-ROLE_CHOICE = (
-    ('Admin', 'Admin'),
-    ('Publisher', 'Publisher'),
-    ('Author', 'Author'),
-)
-
-
-class UserRole(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL)
-    role = models.CharField(max_length=10, choices=STATUS_CHOICE)
 
 
 class Page(models.Model):
