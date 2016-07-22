@@ -31,11 +31,11 @@
           $.post(".", $("#admin_login_form").serialize(), function(data){
               if(data.error){
                   $('p.login_error_required').remove();
-                  for (var key in data.response) {
+                  for (var key in data.errors) {
                     if (key == '__all__'){
-                      $('#'+key).after("<p class='login_error_required text-center'>&nbsp;&nbsp; * " + data.response[key] + "</p>");
+                      $('#'+key).after("<p class='login_error_required text-center'>&nbsp;&nbsp; * " + data.errors[key] + "</p>");
                     }else{
-                      $('#'+key).after("<p class='login_error_required'>&nbsp;&nbsp; * " + data.response[key] + "</p>");
+                      $('#'+key).after("<p class='login_error_required'>&nbsp;&nbsp; * " + data.errors[key] + "</p>");
                     }
                   }
               }else{

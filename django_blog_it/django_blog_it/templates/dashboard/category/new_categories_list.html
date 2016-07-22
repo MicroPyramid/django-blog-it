@@ -70,11 +70,7 @@
                             <td class="text-center"><input name="bulk_actions" class="bulk_actions" value="{{ category.id }}" type="checkbox"></td>
                             <td><a href="#">{{ category.name }}</a></td>
                             <td class="status_on_off text-center">
-                                {% if category.is_active %}
-                                    <a href="#" class="status_on" data-toggle="tooltip" data-placement="bottom" title="Active"><i class="fa fa-circle" aria-hidden="true"></i></a>
-                                {% else %}
-                                    <a href="#" class="status_off" data-toggle="tooltip" data-placement="bottom" title="In-Active"><i class="fa fa-circle" aria-hidden="true"></i></a>
-                                {% endif %}
+                                <a href="{% url 'category_status_update' category.slug %}" {% if category.is_active %}class="status_on" title="Active"{% else %}class="status_off" title="In-Active"{% endif %} data-toggle="tooltip" data-placement="bottom"><i class="fa fa-circle" aria-hidden="true"></i></a>
                             </td>
                             <td class="post_count text-center">
                                 <a href="#">{{ category.category_posts }}</a>
