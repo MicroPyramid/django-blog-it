@@ -1,3 +1,4 @@
+import uuid
 import json
 from PIL import Image
 import os
@@ -6,15 +7,17 @@ from django.db.models.aggregates import Max
 from django.shortcuts import render, render_to_response, get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.contrib import messages
-from django.contrib.auth import logout, authenticate, login
+from django.contrib import auth
+from django.contrib.auth import logout, authenticate, login, load_backend
 from django.contrib.auth.decorators import user_passes_test, login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files import File
 
 from .models import Menu, Post, PostHistory, Category, Tags, Image_File, \
-    STATUS_CHOICE, ROLE_CHOICE, UserRole, Page, Theme
+    STATUS_CHOICE, ROLE_CHOICE, UserRole, Page, Theme, Google
 from .forms import *
-from django_blog_it import settings
+# from django_blog_it import settings
+from django.conf import settings
 try:
     from django.contrib.auth import get_user_model
     User = get_user_model()
@@ -1009,3 +1012,85 @@ def bulk_actions_themes(request):
             else:
                 messages.warning(request, 'Please select at-least one record to perform this action')
                 return HttpResponse(json.dumps({'response': False}))
+
+
+# social login
+def google_login(request):
+    if 'code' in request.GET:
+        params = {
+            'grant_type': 'authorization_code',
+            'code': request.GET.get('code'),
+            'redirect_uri': request.scheme + "://" + request.META['HTTP_HOST'] + reverse('google_login'),
+            'client_id': os.getenv("GP_CLIENT_ID"),
+            'client_secret': os.getenv("GP_CLIENT_SECRET")
+        }
+        info = requests.post("https://accounts.google.com/o/oauth2/token", data=params)
+        info = info.json()
+        url = 'https://www.googleapis.com/oauth2/v1/userinfo'
+        params = {'access_token': info['access_token']}
+        kw = dict(params=params, headers={}, timeout=60)
+        response = requests.request('GET', url, **kw)
+        user_document = response.json()
+        link = "https://plus.google.com/" + user_document['id']
+        picture = user_document['picture'] if 'picture' in user_document.keys() else ""
+        dob = user_document['birthday'] if 'birthday' in user_document.keys() else ""
+        gender = user_document['gender'] if 'gender' in user_document.keys() else ""
+        link = user_document['link'] if 'link' in user_document.keys() else link
+
+        if request.user.is_authenticated():
+            user = request.user
+        else:
+            user = User.objects.filter(email=user_document['email']).first()
+        if user:
+            user.first_name = user_document['name']
+            user.last_name = user_document['family_name']
+            user.dob = dob
+            user.save()
+        else:
+            user = User.objects.create(
+                username=user_document['email'],
+                email=user_document['email'],
+                first_name=user_document['name'],
+                last_name=user_document['family_name'],
+            )
+            user.set_password(uuid.uuid4())
+        user.save()
+        google, created = Google.objects.get_or_create(user=user)
+        google.user = user
+        google.google_url = link
+        google.verified_email = user_document['verified_email']
+        google.google_id = user_document['id']
+        google.family_name = user_document['family_name']
+        google.name = user_document['name']
+        google.given_name = user_document['given_name']
+        google.dob = dob
+        google.email = user_document['email']
+        google.gender = gender
+        google.picture = picture
+        google.save()
+
+        if created:
+            role = UserRole.objects.filter(user=user).last()
+            if not role and user.is_superuser:
+                UserRole.objects.create(user=user, role="Admin")
+            elif not role:
+                UserRole.objects.create(user=user, role="Author")
+        if not request.user.is_authenticated():
+            if not hasattr(user, 'backend'):
+                for backend in settings.AUTHENTICATION_BACKENDS:
+                    if user == load_backend(backend).get_user(user.pk):
+                        user.backend = backend
+                        break
+            if hasattr(user, 'backend'):
+                auth.login(request, user)
+        messages.success(request, "Loggedin successfully")
+        return HttpResponseRedirect(reverse('blog'))
+
+    else:
+        rty = "https://accounts.google.com/o/oauth2/auth?client_id=" + os.getenv("GP_CLIENT_ID")\
+              + "&response_type=code"
+        rty += "&scope=https://www.googleapis.com/auth/userinfo.profile \
+               https://www.googleapis.com/auth/userinfo.email&redirect_uri=" + request.scheme\
+               + "://" + request.META['HTTP_HOST'] + reverse('google_login')\
+               + "&state=1235dfghjkf123"
+        return HttpResponseRedirect(rty)
