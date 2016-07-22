@@ -77,11 +77,7 @@
                         </td>
                         <td>{{ menu_list.url }}</td>
                         <td class="status_on_off text-center">
-                            {% if menu_list.status %}
-                                <a href="#" class="status_on" data-toggle="tooltip" data-placement="bottom" title="Active"><i class="fa fa-circle" aria-hidden="true"></i></a>
-                            {% else %}
-                                <a href="#" class="status_off" data-toggle="tooltip" data-placement="bottom" title="In Active"><i class="fa fa-circle" aria-hidden="true"></i></a>
-                            {% endif %}
+                            <a href="{% url 'menu_status_update' menu_list.id %}" {% if menu_list.status %}class="status_on" title="Active" {% else %}class="status_off" title="In Active"{% endif %} data-toggle="tooltip" data-placement="bottom"><i class="fa fa-circle" aria-hidden="true"></i></a>
                         </td>
 
                         {% if request.user.is_superuser %}

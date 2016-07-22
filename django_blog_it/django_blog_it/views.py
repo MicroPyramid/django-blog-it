@@ -332,6 +332,17 @@ class CategoryUpdateView(AdminMixin, UpdateView):
         return JsonResponse({'error': True, 'response': form.errors})
 
 
+@active_admin_required
+def category_status_update(request, category_slug):
+    category = get_object_or_404(Category, slug=category_slug)
+    if category.is_active:
+        category.is_active = False
+    else:
+        category.is_active = True
+    category.save()
+    return HttpResponseRedirect(reverse_lazy("categories"))
+
+
 class CategoryDeleteView(AdminMixin, View):
 
     def get(self, request, *args, **kwargs):
@@ -499,6 +510,17 @@ class UserUpdateView(AdminOnlyMixin, UpdateView):
         return JsonResponse({'error': True, 'response': form.errors})
 
 
+@active_admin_required
+def user_status_update(request, pk):
+    user = get_object_or_404(User, pk=pk)
+    if user.is_active:
+        user.is_active = False
+    else:
+        user.is_active = True
+    user.save()
+    return HttpResponseRedirect(reverse_lazy("users"))
+
+
 class UserDeleteView(AdminOnlyMixin, View):
 
     def get(self, request, *args, **kwargs):
@@ -619,6 +641,17 @@ class PageUpdateView(AdminMixin, UpdateView):
         return JsonResponse({'error': True, 'response': form.errors})
 
 
+@active_admin_required
+def page_status_update(request, page_slug):
+    page = get_object_or_404(Page, slug=page_slug)
+    if page.is_active:
+        page.is_active = False
+    else:
+        page.is_active = True
+    page.save()
+    return HttpResponseRedirect(reverse_lazy("pages"))
+
+
 class PageDeleteView(AdminMixin, View):
 
     def get(self, request, *args, **kwargs):
@@ -710,6 +743,17 @@ class MenuUpdateView(AdminMixin, UpdateView):
 
     def form_invalid(self, form):
         return JsonResponse({'error': True, 'response': form.errors})
+
+
+@active_admin_required
+def menu_status_update(request, pk):
+    menu = get_object_or_404(Menu, pk=pk)
+    if menu.status:
+        menu.status = False
+    else:
+        menu.status = True
+    menu.save()
+    return HttpResponseRedirect(reverse_lazy("menus"))
 
 
 class MenuBulkActionsView(AdminMixin, View):
@@ -883,6 +927,19 @@ class ThemeUpdateView(AdminMixin, UpdateView):
 
     def form_invalid(self, form):
         return JsonResponse({'error': True, 'response': form.errors})
+
+
+@active_admin_required
+def theme_status_update(request, theme_slug):
+    blog_theme = get_object_or_404(Theme, slug=theme_slug)
+    if blog_theme.enabled is True:
+        blog_theme.enabled = False
+    else:
+        Theme.objects.filter(
+            enabled=True).update(enabled=False)
+        blog_theme.enabled = True
+    blog_theme.save()
+    return HttpResponseRedirect(reverse_lazy("themes"))
 
 
 @active_admin_required

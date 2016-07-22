@@ -80,11 +80,7 @@
             <td><a href="#">{{ user.email }}</a></td>
             <td>{{ user.userrole_set.last.role }}</td>
             <td class="status_on_off text-center">
-              {% if user.is_active %}
-                <a href="#" class="status_on" data-toggle="tooltip" data-placement="bottom" title="Active"><i class="fa fa-circle" aria-hidden="true"></i></a>
-              {% else %}
-                <a href="#" class="status_off" data-toggle="tooltip" data-placement="bottom" title="In-Active"><i class="fa fa-circle" aria-hidden="true"></i></a>
-              {% endif %}
+              <a href="{% url 'user_status_update' user.id %}" {% if user.is_active %}class="status_on" title="Active"{% else %} class="status_off" title="In-Active"{% endif %} data-toggle="tooltip" data-placement="bottom"><i class="fa fa-circle" aria-hidden="true"></i></a>
             </td>
             {% if request.user.is_superuser or request.user|get_user_role_name == 'Admin' %}
             <td class="text-center post_count"><a href="#"><span data-toggle="tooltip" data-placement="bottom" title="Drafted">{{ user|user_drafted_posts }}</span> / <span data-toggle="tooltip" data-placement="bottom" title="Published">{{ user|user_published_posts }}</span></a></td>

@@ -218,6 +218,7 @@ def contact_us(request):
                "keywords": settings.BLOG_KEYWORDS,
                "author": settings.BLOG_AUTHOR,
                "contact_form": form}
+
     if os.getenv("GOOGLE_CAPTCHA_SITE_KEY"):
         context.update({"GOOGLE_CAPTCHA_SITE_KEY": os.getenv("GOOGLE_CAPTCHA_SITE_KEY")})
     context.update(categories_tags_lists())
