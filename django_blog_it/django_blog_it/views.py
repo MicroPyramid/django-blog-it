@@ -1,3 +1,4 @@
+import uuid
 import json
 from PIL import Image
 import os
@@ -6,15 +7,17 @@ from django.db.models.aggregates import Max
 from django.shortcuts import render, render_to_response, get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.contrib import messages
-from django.contrib.auth import logout, authenticate, login
+from django.contrib import auth
+from django.contrib.auth import logout, authenticate, login, load_backend
 from django.contrib.auth.decorators import user_passes_test, login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files import File
 
 from .models import Menu, Post, PostHistory, Category, Tags, Image_File, \
-    STATUS_CHOICE, ROLE_CHOICE, UserRole, Page, Theme
+    STATUS_CHOICE, ROLE_CHOICE, UserRole, Page, Theme, Google
 from .forms import *
-from django_blog_it import settings
+# from django_blog_it import settings
+from django.conf import settings
 try:
     from django.contrib.auth import get_user_model
     User = get_user_model()
@@ -1021,7 +1024,6 @@ def google_login(request):
             'client_id': os.getenv("GP_CLIENT_ID"),
             'client_secret': os.getenv("GP_CLIENT_SECRET")
         }
-
         info = requests.post("https://accounts.google.com/o/oauth2/token", data=params)
         info = info.json()
         url = 'https://www.googleapis.com/oauth2/v1/userinfo'
@@ -1035,9 +1037,6 @@ def google_login(request):
         gender = user_document['gender'] if 'gender' in user_document.keys() else ""
         link = user_document['link'] if 'link' in user_document.keys() else link
 
-        name = urlparse(picture).path.split('/')[-1]
-        # content = urllib.urlretrieve(picture)
-        content = urllib.request.urlretrieve(picture)
         if request.user.is_authenticated():
             user = request.user
         else:
@@ -1048,19 +1047,13 @@ def google_login(request):
             user.dob = dob
             user.save()
         else:
-            username = user_document['email'].split('@')[0]
-            if User.objects.filter(username=username):
-                username = user_document['email'].split('@')[0] + '-' + get_random_string(length=3)
             user = User.objects.create(
-                username=username,
+                username=user_document['email'],
                 email=user_document['email'],
                 first_name=user_document['name'],
                 last_name=user_document['family_name'],
             )
-            user.set_password(get_random_string())
-        # user.profile_pic.save(name, File(open(content[0])), save=True)
-        user.profile_pic.save(name, File(open(content[0], 'rb')), save=True)
-
+            user.set_password(uuid.uuid4())
         user.save()
         google, created = Google.objects.get_or_create(user=user)
         google.user = user
@@ -1075,20 +1068,24 @@ def google_login(request):
         google.gender = gender
         google.picture = picture
         google.save()
-        if request.user.is_authenticated():
-            return HttpResponseRedirect(reverse('organization:index'))
-        else:
-            user = auth.authenticate(username=user_document['email'])
-            auth.login(request, user)
-            user_org = UserOrganization.objects.filter(user=user)
-            user_org.update(status='active', user_confirmed=True)
 
-            if request.user.is_authenticated:
-                user_login.send(sender=None, request=request, user=request.user)
-            if not user.user_first_login:
-                return HttpResponseRedirect(reverse('user:change_password'))
-            else:
-                return HttpResponseRedirect('/')
+        if created:
+            role = UserRole.objects.filter(user=user).last()
+            if not role and user.is_superuser:
+                UserRole.objects.create(user=user, role="Admin")
+            elif not role:
+                UserRole.objects.create(user=user, role="Author")
+        if not request.user.is_authenticated():
+            if not hasattr(user, 'backend'):
+                for backend in settings.AUTHENTICATION_BACKENDS:
+                    if user == load_backend(backend).get_user(user.pk):
+                        user.backend = backend
+                        break
+            if hasattr(user, 'backend'):
+                auth.login(request, user)
+        messages.success(request, "Loggedin successfully")
+        return HttpResponseRedirect(reverse('blog'))
+
     else:
         rty = "https://accounts.google.com/o/oauth2/auth?client_id=" + os.getenv("GP_CLIENT_ID")\
               + "&response_type=code"
