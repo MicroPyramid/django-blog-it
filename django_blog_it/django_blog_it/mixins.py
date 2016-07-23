@@ -17,7 +17,12 @@ class AdminOnlyMixin(object):
         user = self.request.user
         if not (user.is_authenticated and user.is_active):
             return HttpResponseRedirect('/dashboard/')
-        if not user.is_superuser:
+        user_role = UserRole.objects.filter(user=request.user).last()
+        if user_role:
+            user_role = True if user_role.role == "Admin" else False
+        else:
+            user_role = False
+        if not (user.is_superuser or user_role):
             messages.warning(request, "You don't have permission")
             return HttpResponseRedirect(request.META.get('HTTP_REFERER', "/"))
         return super(AdminOnlyMixin, self).dispatch(request, *args, **kwargs)
@@ -48,6 +53,7 @@ class PostAccessRequiredMixin(object):
             get_user_role(request.user) != 'Author'
         ):
             # TODO: Add "PermissionDenied" message
+            messages.warning(request, "You don't have permission")
             return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
         return super(PostAccessRequiredMixin, self).dispatch(

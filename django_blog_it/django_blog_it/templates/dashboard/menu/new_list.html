@@ -12,6 +12,7 @@
 </style>
 {% endblock %}
 {% block content %}
+{% with request.user.userrole_set.last as user_role %}
     <div class="row no_row_margin heading_count">
       <div class="heading col-md-6">Menu Items</div>
       <div class="count_add-new col-md-6 text-right">
@@ -23,7 +24,7 @@
     </div>
     <div class="filters_row">
         <div class="col-md-6 filter_left">
-        {% if request.user.is_superuser %}
+        {% if request.user.is_superuser or user_role.role == "Admin"%}
           <form class="bulk_actions_form" method='get'>
             {% csrf_token %}
             <select class="form-control" name="bulk_actions_select" id='bulk_actions_select'>
@@ -58,20 +59,26 @@
             <table class="table table-bordered table-striped" id="my_table">
                 <thead>
                     <tr>
+                    {% if request.user.is_superuser or user_role.role == "Admin"%}
                         <th width='5%' class="text-center"><input name="bulk_actions" id="selectAll" type="checkbox"></th>
+                    {% endif %}
                         <th width='40%'>Menu Title</th>
                         <th width='30%'>URL</th>
                         <th width="10%" class="text-center">Status</th>
+                    {% if request.user.is_superuser or user_role.role == "Admin"%}
                         <th width='15%' colspan="2">Actions</th>
+                    {% endif %}    
                     </tr>
                 </thead>
                 <tbody>
                 {% recurse menu_list.menu_set.all|dictsort:"lvl"  with menu_list as menu_list %}
                 {% loop %}
                     <tr>
+                    {% if request.user.is_superuser or user_role.role == "Admin"%}
                         <td class="text-center">
                             <input name="bulk_actions" class="bulk_actions" value="{{ menu_list.id }}" type="checkbox" />
                         </td>
+                    {% endif %}
                         <td class="{% if level|add:"-1"|get_range %}sub_menu{% endif %}">
                             {% for i in level|add:"-1"|get_range %}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{% endfor %}<a href="#">{{ menu_list.title }}</a>
                         </td>
@@ -80,7 +87,7 @@
                             <a href="{% url 'menu_status_update' menu_list.id %}" {% if menu_list.status %}class="status_on" title="Active" {% else %}class="status_off" title="In Active"{% endif %} data-toggle="tooltip" data-placement="bottom"><i class="fa fa-circle" aria-hidden="true"></i></a>
                         </td>
 
-                        {% if request.user.is_superuser %}
+                        {% if request.user.is_superuser or user_role.role == "Admin"%}
                         <td class="actions">
                             <a href="{% url 'edit_menu' menu_list.id %}" class="edit"><i class="fa fa-edit"></i> Edit</a>
                             <a href="#" class="delete" data-confirm="true"><i class="fa fa-trash"></i> Delete</a>
@@ -104,6 +111,7 @@
         {% endif %}
         </div>
     </div>
+{% endwith %}
 {% endblock %}
 {% block js_script %}
     <script type="text/javascript">

@@ -306,7 +306,7 @@ class CategoryList(AdminMixin, TemplateView, ProcessFormView):
         return context
 
 
-class CategoryCreateView(AdminMixin, CreateView):
+class CategoryCreateView(AdminOnlyMixin, CreateView):
     template_name = "dashboard/category/new_category_add.html"
     form_class = BlogCategoryForm
 
@@ -319,7 +319,7 @@ class CategoryCreateView(AdminMixin, CreateView):
         return JsonResponse({'error': True, 'response': form.errors})
 
 
-class CategoryUpdateView(AdminMixin, UpdateView):
+class CategoryUpdateView(AdminOnlyMixin, UpdateView):
     template_name = "dashboard/category/new_category_add.html"
     model = Category
     slug_url_kwarg = "category_slug"
@@ -334,18 +334,19 @@ class CategoryUpdateView(AdminMixin, UpdateView):
         return JsonResponse({'error': True, 'response': form.errors})
 
 
-@active_admin_required
-def category_status_update(request, category_slug):
-    category = get_object_or_404(Category, slug=category_slug)
-    if category.is_active:
-        category.is_active = False
-    else:
-        category.is_active = True
-    category.save()
-    return HttpResponseRedirect(reverse_lazy("categories"))
+class CategoryStatusUpdateView(AdminOnlyMixin, View):
+
+    def get(self, request, *args, **kwargs):
+        category = get_object_or_404(Category, slug=kwargs.get("category_slug"))
+        if category.is_active:
+            category.is_active = False
+        else:
+            category.is_active = True
+        category.save()
+        return HttpResponseRedirect(reverse_lazy("categories"))
 
 
-class CategoryDeleteView(AdminMixin, View):
+class CategoryDeleteView(AdminOnlyMixin, View):
 
     def get(self, request, *args, **kwargs):
         category = get_object_or_404(Category, slug=kwargs.get("category_slug"))
@@ -353,7 +354,7 @@ class CategoryDeleteView(AdminMixin, View):
         return HttpResponseRedirect(reverse_lazy("categories"))
 
 
-class BlogPostBulkActionsView(AdminMixin, View):
+class BlogPostBulkActionsView(PostAccessRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
         if 'blog_ids[]' in request.GET:
@@ -370,7 +371,7 @@ class BlogPostBulkActionsView(AdminMixin, View):
             return HttpResponse(json.dumps({'response': False}))
 
 
-class CategoryBulkActionsView(AdminMixin, View):
+class CategoryBulkActionsView(AdminOnlyMixin, View):
 
     def get(self, request, *args, **kwargs):
         if 'blog_ids[]' in request.GET:
@@ -446,7 +447,7 @@ def recent_photos(request):
     return render_to_response('dashboard/browse.html', {'files': imgs})
 
 
-class UserListView(AdminMixin, ListView):
+class UserListView(AdminOnlyMixin, ListView):
     template_name = "dashboard/user/new_list.html"
     context_object_name = "users_list"
 
@@ -515,11 +516,19 @@ class UserUpdateView(AdminOnlyMixin, UpdateView):
 @active_admin_required
 def user_status_update(request, pk):
     user = get_object_or_404(User, pk=pk)
-    if user.is_active:
-        user.is_active = False
+    user_role = UserRole.objects.filter(user=request.user).last()
+    if user_role:
+        user_role = True if user_role.role == "Admin" else False
     else:
-        user.is_active = True
-    user.save()
+        user_role = False
+    if request.user.is_superuser or user_role:
+        if user.is_active:
+            user.is_active = False
+        else:
+            user.is_active = True
+        user.save()
+    else:
+        messages.warning(request, "You don't have permission")
     return HttpResponseRedirect(reverse_lazy("users"))
 
 
@@ -530,33 +539,6 @@ class UserDeleteView(AdminOnlyMixin, View):
         user.delete()
         messages.success(request, 'User successfully deleted!')
         return HttpResponseRedirect(reverse_lazy("users"))
-
-
-@active_admin_required
-def bulk_actions_users(request):
-    if request.user.is_superuser:
-        if request.method == 'GET':
-            if 'user_ids[]' in request.GET:
-                if request.GET.get('action') == 'True':
-                    User.objects.filter(
-                        id__in=request.GET.getlist('user_ids[]')).update(
-                        is_active=True)
-                    messages.success(request, 'Selected Users successfully updated as Active')
-                elif request.GET.get('action') == 'False':
-                    User.objects.filter(
-                        id__in=request.GET.getlist('user_ids[]')).update(
-                        is_active=False)
-                    messages.success(request, 'Selected Users successfully updated as Inactive')
-
-                elif request.GET.get('action') == 'Delete':
-                    User.objects.filter(
-                        id__in=request.GET.getlist('user_ids[]')).delete()
-                    messages.success(request, 'Selected Users successfully deleted!')
-
-                return HttpResponse(json.dumps({'response': True}))
-            else:
-                messages.warning(request, 'Please select at-least one record to perform this action')
-                return HttpResponse(json.dumps({'response': False}))
 
 
 class UserBulkActionsView(AdminOnlyMixin, View):
@@ -615,7 +597,7 @@ class PagesListView(AdminMixin, ListView):
         return queryset
 
 
-class PageCreateView(AdminMixin, CreateView):
+class PageCreateView(AdminOnlyMixin, CreateView):
     template_name = "dashboard/pages/new_add_page.html"
     form_class = PageForm
 
@@ -628,7 +610,7 @@ class PageCreateView(AdminMixin, CreateView):
         return JsonResponse({'error': True, 'response': form.errors})
 
 
-class PageUpdateView(AdminMixin, UpdateView):
+class PageUpdateView(AdminOnlyMixin, UpdateView):
     template_name = "dashboard/pages/new_add_page.html"
     model = Page
     form_class = PageForm
@@ -654,7 +636,7 @@ def page_status_update(request, page_slug):
     return HttpResponseRedirect(reverse_lazy("pages"))
 
 
-class PageDeleteView(AdminMixin, View):
+class PageDeleteView(AdminOnlyMixin, View):
 
     def get(self, request, *args, **kwargs):
         page = get_object_or_404(Page, slug=kwargs.get("page_slug"))
@@ -663,7 +645,7 @@ class PageDeleteView(AdminMixin, View):
         return HttpResponseRedirect(reverse_lazy("pages"))
 
 
-class BulkActionsPageView(AdminMixin, View):
+class BulkActionsPageView(AdminOnlyMixin, View):
 
     def get(self, request, *args, **kwargs):
         if 'page_ids[]' in request.GET:
@@ -698,7 +680,7 @@ class MenuListView(AdminMixin, ListView):
         return queryset
 
 
-class MenuCreateView(AdminMixin, CreateView):
+class MenuCreateView(AdminOnlyMixin, CreateView):
     template_name = "dashboard/menu/new_manage.html"
     form_class = MenuForm
 
@@ -716,7 +698,7 @@ class MenuCreateView(AdminMixin, CreateView):
         return JsonResponse({'error': True, 'response': form.errors})
 
 
-class MenuUpdateView(AdminMixin, UpdateView):
+class MenuUpdateView(AdminOnlyMixin, UpdateView):
     template_name = "dashboard/menu/new_manage.html"
     model = Menu
     pk = "pk"
@@ -758,7 +740,7 @@ def menu_status_update(request, pk):
     return HttpResponseRedirect(reverse_lazy("menus"))
 
 
-class MenuBulkActionsView(AdminMixin, View):
+class MenuBulkActionsView(AdminOnlyMixin, View):
 
     def get(self, request, *args, **kwargs):
         if 'menu_ids[]' in request.GET:
@@ -838,7 +820,7 @@ class ThemesList(AdminMixin, ListView):
                       {'themes_list': themes_list})
 
 
-class ThemeDetailView(AdminMixin, DetailView):
+class ThemeDetailView(AdminOnlyMixin, DetailView):
     model = Theme
     template_name = 'dashboard/themes/theme_view.html'
     slug_field = "theme_slug"
@@ -848,7 +830,7 @@ class ThemeDetailView(AdminMixin, DetailView):
         return get_object_or_404(Theme, slug=self.kwargs['theme_slug'])
 
 
-class ThemeCreateView(AdminMixin, CreateView):
+class ThemeCreateView(AdminOnlyMixin, CreateView):
     model = Theme
     form_class = BlogThemeForm
     template_name = "dashboard/themes/theme_add.html"
@@ -905,7 +887,7 @@ def add_theme(request):
     return render(request, 'dashboard/themes/theme_add.html', context)
 
 
-class ThemeUpdateView(AdminMixin, UpdateView):
+class ThemeUpdateView(AdminOnlyMixin, UpdateView):
     pk = 'pk'
     model = Theme
     form_class = BlogThemeForm
@@ -981,7 +963,7 @@ def delete_theme(request, theme_slug):
         return HttpResponseRedirect(reverse_lazy('themes'))
 
 
-class DeleteThemeView(AdminMixin, View):
+class DeleteThemeView(AdminOnlyMixin, View):
 
     def get(self, request, *args, **kwargs):
         theme = get_object_or_404(Theme, id=kwargs.get('pk'))
