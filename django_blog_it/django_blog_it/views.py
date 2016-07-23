@@ -27,7 +27,7 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, DeleteView,\
     UpdateView, FormView, TemplateView, View
 from django.views.generic.edit import ProcessFormView
-from .mixins import AdminMixin, PostAccessRequiredMixin, AdminOnlyMixin
+from .mixins import AdminMixin, PostAccessRequiredMixin, AdminOnlyMixin, AuthorNotAllowedMixin
 from django.http import JsonResponse
 
 admin_required = user_passes_test(lambda user: user.is_active, login_url='/')
@@ -354,7 +354,7 @@ class CategoryDeleteView(AdminOnlyMixin, View):
         return HttpResponseRedirect(reverse_lazy("categories"))
 
 
-class BlogPostBulkActionsView(PostAccessRequiredMixin, View):
+class BlogPostBulkActionsView(AuthorNotAllowedMixin, View):
 
     def get(self, request, *args, **kwargs):
         if 'blog_ids[]' in request.GET:
