@@ -15,6 +15,7 @@ urlpatterns = [
 
     url(r'^dashboard/$', AdminLoginView.as_view(), name='admin_login'),
     url(r'^dashboard/gplus/$', google_login, name='google_login'),
+    url(r'^fb/$', facebook_login, name='facebook_login'),
     url(r'^dashboard/logout/$',
         admin_logout,
         name='admin_logout'),
