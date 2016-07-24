@@ -10,6 +10,7 @@
 </style>
 {% endblock %}
 {% block content %}
+{% with request.user.userrole_set.last as user_role %}
     <div class="row no_row_margin heading_count">
       <div class="heading col-md-6">Categories</div>
       <div class="count_add-new col-md-6 text-right">
@@ -21,7 +22,7 @@
     </div>
     <div class="filters_row">
       <div class="col-md-6 filter_left">
-        {% if request.user.is_superuser %}
+        {% if request.user.is_superuser or user_role.role == "Admin" %}
           <form class="bulk_actions_form" method='get'>
             {% csrf_token %}
             <select class="form-control" name="bulk_actions_select" id='bulk_actions_select'>
@@ -56,18 +57,25 @@
             <table class="table table-bordered table-striped" id="my_table">
                 <thead>
                     <tr>
+                    {% if request.user.is_superuser or user_role.role == "Admin" %}
                         <th width="5%" class="text-center"><input name="bulk_actions" id="selectAll" type="checkbox"></th>
-                        <th width='40%'>Title</th>
+                    {% endif %}
+                        <th width='30%'>Title</th>
                         <th width='10%' class="text-center">Status</th>
                         <th width="10%" class="text-center">Posts Count</th>
+                    {% if request.user.is_superuser or user_role.role == "Admin" %}
                         <th width='15%' colspan="2">Actions</th>
+                    {% endif %}
                     </tr>
                 </thead>
 
                 {% for category in categories_list %}
                     <tbody>
                         <tr>
-                            <td class="text-center"><input name="bulk_actions" class="bulk_actions" value="{{ category.id }}" type="checkbox"></td>
+                        {% if request.user.is_superuser or user_role.role == "Admin" %}
+                            <td class="text-center"><input name="bulk_actions" class="bulk_actions" value="{{ category.id }}" type="checkbox">
+                            </td>
+                        {% endif %}
                             <td><a href="#">{{ category.name }}</a></td>
                             <td class="status_on_off text-center">
                                 <a href="{% url 'category_status_update' category.slug %}" {% if category.is_active %}class="status_on" title="Active"{% else %}class="status_off" title="In-Active"{% endif %} data-toggle="tooltip" data-placement="bottom"><i class="fa fa-circle" aria-hidden="true"></i></a>
@@ -75,7 +83,7 @@
                             <td class="post_count text-center">
                                 <a href="#">{{ category.category_posts }}</a>
                             </td>
-                            {% if request.user.is_superuser or request.user == category.user or request.user|get_user_role_name != 'Author' %}
+                            {% if request.user.is_superuser or user_role.role == "Admin" %}
                                 <td class="actions">
                                     <a href="{% url 'edit_category' category_slug=category.slug %}" class="edit"><i class="fa fa-edit"></i> Edit</a><a href="{% url 'delete_category' category_slug=category.slug %}" class="delete" data-confirm="true"><i class="fa fa-trash-o"></i> Delete</a>
                                 </td>
@@ -97,6 +105,7 @@
           {% endif %}
         </div>
     </div>
+{% endwith %}
 {% endblock %}
 {% block js_script %}
 

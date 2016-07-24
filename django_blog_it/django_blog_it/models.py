@@ -144,13 +144,13 @@ class Post(models.Model):
             user = self.user
             author_name = user.first_name + user.last_name if user.first_name else user.email
             text = "New blog post has been created by {0} with the name {1} in the category {2}.".format(author_name, self.title, self.category.name)
-            print(send_mail(
+            send_mail(
                 subject="New Blog Post created",
                 message=text,
                 from_email=email,
                 recipient_list=admin_emails,
                 fail_silently=False,
-            ))
+            )
 
 
 def create_slug(tempslug):

@@ -54,26 +54,33 @@
     <div class="container-fluid">
     {% paginate 5 users_list %}
     {% show_pageitems %}
+    {% with request.user.userrole_set.last as user_role %}
       <table class="table table-bordered table-hover" id="my_table">
         <thead>
           <tr>
+          {% if user_role.role != "Author" and user_role.role != "Publisher"%}
             <th width='5%' class="text-center"><input name="bulk_actions" id="selectAll" type="checkbox"></th>
+          {% endif %}
             <th width='15%'>Username</th>
             <th width='10%'>First Name</th>
             <th width='10%'>Last Name</th>
             <th width='20%'>Email</th>
             <th width='10%'>Role</th>
             <th width="5%" class="text-center">Status</th>
+          {% if request.user.is_superuser or request.user|get_user_role_name == 'Admin' %}
             <th width="5%" class="text-center">Posts</th>
-            {% if request.user|get_user_role_name == 'Admin' %}
+          {% endif %}
+          {% if request.user.is_superuser or request.user|get_user_role_name == 'Admin' %}
             <th width='15%' colspan="2">Actions</th>
-            {% endif %}
+          {% endif %}
           </tr>
         </thead>
         {% for user in users_list %}
         <tbody>
           <tr>
+          {% if user_role.role != "Author" and user_role.role != "Publisher"%}
             <td class="text-center"><input name="bulk_actions" class="bulk_actions" value="{{ user.id }}" type="checkbox"></td>
+          {% endif %}
             <td><a href="#">{{ user.username }}</a></td>
             <td>{% if user.first_name %}{{ user.first_name }}{% else %}<center> -- </center>{% endif %}</td>
             <td>{% if user.last_name %}{{ user.last_name }}{% else %}<center> -- </center>{% endif %}</td>
@@ -93,6 +100,7 @@
         </tbody>
         {% endfor %}
       </table>
+      {% endwith %}
       <!-- end div of table -->
       <!-- pagination -->
       <div class="pagination_wrap text-center">
