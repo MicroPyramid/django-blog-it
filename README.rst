@@ -120,7 +120,7 @@ You can try it by hosting on your own or deploy to Heroku with a button click.
 Deploy To Heroku:
 
 .. image:: https://www.herokucdn.com/deploy/button.svg
-   :target: https://heroku.com/deploy?template=https://github.com/AnjaneyuluBatta505/django-blog-it&env[API_KEY]=AIzaSyANPi_ULytUHdU4UKtlVmb_Jo1_N29IwTE&env[GOOGLE_CAPTCHA_SITE_KEY]=6LczhSUTAAAAAEGXEzXenG9LTpRgWj5kZ5HKUsys&env[GOOGLE_CAPTCHA_SECRET_KEY]=6LczhSUTAAAAAPcdeBD4YSJfijBsoI1T2rNiXB-D&env[GOOGLE_ANALYTICS_ID]=UA-1232342342&env[GP_CLIENT_ID]=51531256941-jbi840coio2vg8q1mht5bmuq002p2kt8.apps.googleusercontent.com&env[GP_CLIENT_SECRET]=757UNcQ3Py03QVFMm4Wg5tsE&env[FB_APP_ID]=1578441772473570&env[FB_SECRET]=023df180c6d868e76a02aec17134c843&env[DEFAULT_EMAIL]=noreply@djangoblogit.com
+   :target: https://heroku.com/deploy?template=https://github.com/AnjaneyuluBatta505/django-blog-it
    
 
 We welcome your feedback and support, raise github ticket if you want to report a bug. Need new features? `Contact us here`_
