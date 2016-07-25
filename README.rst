@@ -61,6 +61,55 @@ Installation
     DISQUSSHORTNAME="Your Disquss Short Name"
 
     export DISQUSSHORTNAME
+   
+   # google api key for short url
+
+    API_KEY="google api key"
+
+    export API_KEY
+
+   # google captcha
+
+    GOOGLE_CAPTCHA_SITE_KEY="Site key"
+
+    export GOOGLE_CAPTCHA_SITE_KEY
+
+    GOOGLE_CAPTCHA_SECRET_KEY="Secret key"
+
+    export GOOGLE_CAPTCHA_SECRET_KEY
+   
+   # Google Analytics Account
+
+    GOOGLE_ANALYTICS_ID="UA-123456789"
+
+    export GOOGLE_ANALYTICS_ID
+
+   # Google Login
+   
+    GP_CLIENT_ID="google client id"
+   
+    export GP_CLIENT_ID
+
+    GP_CLIENT_SECRET="secret key"
+
+    export GP_CLIENT_SECRET
+   
+   # Facebook Login 
+   
+    FB_APP_ID="facebook app id"
+
+    export FB_APP_ID
+
+    FB_SECRET="023df180c6d868e76a02aec17134c843"
+
+    export FB_SECRET
+   
+   # Default E-mail
+
+    DEFAULT_EMAIL="noreply@djangoblogit.com"
+
+    export DEFAULT_EMAIL
+
 
 3. Use virtualenv to install requirements::
 
