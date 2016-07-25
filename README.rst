@@ -61,10 +61,23 @@ Installation
     DISQUSSHORTNAME="Your Disquss Short Name"
 
     export DISQUSSHORTNAME
+   
+   You can create google captcha for your blog. Login to your google account then access url: https://www.google.com/recaptcha/admin. Add you domain to google, it will generate two keys "Site key" and "Secret key"
+   GOOGLE_CAPTCHA_SITE_KEY="Site key"
+   export GOOGLE_CAPTCHA_SITE_KEY
+
+   GOOGLE_CAPTCHA_SECRET_KEY="Secret key"
+   export GOOGLE_CAPTCHA_SECRET_KEY
+   
+   # Google Analytics Account
+   GOOGLE_ANALYTICS_ID="UA-123456789"
+   export GOOGLE_ANALYTICS_ID
 
 3. Use virtualenv to install requirements::
 
     pip install -r requirements.txt
+
+
 
 You can try it by hosting on your own or deploy to Heroku with a button click.
 
