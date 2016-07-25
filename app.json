@@ -4,5 +4,43 @@
    "repository": "https://github.com/MicroPyramid/django-blog-it",
    "scripts": {
    "postdeploy": "python sandbox/manage.py makemigrations && python sandbox/manage.py migrate"
- }
+ },
+ "env": {
+    "API_KEY": {
+      "description": "micro url ",
+      "value": "AIzaSyANPi_ULytUHdU4UKtlVmb_Jo1_N29IwTE"
+    },
+    "GOOGLE_CAPTCHA_SITE_KEY": {
+      "description": "google captcha site key",
+      "value": "6LczhSUTAAAAAEGXEzXenG9LTpRgWj5kZ5HKUsys"
+    },
+    "GOOGLE_CAPTCHA_SECRET_KEY": {
+      "description": "google captcha secret key",
+      "value": "6LczhSUTAAAAAPcdeBD4YSJfijBsoI1T2rNiXB-D"
+    },
+    "GOOGLE_ANALYTICS_ID": {
+      "description": "google analytics Id",
+      "value": "UA-1232342342"
+    },
+    "GP_CLIENT_ID": {
+      "description": "Google client login Id",
+      "value": "51531256941-jbi840coio2vg8q1mht5bmuq002p2kt8.apps.googleusercontent.com"
+    },
+    "GP_CLIENT_SECRET": {
+      "description": "Google client secret key",
+      "value": "757UNcQ3Py03QVFMm4Wg5tsE"
+    },
+     "FB_APP_ID": {
+      "description": "Facebook app id",
+      "value": "1578441772473570"
+    },
+    "FB_SECRET": {
+      "description": "Facebook secret key",
+      "value": "023df180c6d868e76a02aec17134c843"
+    },
+     "DEFAULT_EMAIL": {
+      "description": "default email",
+      "value": "noreply@djangoblogit.com"
+    },
+  },
 }
