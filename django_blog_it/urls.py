@@ -100,7 +100,7 @@ urlpatterns = [
     # url(r'^dashboard/themes/delete/(?P<theme_slug>[-\w]+)/$',
     #     delete_theme, name='delete_theme'),
     url(r'^dashboard/bulk_actions_themes/$',
-        bulk_actions_themes, name='bulk_actions_themes'),
+        ThemesBulkActionsView.as_view(), name='bulk_actions_themes'),
 
     url(r'^dashboard/themes/update/(?P<theme_slug>[-\w]+)/$',
         theme_status_update,
