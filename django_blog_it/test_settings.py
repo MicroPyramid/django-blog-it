@@ -76,3 +76,6 @@ TEMPLATES = [
     },
 ]
 DEBUG = True
+EMAIL_PORT    = 1025
+EMAIL_HOST    = '127.0.0.1'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
