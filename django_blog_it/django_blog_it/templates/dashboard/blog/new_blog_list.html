@@ -23,7 +23,7 @@
         </div>
         <div class="filters_row">
             <div class="col-md-6 filter_left">
-                {% if request.user.is_superuser %}
+                {% if request.user.is_superuser or request.user.userrole_set.last.role == "Admin"%}
                 <div class="bulk_button" style="display:none">
                   <form class="bulk_actions_form" method='get'>
                     {% csrf_token %}
@@ -59,10 +59,13 @@
               <div class="container-fluid">
                 {% paginate 5 blog_list %}
                 {% show_pageitems %}
+            {% with request.user.userrole_set.last as user_role %}
                 <table class="table table-bordered table-striped" id="my_table">
                     <thead>
                         <tr>
+                        {% if request.user.is_superuser or user_role.role == "Admin"%}
                             <th width="5%" class="text-center"><input name="bulk_actions" id="selectAll" type="checkbox"></th>
+                        {% endif %}
                             <th width="30%">Title</th>
                             <th width="10%">Author</th>
                             <th width="15%">Category</th>
@@ -74,7 +77,10 @@
                     {% for blog in blog_list %}
                         <tbody>
                             <tr>
-                                <td class="text-center"><input name="bulk_actions" class="bulk_actions" value="{{ blog.id }}" type="checkbox"></td>
+                            {% if request.user.is_superuser or user_role.role == "Admin"%}
+                                <td class="text-center"><input name="bulk_actions" class="bulk_actions" value="{{ blog.id }}" type="checkbox">
+                                </td>
+                            {% endif %}
                                 <td><a href="#">{{ blog.title }}</a></td>
                                 <td>{{ blog.user }}</td>
                                 <td>{{ blog.category }}</td>
@@ -102,7 +108,7 @@
                                     {% if blog|is_deletable_by:request.user or request.user|get_user_role_name != 'Author' %}
                                         <a href="{% url 'edit_blog' blog_slug=blog.slug %}" class="edit"><i class="fa fa-edit"></i> Edit</a>
                                     {% endif %}
-                                    {% if request.user.is_superuser or request.user|get_user_role_name != 'Author' %}
+                                    {% if request.user.is_superuser or request.user|get_user_role_name != 'Author' or blog.user == request.user %}
                                     {% ifequal blog.status "Trashed" %}
                                       <a href='#' class="restore manage_blog" action="restore" title="Restore from trash"><i class="fa fa-refresh"></i> Restore</a>
                                       <a href='#' class="delete manage_blog" action="delete" title="Permanently delete from trash" data-confirm="true"><i class="fa fa-trash-o"></i> Delete</a>
@@ -117,6 +123,7 @@
 
                     {% endfor %}
                 </table>
+            {% endwith %}
             <!-- end div of table -->
 
             <!-- pagination -->

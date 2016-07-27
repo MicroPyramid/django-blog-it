@@ -68,24 +68,26 @@ class BlogPostForm(forms.ModelForm):
         exclude = ('slug', 'user', 'tags')
 
     def __init__(self, *args, **kwargs):
-        self.is_superuser = kwargs.pop('is_superuser', None)
         self.user_role = kwargs.pop('user_role', None)
         super(BlogPostForm, self).__init__(*args, **kwargs)
-        if self.is_superuser or self.user_role != 'Author':
-            pass
-        else:
-            del self.fields['status']
-        for field in iter(self.fields):
 
+        if self.user_role == 'Author':
+            del self.fields['status']
+
+        for field in iter(self.fields):
             if field == 'tags':
                 self.fields[field].widget.attrs.update({
                     'class': 'form-control myTags', "placeholder": "Please enter your Blog " + field.capitalize()
                 })
-
             else:
                 self.fields[field].widget.attrs.update({
                     'class': 'form-control', "placeholder": "Please enter your Blog " + field.capitalize()
                 })
+
+    def clean_status(self):
+        if self.user_role == "Author":
+            raise forms.ValidationError("Admin and Publisher can change status only.")
+        return self.cleaned_data.get("status")
 
 
 class BlogCategoryForm(forms.ModelForm):

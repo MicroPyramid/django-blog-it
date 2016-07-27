@@ -1,3 +1,4 @@
+import uuid
 import json
 from PIL import Image
 import os
@@ -6,15 +7,17 @@ from django.db.models.aggregates import Max
 from django.shortcuts import render, render_to_response, get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.contrib import messages
-from django.contrib.auth import logout, authenticate, login
+from django.contrib import auth
+from django.contrib.auth import logout, authenticate, login, load_backend
 from django.contrib.auth.decorators import user_passes_test, login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files import File
 
 from .models import Menu, Post, PostHistory, Category, Tags, Image_File, \
-    STATUS_CHOICE, ROLE_CHOICE, UserRole, Page, Theme
+    STATUS_CHOICE, ROLE_CHOICE, UserRole, Page, Theme, Google, Facebook
 from .forms import *
-from django_blog_it import settings
+# from django_blog_it import settings
+from django.conf import settings
 try:
     from django.contrib.auth import get_user_model
     User = get_user_model()
@@ -25,7 +28,7 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, DeleteView,\
     UpdateView, FormView, TemplateView, View
 from django.views.generic.edit import ProcessFormView
-from .mixins import AdminMixin, PostAccessRequiredMixin, AdminOnlyMixin
+from .mixins import AdminMixin, PostAccessRequiredMixin, AdminOnlyMixin, AuthorNotAllowedMixin
 from django.http import JsonResponse
 
 admin_required = user_passes_test(lambda user: user.is_active, login_url='/')
@@ -113,6 +116,13 @@ class PostCreateView(AdminMixin, CreateView):
     template_name = "dashboard/blog/new_blog_add.html"
     success_url = '/dashboard/blog/'
 
+    def get_form_kwargs(self):
+        kwargs = super(PostCreateView, self).get_form_kwargs()
+        role = get_user_role(self.request.user)
+        role = role if role in dict(ROLE_CHOICE).keys() else None
+        kwargs["user_role"] = role
+        return kwargs
+
     def form_valid(self, form):
         self.blog_post = form.save(commit=False)
         self.blog_post.user = self.request.user
@@ -142,26 +152,22 @@ class PostCreateView(AdminMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super(PostCreateView, self).get_context_data(**kwargs)
-        form = BlogPostForm(self.request.GET,
-                            is_superuser=self.request.user.is_superuser)
         tags_list = Tags.objects.all()
         categories_list = Category.objects.filter(is_active=True)
-
-        context['form'] = form
         context['status_choices'] = STATUS_CHOICE
-
         context['categories_list'] = categories_list
         context['tags_list'] = tags_list
         context['add_blog'] = True
         return context
 
 
-class PostEditView(UpdateView):
+class PostEditView(AdminMixin, UpdateView):
     model = Post
     success_url = '/dashboard/blog/'
-    slug_field = 'slug'
+    slug_url_kwarg = 'blog_slug'
     template_name = "dashboard/blog/new_blog_add.html"
     form_class = BlogPostForm
+    context_object_name = "blog_name"
 
     def dispatch(self, request, *args, **kwargs):
         if request.POST:
@@ -172,8 +178,12 @@ class PostEditView(UpdateView):
                     return JsonResponse({"content": history_post.content})
         return super(PostEditView, self).dispatch(request, *args, **kwargs)
 
-    def get_object(self):
-        return get_object_or_404(Post, slug=self.kwargs['blog_slug'])
+    def get_form_kwargs(self):
+        kwargs = super(PostEditView, self).get_form_kwargs()
+        role = get_user_role(self.request.user)
+        role = role if role in dict(ROLE_CHOICE).keys() else None
+        kwargs["user_role"] = role
+        return kwargs
 
     def form_invalid(self, form):
         return JsonResponse({'error': True, 'response': form.errors})
@@ -182,7 +192,7 @@ class PostEditView(UpdateView):
         previous_status = self.get_object().status
         previous_content = self.get_object().content
         self.blog_post = form.save(commit=False)
-        self.blog_post.user = self.request.user
+        # self.blog_post.user = self.request.user
         if self.request.user.is_superuser or get_user_role(self.request.user) != 'Author':
             self.blog_post.status = self.request.POST.get('status')
         else:
@@ -218,15 +228,7 @@ class PostEditView(UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super(PostEditView, self).get_context_data(**kwargs)
-        form = BlogPostForm(instance=self.get_object(),
-                            is_superuser=self.request.user.is_superuser,
-                            user_role=get_user_role(self.request.user),
-                            initial={'tags': ','.join([tag.name for tag in self.get_object().tags.all()])}
-                            )
         categories_list = Category.objects.filter(is_active=True)
-
-        context['form'] = form
-        context['blog_name'] = self.get_object()
         context['status_choices'] = STATUS_CHOICE,
         context['categories_list'] = categories_list
         context['history_list'] = self.get_object().history.all()
@@ -305,7 +307,7 @@ class CategoryList(AdminMixin, TemplateView, ProcessFormView):
         return context
 
 
-class CategoryCreateView(AdminMixin, CreateView):
+class CategoryCreateView(AdminOnlyMixin, CreateView):
     template_name = "dashboard/category/new_category_add.html"
     form_class = BlogCategoryForm
 
@@ -318,7 +320,7 @@ class CategoryCreateView(AdminMixin, CreateView):
         return JsonResponse({'error': True, 'response': form.errors})
 
 
-class CategoryUpdateView(AdminMixin, UpdateView):
+class CategoryUpdateView(AdminOnlyMixin, UpdateView):
     template_name = "dashboard/category/new_category_add.html"
     model = Category
     slug_url_kwarg = "category_slug"
@@ -333,18 +335,19 @@ class CategoryUpdateView(AdminMixin, UpdateView):
         return JsonResponse({'error': True, 'response': form.errors})
 
 
-@active_admin_required
-def category_status_update(request, category_slug):
-    category = get_object_or_404(Category, slug=category_slug)
-    if category.is_active:
-        category.is_active = False
-    else:
-        category.is_active = True
-    category.save()
-    return HttpResponseRedirect(reverse_lazy("categories"))
+class CategoryStatusUpdateView(AdminOnlyMixin, View):
+
+    def get(self, request, *args, **kwargs):
+        category = get_object_or_404(Category, slug=kwargs.get("category_slug"))
+        if category.is_active:
+            category.is_active = False
+        else:
+            category.is_active = True
+        category.save()
+        return HttpResponseRedirect(reverse_lazy("categories"))
 
 
-class CategoryDeleteView(AdminMixin, View):
+class CategoryDeleteView(AdminOnlyMixin, View):
 
     def get(self, request, *args, **kwargs):
         category = get_object_or_404(Category, slug=kwargs.get("category_slug"))
@@ -352,7 +355,7 @@ class CategoryDeleteView(AdminMixin, View):
         return HttpResponseRedirect(reverse_lazy("categories"))
 
 
-class BlogPostBulkActionsView(AdminMixin, View):
+class BlogPostBulkActionsView(AuthorNotAllowedMixin, View):
 
     def get(self, request, *args, **kwargs):
         if 'blog_ids[]' in request.GET:
@@ -369,7 +372,7 @@ class BlogPostBulkActionsView(AdminMixin, View):
             return HttpResponse(json.dumps({'response': False}))
 
 
-class CategoryBulkActionsView(AdminMixin, View):
+class CategoryBulkActionsView(AdminOnlyMixin, View):
 
     def get(self, request, *args, **kwargs):
         if 'blog_ids[]' in request.GET:
@@ -445,7 +448,7 @@ def recent_photos(request):
     return render_to_response('dashboard/browse.html', {'files': imgs})
 
 
-class UserListView(AdminMixin, ListView):
+class UserListView(AdminOnlyMixin, ListView):
     template_name = "dashboard/user/new_list.html"
     context_object_name = "users_list"
 
@@ -514,11 +517,19 @@ class UserUpdateView(AdminOnlyMixin, UpdateView):
 @active_admin_required
 def user_status_update(request, pk):
     user = get_object_or_404(User, pk=pk)
-    if user.is_active:
-        user.is_active = False
+    user_role = UserRole.objects.filter(user=request.user).last()
+    if user_role:
+        user_role = True if user_role.role == "Admin" else False
     else:
-        user.is_active = True
-    user.save()
+        user_role = False
+    if request.user.is_superuser or user_role:
+        if user.is_active:
+            user.is_active = False
+        else:
+            user.is_active = True
+        user.save()
+    else:
+        messages.warning(request, "You don't have permission")
     return HttpResponseRedirect(reverse_lazy("users"))
 
 
@@ -529,33 +540,6 @@ class UserDeleteView(AdminOnlyMixin, View):
         user.delete()
         messages.success(request, 'User successfully deleted!')
         return HttpResponseRedirect(reverse_lazy("users"))
-
-
-@active_admin_required
-def bulk_actions_users(request):
-    if request.user.is_superuser:
-        if request.method == 'GET':
-            if 'user_ids[]' in request.GET:
-                if request.GET.get('action') == 'True':
-                    User.objects.filter(
-                        id__in=request.GET.getlist('user_ids[]')).update(
-                        is_active=True)
-                    messages.success(request, 'Selected Users successfully updated as Active')
-                elif request.GET.get('action') == 'False':
-                    User.objects.filter(
-                        id__in=request.GET.getlist('user_ids[]')).update(
-                        is_active=False)
-                    messages.success(request, 'Selected Users successfully updated as Inactive')
-
-                elif request.GET.get('action') == 'Delete':
-                    User.objects.filter(
-                        id__in=request.GET.getlist('user_ids[]')).delete()
-                    messages.success(request, 'Selected Users successfully deleted!')
-
-                return HttpResponse(json.dumps({'response': True}))
-            else:
-                messages.warning(request, 'Please select at-least one record to perform this action')
-                return HttpResponse(json.dumps({'response': False}))
 
 
 class UserBulkActionsView(AdminOnlyMixin, View):
@@ -614,7 +598,7 @@ class PagesListView(AdminMixin, ListView):
         return queryset
 
 
-class PageCreateView(AdminMixin, CreateView):
+class PageCreateView(AdminOnlyMixin, CreateView):
     template_name = "dashboard/pages/new_add_page.html"
     form_class = PageForm
 
@@ -627,7 +611,7 @@ class PageCreateView(AdminMixin, CreateView):
         return JsonResponse({'error': True, 'response': form.errors})
 
 
-class PageUpdateView(AdminMixin, UpdateView):
+class PageUpdateView(AdminOnlyMixin, UpdateView):
     template_name = "dashboard/pages/new_add_page.html"
     model = Page
     form_class = PageForm
@@ -653,7 +637,7 @@ def page_status_update(request, page_slug):
     return HttpResponseRedirect(reverse_lazy("pages"))
 
 
-class PageDeleteView(AdminMixin, View):
+class PageDeleteView(AdminOnlyMixin, View):
 
     def get(self, request, *args, **kwargs):
         page = get_object_or_404(Page, slug=kwargs.get("page_slug"))
@@ -662,7 +646,7 @@ class PageDeleteView(AdminMixin, View):
         return HttpResponseRedirect(reverse_lazy("pages"))
 
 
-class BulkActionsPageView(AdminMixin, View):
+class BulkActionsPageView(AdminOnlyMixin, View):
 
     def get(self, request, *args, **kwargs):
         if 'page_ids[]' in request.GET:
@@ -697,7 +681,7 @@ class MenuListView(AdminMixin, ListView):
         return queryset
 
 
-class MenuCreateView(AdminMixin, CreateView):
+class MenuCreateView(AdminOnlyMixin, CreateView):
     template_name = "dashboard/menu/new_manage.html"
     form_class = MenuForm
 
@@ -715,7 +699,7 @@ class MenuCreateView(AdminMixin, CreateView):
         return JsonResponse({'error': True, 'response': form.errors})
 
 
-class MenuUpdateView(AdminMixin, UpdateView):
+class MenuUpdateView(AdminOnlyMixin, UpdateView):
     template_name = "dashboard/menu/new_manage.html"
     model = Menu
     pk = "pk"
@@ -757,7 +741,7 @@ def menu_status_update(request, pk):
     return HttpResponseRedirect(reverse_lazy("menus"))
 
 
-class MenuBulkActionsView(AdminMixin, View):
+class MenuBulkActionsView(AdminOnlyMixin, View):
 
     def get(self, request, *args, **kwargs):
         if 'menu_ids[]' in request.GET:
@@ -837,7 +821,7 @@ class ThemesList(AdminMixin, ListView):
                       {'themes_list': themes_list})
 
 
-class ThemeDetailView(AdminMixin, DetailView):
+class ThemeDetailView(AdminOnlyMixin, DetailView):
     model = Theme
     template_name = 'dashboard/themes/theme_view.html'
     slug_field = "theme_slug"
@@ -847,7 +831,7 @@ class ThemeDetailView(AdminMixin, DetailView):
         return get_object_or_404(Theme, slug=self.kwargs['theme_slug'])
 
 
-class ThemeCreateView(AdminMixin, CreateView):
+class ThemeCreateView(AdminOnlyMixin, CreateView):
     model = Theme
     form_class = BlogThemeForm
     template_name = "dashboard/themes/theme_add.html"
@@ -904,7 +888,7 @@ def add_theme(request):
     return render(request, 'dashboard/themes/theme_add.html', context)
 
 
-class ThemeUpdateView(AdminMixin, UpdateView):
+class ThemeUpdateView(AdminOnlyMixin, UpdateView):
     pk = 'pk'
     model = Theme
     form_class = BlogThemeForm
@@ -980,7 +964,7 @@ def delete_theme(request, theme_slug):
         return HttpResponseRedirect(reverse_lazy('themes'))
 
 
-class DeleteThemeView(AdminMixin, View):
+class DeleteThemeView(AdminOnlyMixin, View):
 
     def get(self, request, *args, **kwargs):
         theme = get_object_or_404(Theme, id=kwargs.get('pk'))
@@ -1010,6 +994,169 @@ def bulk_actions_themes(request):
             else:
                 messages.warning(request, 'Please select at-least one record to perform this action')
                 return HttpResponse(json.dumps({'response': False}))
+
+# social login
+def google_login(request):
+    if 'code' in request.GET:
+        params = {
+            'grant_type': 'authorization_code',
+            'code': request.GET.get('code'),
+            'redirect_uri': request.scheme + "://" + request.META['HTTP_HOST'] + reverse('google_login'),
+            'client_id': os.getenv("GP_CLIENT_ID"),
+            'client_secret': os.getenv("GP_CLIENT_SECRET")
+        }
+        info = requests.post("https://accounts.google.com/o/oauth2/token", data=params)
+        info = info.json()
+        url = 'https://www.googleapis.com/oauth2/v1/userinfo'
+        params = {'access_token': info['access_token']}
+        kw = dict(params=params, headers={}, timeout=60)
+        response = requests.request('GET', url, **kw)
+        user_document = response.json()
+        link = "https://plus.google.com/" + user_document['id']
+        picture = user_document['picture'] if 'picture' in user_document.keys() else ""
+        dob = user_document['birthday'] if 'birthday' in user_document.keys() else ""
+        gender = user_document['gender'] if 'gender' in user_document.keys() else ""
+        link = user_document['link'] if 'link' in user_document.keys() else link
+
+        if request.user.is_authenticated():
+            user = request.user
+        else:
+            user = User.objects.filter(email=user_document['email']).first()
+        if user:
+            user.first_name = user_document['name']
+            user.last_name = user_document['family_name']
+            user.dob = dob
+            user.save()
+        else:
+            user = User.objects.create(
+                username=user_document['email'],
+                email=user_document['email'],
+                first_name=user_document['name'],
+                last_name=user_document['family_name'],
+            )
+            user.set_password(uuid.uuid4())
+        user.save()
+        google, created = Google.objects.get_or_create(user=user)
+        google.user = user
+        google.google_url = link
+        google.verified_email = user_document['verified_email']
+        google.google_id = user_document['id']
+        google.family_name = user_document['family_name']
+        google.name = user_document['name']
+        google.given_name = user_document['given_name']
+        google.dob = dob
+        google.email = user_document['email']
+        google.gender = gender
+        google.picture = picture
+        google.save()
+
+        if created:
+            role = UserRole.objects.filter(user=user).last()
+            if not role and user.is_superuser:
+                UserRole.objects.create(user=user, role="Admin")
+            elif not role:
+                UserRole.objects.create(user=user, role="Author")
+        if not request.user.is_authenticated():
+            if not hasattr(user, 'backend'):
+                for backend in settings.AUTHENTICATION_BACKENDS:
+                    if user == load_backend(backend).get_user(user.pk):
+                        user.backend = backend
+                        break
+            if hasattr(user, 'backend'):
+                auth.login(request, user)
+        messages.success(request, "Loggedin successfully")
+        return HttpResponseRedirect(reverse('blog'))
+
+    else:
+        rty = "https://accounts.google.com/o/oauth2/auth?client_id=" + os.getenv("GP_CLIENT_ID")\
+              + "&response_type=code"
+        rty += "&scope=https://www.googleapis.com/auth/userinfo.profile \
+               https://www.googleapis.com/auth/userinfo.email&redirect_uri=" + request.scheme\
+               + "://" + request.META['HTTP_HOST'] + reverse('google_login')\
+               + "&state=1235dfghjkf123"
+        return HttpResponseRedirect(rty)
+
+
+def facebook_login(request):
+    if 'code' in request.GET:
+        accesstoken = get_access_token_from_code(request.GET['code'], 'https://' + request.META['HTTP_HOST'] + reverse('facebook_login'), os.getenv("FB_APP_ID"), os.getenv("FB_SECRET"))
+        if 'error' in accesstoken.keys():
+            messages.error(request, "Sorry, Your session has been expired")
+            return render(request, '404.html')
+        graph = GraphAPI(accesstoken['access_token'])
+        accesstoken = graph.extend_access_token(os.getenv("FB_APP_ID"), os.getenv("FB_SECRET"))['accesstoken']
+        hometown = profile['hometown']['name'] if 'hometown' in profile.keys() else ''
+        location = profile['location']['name'] if 'location' in profile.keys() else ''
+        bday = datetime.strptime(profile['birthday'], '%m/%d/%Y').strftime('%Y-%m-%d') if 'birthday' in profile.keys() else '1970-09-09'
+
+        if 'email' in profile.keys():
+            user, created = User.objects.get_or_create(
+                username=profile['email'],
+                email=profile['email'],
+                first_name=profile['first_name'],
+                last_name=profile['last_name'],
+                last_login=timezone.now()
+            )
+            if created:
+                role = UserRole.objects.filter(user=user).last()
+                if not role and user.is_superuser:
+                    UserRole.objects.create(user=user, role="Admin")
+                elif not role:
+                    UserRole.objects.create(user=user, role="Author")
+            fb = Facebook.objects.filter(user=user).last()
+            if not fb:
+                Facebook.objects.create(
+                    user=user,
+                    facebook_url=profile['link'],
+                    facebook_id=profile['id'],
+                    first_name=profile['first_name'],
+                    last_name=profile['last_name'],
+                    verified=profile['verified'],
+                    name=profile['name'],
+                    language=profile['locale'],
+                    hometown=hometown,
+                    email=profile['email'],
+                    gender=profile['gender'],
+                    dob=bday,
+                    location=location,
+                    timezone=profile['timezone'],
+                    accesstoken=accesstoken
+                )
+            else:
+                fb.user = user,
+                fb.facebook_url = profile['link'],
+                fb.facebook_id = profile['id'],
+                fb.first_name = profile['first_name'],
+                fb.last_name = profile['last_name'],
+                fb.verified = profile['verified'],
+                fb.name = profile['name'],
+                fb.language = profile['locale'],
+                fb.hometown = hometown,
+                fb.email = profile['email'],
+                fb.gender = profile['gender'],
+                fb.dob = bday,
+                fb.location = location,
+                fb.timezone = profile['timezone'],
+                fb.accesstoken = accesstoken
+                fb.save()
+            if not request.user.is_authenticated():
+                if not hasattr(user, 'backend'):
+                    for backend in settings.AUTHENTICATION_BACKENDS:
+                        if user == load_backend(backend).get_user(user.pk):
+                            user.backend = backend
+                            break
+                if hasattr(user, 'backend'):
+                    auth.login(request, user)
+            messages.success(request, "Loggedin successfully")
+            return HttpResponseRedirect(reverse('blog'))
+        else:
+            message.error(request, "Sorry, We didnt find your email id through facebook")
+            return render(request, '404.html')
+    elif 'error' in request.GET:
+        print(request.GET)
+    else:
+        rty = "https://graph.facebook.com/oauth/authorize?client_id=" + os.getenv("FB_APP_ID") + "&redirect_uri=" + 'https://' + request.META['HTTP_HOST'] + reverse('facebook_login') + "&scope=manage_pages,read_stream, user_about_me, user_birthday, user_location, user_work_history, user_hometown, user_website, email, user_likes, user_groups"
+        return HttpResponseRedirect(rty)
 
 
 class ChangePasswordView(LoginRequiredMixin, FormView):

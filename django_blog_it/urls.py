@@ -14,6 +14,8 @@ urlpatterns = [
     url(r'^blog/(?P<blog_slug>[-\w]+)/$', BlogPostView.as_view(), name='blog_post_view'),
 
     url(r'^dashboard/$', AdminLoginView.as_view(), name='admin_login'),
+    url(r'^dashboard/gplus/$', google_login, name='google_login'),
+    url(r'^fb/$', facebook_login, name='facebook_login'),
     url(r'^dashboard/logout/$',
         admin_logout,
         name='admin_logout'),
@@ -40,7 +42,7 @@ urlpatterns = [
     url(r'^dashboard/category/add/$', CategoryCreateView.as_view(), name='add_category'),
     url(r'^dashboard/category/edit/(?P<category_slug>[-\w]+)/$', CategoryUpdateView.as_view(), name='edit_category'),
     url(r'^dashboard/category/delete/(?P<category_slug>[-\w]+)/$', CategoryDeleteView.as_view(), name='delete_category'),
-    url(r'^dashboard/category/status/(?P<category_slug>[-\w]+)/$', category_status_update, name='category_status_update'),
+    url(r'^dashboard/category/status/(?P<category_slug>[-\w]+)/$', CategoryStatusUpdateView.as_view(), name='category_status_update'),
     # pages
     url(r'^dashboard/bulk_actions_category/$',
         CategoryBulkActionsView.as_view(), name='bulk_actions_category'),

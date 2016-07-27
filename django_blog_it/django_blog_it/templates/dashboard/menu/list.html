@@ -12,7 +12,7 @@
 </style>
 {% endblock %}
 {% block content %}
-
+{% with request.user.userrole_set.last as user_role %}
     <div class="row" id="head_style">
         <h1 align="center"><i class="fa fa-database"></i> Menus list</h1>
         <p align="center" class="lead">
@@ -22,7 +22,7 @@
         </p>
          <!-- end div of add blog button -->
 
-            {% if request.user.is_superuser %}
+            {% if request.user.is_superuser or user_role.role == "Admin"%}
             <div class="bulk_button pull-left">
                <!-- Bulk actions -->
                 <div class="btn-group">
@@ -79,7 +79,9 @@
             <table class="table table-bordered table-hover" id="my_table">
                 <thead>
                     <tr>
+                    {% if request.user.is_superuser or user_role.role == "Admin"%}
                         <th><input name="bulk_actions" id="selectAll" type="checkbox"></th>
+                    {% endif %}
                         <th>Title</th>
                         <th>Status</th>
                         <th colspan="2">Actions</th>
@@ -90,7 +92,9 @@
                     {% recurse menu_list.menu_set.all|dictsort:"lvl"  with menu_list as menu_list %}
                     {% loop %}
                         <tr>
+                        {% if request.user.is_superuser or user_role.role == "Admin"%}
                             <td><input name="bulk_actions" class="bulk_actions" value="{{ menu_list.id }}" type="checkbox"></td>
+                        {% endif %}
                             <td class="pull-left">{% for i in level|add:"-1"|get_range %}------{% endfor %}{{ menu_list.title }}</td>
 
                             {% if menu_list.status %}
@@ -122,6 +126,7 @@
     {% endif %}
 
     </div>
+{% endwith %}
 {% endblock %}
 {% block js_script %}
 

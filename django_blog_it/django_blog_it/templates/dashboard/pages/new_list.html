@@ -10,6 +10,7 @@
 </style>
 {% endblock %}
 {% block content %}
+{% with request.user.userrole_set.last as user_role %}
   <div class="row no_row_margin heading_count">
     <div class="heading col-md-6">Pages</div>
     <div class="count_add-new col-md-6 text-right">
@@ -21,7 +22,7 @@
   </div>
   <div class="filters_row">
     <div class="col-md-6 filter_left">
-      {% if request.user.is_superuser %}
+      {% if request.user.is_superuser or user_role.role == "Admin"%}
         <form class="bulk_actions_form" method='get'>
           {% csrf_token %}
           <select class="form-control" name="bulk_actions_select" id='bulk_actions_select'>
@@ -56,23 +57,29 @@
       <table class="table table-bordered table-striped" id="my_table">
         <thead>
           <tr>
+          {% if request.user.is_superuser or user_role.role == "Admin"%}
             <th width='5%' class="text-center"><input name="bulk_actions" id="selectAll" type="checkbox"></th>
+          {% endif %}
             <th width='20%'>Title</th>
             <th width='10%'>Slug</th>
             <th width='5%' class="text-center">Status</th>
+          {% if request.user.is_superuser or user_role.role == "Admin"%}
             <th width='15%' colspan="3">Actions</th>
+          {% endif %}
           </tr>
         </thead>
         {% for page in pages_list %}
         <tbody>
           <tr>
+          {% if request.user.is_superuser or user_role.role == "Admin"%}
             <td class="text-center"><input name="bulk_actions" class="bulk_actions" value="{{ page.id }}" type="checkbox"></td>
+          {% endif %}
             <td><a href="#">{{ page.title }}</a></td>
             <td>{{ page.slug }}</td>
             <td class="status_on_off text-center">
               <a href="{% url 'page_status_update' page.slug %}" {% if page.is_active %}class="status_on" title="Active"{% else %}class="status_off" title="In-Active"{% endif %} data-toggle="tooltip" data-placement="bottom"><i class="fa fa-circle" aria-hidden="true"></i></a>
             </td>
-            {% if request.user.is_superuser or request.user|get_user_role_name != 'Author' %}
+            {% if request.user.is_superuser or user_role.role == "Admin"%}
             <td class="actions">
               <a href="{% url 'page_view' page_slug=page.slug %}" class="view"><i class="fa fa-eye"></i> View</a>
               <a href="{% url 'edit_page' page_slug=page.slug %}" class="edit"><i class="fa fa-edit"></i> Edit</a>
@@ -94,6 +101,7 @@
       {% endif %}
     </div>
   </div>
+{% endwith %}
 {% endblock %}
 {% block js_script %}
 <script type="text/javascript">

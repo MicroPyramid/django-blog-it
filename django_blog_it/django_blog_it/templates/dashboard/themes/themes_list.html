@@ -10,6 +10,7 @@
 </style>
 {% endblock %}
 {% block content %}
+{% with request.user.userrole_set.last as user_role %}
     <div class="row no_row_margin heading_count">
       <div class="heading col-md-6">Themes</div>
       <div class="count_add-new col-md-6 text-right">
@@ -21,7 +22,7 @@
     </div>
     <div class="filters_row">
       <div class="col-md-6 filter_left">
-        {% if request.user.is_superuser %}
+        {% if request.user.is_superuser or user_role.role == "Admin"%}
           <form class="bulk_actions_form" method='get'>
             {% csrf_token %}
             <select class="form-control" name="bulk_actions_select" id='bulk_actions_select'>
@@ -55,26 +56,32 @@
             <table class="table table-bordered table-striped" id="my_table">
                 <thead>
                     <tr>
+                    {% if request.user.is_superuser or user_role.role == "Admin"%}
                         <th width="5%" class="text-center"><input name="bulk_actions" id="selectAll" type="checkbox"></th>
+                    {% endif %}
                         <th width='40%'>Title</th>
                         <th width='10%' class="text-center">Status</th>
+                    {% if request.user.is_superuser or user_role.role == "Admin"%}
                         <th width='20%' colspan="2">Actions</th>
+                    {% endif %}
                     </tr>
                 </thead>
 
                 {% for theme in themes_list %}
                     <tbody>
                         <tr>
+                        {% if request.user.is_superuser or user_role.role == "Admin"%}
                             <td class="text-center"><input name="bulk_actions" class="bulk_actions" value="{{ theme.id }}" type="checkbox"></td>
+                        {% endif %}
                             <td><a href="{% url 'view_theme' theme_slug=theme.slug %}">{{ theme.name }}</a></td>
                             <td class="status_on_off text-center">
                                 <a href="{% url 'theme_status_update' theme.slug %}" {% if theme.enabled %}class="status_on" title="Enabled"{% else %}class="status_off" title="Disabled"{% endif %} data-toggle="tooltip" data-placement="bottom"><i class="fa fa-circle" aria-hidden="true"></i></a>
                             </td>
-                            {% if request.user.is_superuser or request.user|get_user_role_name != 'Author' %}
-                                <td class="actions">
-                                    <a href="{% url 'edit_theme' theme.id %}" class="edit"><i class="fa fa-edit"></i> Edit</a><a href="{% url 'delete_theme' theme.id %}" class="delete" data-confirm="true"><i class="fa fa-trash-o"></i> Delete</a>
-                                </td>
-                            {% endif %}
+                        {% if request.user.is_superuser or user_role.role == "Admin"%}
+                            <td class="actions">
+                                <a href="{% url 'edit_theme' theme.id %}" class="edit"><i class="fa fa-edit"></i> Edit</a><a href="{% url 'delete_theme' theme.id %}" class="delete" data-confirm="true"><i class="fa fa-trash-o"></i> Delete</a>
+                            </td>
+                        {% endif %}
                         </tr>
                     </tbody>
 
@@ -92,6 +99,7 @@
           {% endif %}
         </div>
     </div>
+{% endwith %}
 {% endblock %}
 {% block js_script %}
 
