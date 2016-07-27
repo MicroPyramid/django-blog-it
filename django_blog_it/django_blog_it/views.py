@@ -20,6 +20,7 @@ try:
     User = get_user_model()
 except ImportError:
     from django.contrib.auth.models import User
+from django.contrib.auth.mixins import LoginRequiredMixin 
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, DeleteView,\
     UpdateView, FormView, TemplateView, View
@@ -1009,3 +1010,18 @@ def bulk_actions_themes(request):
             else:
                 messages.warning(request, 'Please select at-least one record to perform this action')
                 return HttpResponse(json.dumps({'response': False}))
+
+
+class ChangePasswordView(LoginRequiredMixin, FormView):
+    template_name = "dashboard/user/change_password.html"
+    form_class = ChangePasswordForm
+    success_url = reverse_lazy("blog")
+
+    def form_valid(self, form):
+        user = self.request.user
+        user.set_password(form.cleaned_data.get("password"))
+        user.save()
+        user = authenticate(username=user.username, password=form.cleaned_data.get("password"))
+        login(self.request, user)
+        messages.success(self.request, "your password has been changed!!!")
+        return super(ChangePasswordView, self).form_valid(form)

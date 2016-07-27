@@ -106,5 +106,6 @@ urlpatterns = [
 
     url(r'^dashboard/contactUs/$',
         configure_contact_us, name='configure_contact_us'),
+    url(r'^dashboard/change-password/$', ChangePasswordView.as_view(), name='change_password'),
 
 ] + static(MEDIA_URL, document_root=MEDIA_ROOT)
