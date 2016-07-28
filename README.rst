@@ -51,12 +51,13 @@ Installation
 
     python setup.py install
 
-2. Add app name in settings.py
+2. Add app name in settings.py::
+
     INSTALLED_APPS = [
-       ..................
+       '..................',
        'simple_pagination',
        'django_blog_it.django_blog_it',
-       ..................
+       '..................'
     ]
 
 
