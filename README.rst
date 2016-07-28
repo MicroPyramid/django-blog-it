@@ -51,8 +51,16 @@ Installation
 
     python setup.py install
 
+2. Add app name in settings.py
+    INSTALLED_APPS = [
+       ..................
+       'simple_pagination',
+       'django_blog_it.django_blog_it',
+       ..................
+    ]
 
-2. After installing/cloning this, add the following settings in the virtual env/bin/activate file to start discussions on blog articles ::
+
+3. After installing/cloning this, add the following settings in the virtual env/bin/activate file to start discussions on blog articles ::
 
     You can create your disqus account at https://disqus.com/profile/login/
 
@@ -111,7 +119,7 @@ Installation
     export DEFAULT_EMAIL
 
 
-3. Use virtualenv to install requirements::
+4. Use virtualenv to install requirements::
 
     pip install -r requirements.txt
 
