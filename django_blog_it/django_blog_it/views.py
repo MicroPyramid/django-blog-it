@@ -23,6 +23,7 @@ try:
     User = get_user_model()
 except ImportError:
     from django.contrib.auth.models import User
+from django.contrib.auth.mixins import LoginRequiredMixin 
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, DeleteView,\
     UpdateView, FormView, TemplateView, View
@@ -926,7 +927,6 @@ class ThemesBulkActionsView(AdminOnlyMixin, View):
             messages.warning(request,'Please select at-least one record to perform this action')
             return JsonResponse({'response': False})
 
-
 # social login
 def google_login(request):
     if 'code' in request.GET:
@@ -1089,3 +1089,18 @@ def facebook_login(request):
     else:
         rty = "https://graph.facebook.com/oauth/authorize?client_id=" + os.getenv("FB_APP_ID") + "&redirect_uri=" + 'https://' + request.META['HTTP_HOST'] + reverse('facebook_login') + "&scope=manage_pages,read_stream, user_about_me, user_birthday, user_location, user_work_history, user_hometown, user_website, email, user_likes, user_groups"
         return HttpResponseRedirect(rty)
+
+
+class ChangePasswordView(LoginRequiredMixin, FormView):
+    template_name = "dashboard/user/change_password.html"
+    form_class = ChangePasswordForm
+    success_url = reverse_lazy("blog")
+
+    def form_valid(self, form):
+        user = self.request.user
+        user.set_password(form.cleaned_data.get("password"))
+        user.save()
+        user = authenticate(username=user.username, password=form.cleaned_data.get("password"))
+        login(self.request, user)
+        messages.success(self.request, "your password has been changed!!!")
+        return super(ChangePasswordView, self).form_valid(form)
