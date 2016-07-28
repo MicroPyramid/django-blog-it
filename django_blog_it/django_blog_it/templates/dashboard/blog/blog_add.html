@@ -64,7 +64,7 @@ Edit
                        }
                        else
                        {
-                               window.location='/dashboard/blog/';
+                               window.location='{% url 'blog' %}';
                        }
                 }
         });
@@ -73,7 +73,7 @@ Edit
 
     // for page title
 
-        if(window.location.pathname=='/dashboard/add/'){
+        if(window.location.pathname=='{% url 'blog_add' %}'){
             $('#page_title').text('Add Blog');
         }
         else{

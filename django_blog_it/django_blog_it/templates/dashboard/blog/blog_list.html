@@ -191,10 +191,10 @@
             $.get("{% url 'bulk_actions_blog' %}", {'blog_ids':blog_ids, 'action': "Published"}, function(data){
                 if(data.response){
                     //alert('Record(s) successfully updated as Published!');
-                    window.location='/dashboard/blog/';
+                    window.location='{% url 'blog' %}';
                 }else{
                     //alert('Please select at least one record !');
-                    window.location='/dashboard/blog/';
+                    window.location='{% url 'blog' %}';
                 }
             }, 'json');
 
@@ -210,10 +210,10 @@
             $.get("{% url 'bulk_actions_blog' %}", {'blog_ids':blog_ids, 'action': 'Drafted'}, function(data){
                 if(data.response){
                     //alert('Record(s) successfully updated as Drafted!');
-                    window.location='/dashboard/blog/';
+                    window.location='{% url 'blog' %}';
                 }else{
                     //alert('Please select at least one record !');
-                    window.location='/dashboard/blog/';
+                    window.location='{% url 'blog' %}';
                 }
             }, 'json');
 
@@ -229,10 +229,10 @@
             $.get("{% url 'bulk_actions_blog' %}", {'blog_ids':blog_ids, 'action': 'Rejected'}, function(data){
                 if(data.response){
                     //alert('Record(s) successfully updated as Rejected!');
-                    window.location='/dashboard/blog/';
+                    window.location='{% url 'blog' %}';
                 }else{
                     //alert('Please select at least one record !');
-                    window.location='/dashboard/blog/';
+                    window.location='{% url 'blog' %}';
                 }
             }, 'json');
 
@@ -247,10 +247,10 @@
             $.get("{% url 'bulk_actions_blog' %}", {'blog_ids':blog_ids, 'action': 'Delete'}, function(data){
                 if(data.response){
                     //alert('Record(s) successfully Deleted!');
-                    window.location='/dashboard/blog/';
+                    window.location='{% url 'blog' %}';
                 }else{
                     //alert('Please select at least one record !');
-                    window.location='/dashboard/blog/';
+                    window.location='{% url 'blog' %}';
                 }
             }, 'json');
 

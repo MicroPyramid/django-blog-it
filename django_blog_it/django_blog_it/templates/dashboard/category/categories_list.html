@@ -154,9 +154,9 @@
 
             $.get("{% url 'bulk_actions_category' %}", {'blog_ids':blog_ids, 'action': 'True'}, function(data){
                 if(data.response){
-                    window.location='/dashboard/category/';
+                    window.location='{% url 'categories' %}';
                 }else{
-                    window.location='/dashboard/category/';
+                    window.location='{% url 'categories' %}';
                 }
             }, 'json');
 
@@ -171,9 +171,9 @@
 
             $.get("{% url 'bulk_actions_category' %}", {'blog_ids':blog_ids, 'action': 'False'}, function(data){
                 if(data.response){
-                    window.location='/dashboard/category/';
+                    window.location='{% url 'categories' %}';
                 }else{
-                    window.location='/dashboard/category/';
+                    window.location='{% url 'categories' %}';
                 }
             }, 'json');
 
@@ -188,10 +188,10 @@
             $.get("{% url 'bulk_actions_category' %}", {'blog_ids':blog_ids, 'action': 'Delete'}, function(data){
                 if(data.response){
                     //alert('Record(s) successfully Deleted!');
-                    window.location='/dashboard/category/';
+                    window.location='{% url 'categories' %}';
                 }else{
                     //alert('Please select at least one record !');
-                    window.location='/dashboard/category/';
+                    window.location='{% url 'categories' %}';
                 }
             }, 'json');
 

@@ -45,7 +45,7 @@ class AdminLoginView(FormView):
 
     def dispatch(self, request, *args, **kwargs):
         if(request.user.is_authenticated and request.user.is_active):
-            return HttpResponseRedirect(reverse("blog"))
+            return HttpResponseRedirect(reverse_lazy("blog"))
         return super(AdminLoginView, self).dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
@@ -114,7 +114,7 @@ class PostCreateView(AdminMixin, CreateView):
     model = Post
     form_class = BlogPostForm
     template_name = "dashboard/blog/new_blog_add.html"
-    success_url = '/dashboard/blog/'
+    success_url = reverse_lazy('blog')
 
     def get_form_kwargs(self):
         kwargs = super(PostCreateView, self).get_form_kwargs()
@@ -163,7 +163,7 @@ class PostCreateView(AdminMixin, CreateView):
 
 class PostEditView(AdminMixin, UpdateView):
     model = Post
-    success_url = '/dashboard/blog/'
+    success_url = reverse_lazy('blog')
     slug_url_kwarg = 'blog_slug'
     template_name = "dashboard/blog/new_blog_add.html"
     form_class = BlogPostForm
@@ -237,7 +237,7 @@ class PostEditView(AdminMixin, UpdateView):
 
 class PostDeleteView(PostAccessRequiredMixin, DeleteView):
     model = Post
-    success_url = '/dashboard/blog/'
+    success_url = reverse_lazy("blog")
     slug_field = 'slug'
     template_name = "dashboard/blog/new_blog_list.html"
 
@@ -1065,7 +1065,7 @@ def google_login(request):
             if hasattr(user, 'backend'):
                 auth.login(request, user)
         messages.success(request, "Loggedin successfully")
-        return HttpResponseRedirect(reverse('blog'))
+        return HttpResponseRedirect(reverse_lazy('blog'))
 
     else:
         rty = "https://accounts.google.com/o/oauth2/auth?client_id=" + os.getenv("GP_CLIENT_ID")\
@@ -1148,7 +1148,7 @@ def facebook_login(request):
                 if hasattr(user, 'backend'):
                     auth.login(request, user)
             messages.success(request, "Loggedin successfully")
-            return HttpResponseRedirect(reverse('blog'))
+            return HttpResponseRedirect(reverse_lazy('blog'))
         else:
             message.error(request, "Sorry, We didnt find your email id through facebook")
             return render(request, '404.html')
