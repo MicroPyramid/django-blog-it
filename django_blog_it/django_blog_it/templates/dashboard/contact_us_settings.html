@@ -58,7 +58,7 @@ Configure Contact Us.
               }
           }else{
               //alert(data['response']);
-              window.location='/dashboard/';
+              window.location='{% url "admin_login" %}';
           }
       }, 'json');
   });

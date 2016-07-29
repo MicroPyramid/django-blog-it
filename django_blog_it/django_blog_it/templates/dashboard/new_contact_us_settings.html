@@ -89,7 +89,7 @@ Configure Contact Us.
               }
           }else{
               //alert(data['response']);
-              window.location='/dashboard/blog/';
+              window.location='{% url "blog" %}';
           }
       }, 'json');
   });

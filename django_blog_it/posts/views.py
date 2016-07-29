@@ -8,13 +8,14 @@ from django_blog_it.django_blog_it.forms import ContactForm
 from django.db.models import Count
 from django_blog_it import settings
 from django.contrib import messages
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
 from django.core.mail import EmailMultiAlternatives
 from django.template import Context
 from django.views.generic import ListView, DetailView
 from django.shortcuts import render_to_response
+from django.core.urlresolvers import reverse
 from microurl import google_mini
-from django_blog_it.django_blog_it.models import ContactUsSettings
+from django_blog_it.django_blog_it.models import ContactUsSettings, Post_Slugs
 
 
 def categories_tags_lists():
@@ -56,6 +57,14 @@ class BlogPostView(DetailView):
     model = Post
     slug_url_kwarg = "blog_slug"
     context_object_name = "blog_name"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.object = Post.objects.filter(slug=kwargs.get("blog_slug")).last()
+        if not self.object:
+            post_slug = get_object_or_404(Post_Slugs, slug=self.kwargs.get("blog_slug"))
+            if self.kwargs.get("blog_slug") != post_slug.blog.slug:
+                return HttpResponseRedirect(reverse('blog_post_view', kwargs={"blog_slug": post_slug.blog.slug}), status=301)
+        return super(BlogPostView, self).dispatch(request, *args, **kwargs)
 
     def get_mini_url(self, request):
         url = request.build_absolute_uri()
