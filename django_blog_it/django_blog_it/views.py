@@ -884,31 +884,6 @@ class ThemeCreateView(AdminOnlyMixin, CreateView):
         return context
 
 
-@active_admin_required
-def add_theme(request):
-    form = BlogThemeForm()
-    if request.method == 'POST':
-        form = BlogThemeForm(request.POST)
-
-        if form.is_valid():
-            blog_theme = form.save(commit=False)
-            if self.request.POST.get('enabled') == 'True':
-                Theme.objects.filter(
-                    enabled=True).update(enabled=False)
-                blog_theme.enabled = True
-            elif self.request.POST.get('enabled') == 'False':
-                blog_theme.enabled = False
-            blog_theme.save()
-            messages.success(request, 'Successfully added your Theme')
-            data = {'error': False,
-                    'response': 'Successfully added your Theme'}
-        else:
-            data = {'error': True, 'response': form.errors}
-        return HttpResponse(json.dumps(data))
-    context = {'form': form, 'add_theme': True}
-    return render(request, 'dashboard/themes/theme_add.html', context)
-
-
 class ThemeUpdateView(AdminOnlyMixin, UpdateView):
     pk = 'pk'
     model = Theme
@@ -948,43 +923,6 @@ def theme_status_update(request, theme_slug):
     return HttpResponseRedirect(reverse_lazy("themes"))
 
 
-@active_admin_required
-def edit_theme(request, theme_slug):
-    theme = get_object_or_404(Theme, slug=theme_slug) #  Theme.objects.get(slug=theme_slug)
-    if request.user.is_superuser is True:
-        form = BlogThemeForm(instance=theme)
-
-        if request.method == 'POST':
-            form = BlogThemeForm(request.POST, instance=theme)
-            if form.is_valid():
-                blog_theme = form.save(commit=False)
-                if self.request.POST.get('enabled') == 'True':
-                    Theme.objects.filter(
-                        enabled=True).update(enabled=False)
-                    blog_theme.enabled = True
-                elif self.request.POST.get('enabled') == 'False':
-                    blog_theme.enabled = False
-                blog_theme.save()
-                messages.success(request, 'Successfully updated your Theme')
-                data = {'error': False,
-                        'response': 'Successfully updated your Theme'}
-            else:
-                data = {'error': True, 'response': form.errors}
-            return HttpResponse(json.dumps(data))
-        context = {'form': form, 'theme': theme}
-        return render(request,
-                      'dashboard/themes/theme_add.html', context)
-
-
-@active_admin_required
-def delete_theme(request, theme_slug):
-    theme = get_object_or_404(Theme, slug=theme_slug) #  Theme.objects.get(slug=theme_slug)
-    if request.user.is_superuser is True:
-        theme.delete()
-        messages.success(request, 'Successfully Deleted Theme')
-        return HttpResponseRedirect(reverse_lazy('themes'))
-
-
 class DeleteThemeView(AdminOnlyMixin, View):
 
     def get(self, request, *args, **kwargs):
@@ -995,26 +933,20 @@ class DeleteThemeView(AdminOnlyMixin, View):
                 return HttpResponseRedirect(reverse_lazy('themes'))
 
 
-@active_admin_required
-def bulk_actions_themes(request):
-    if request.user.is_superuser:
-        if request.method == 'GET':
-            if 'theme_ids[]' in request.GET:
-                if request.GET.get('action') == 'False':
-                    Theme.objects.filter(
-                        id__in=request.GET.getlist('theme_ids[]')).update(
-                        enabled=False)
-                    messages.success(request, "Selected Theme's successfully updated as Disabled")
+class ThemesBulkActionsView(AdminOnlyMixin, View):
 
-                elif request.GET.get('action') == 'Delete':
-                    Theme.objects.filter(
-                        id__in=request.GET.getlist('theme_ids[]')).delete()
-                    messages.success(request, "Selected Theme's successfully deleted!")
-
-                return HttpResponse(json.dumps({'response': True}))
-            else:
-                messages.warning(request, 'Please select at-least one record to perform this action')
-                return HttpResponse(json.dumps({'response': False}))
+    def get(self, request, *args, **kwargs):
+        if 'theme_ids[]' in request.GET:
+            if request.GET.get('action') == 'False':
+                Theme.objects.filter(id__in=request.GET.getlist('theme_ids[]')).update(enabled=False)
+                messages.success(request, "Selected Theme's successfully updated as Disabled")
+            elif request.GET.get('action') == 'Delete':
+                Theme.objects.filter(id__in=request.GET.getlist('theme_ids[]')).delete()
+                messages.success(request, "Selected Theme's successfully deleted!")
+            return JsonResponse({'response': True})
+        else:
+            messages.warning(request,'Please select at-least one record to perform this action')
+            return JsonResponse({'response': False})
 
 # social login
 def google_login(request):
