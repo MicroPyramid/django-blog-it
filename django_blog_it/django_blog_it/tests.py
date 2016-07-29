@@ -443,7 +443,11 @@ class blog_post_creation(TestCase):
                 'status': 'Published',
                 'tags': 'django',
                 'is_superuser': 'True',
-                'slug': 'python-introduction-1'
+                'slug': 'python-introduction-1',
+                'slugs-MAX_NUM_FORMS': ['1000'],
+                'slugs-TOTAL_FORMS': ['3'], 'slugs-MIN_NUM_FORMS': ['0'],
+                'slugs-0-slug': ['python-introduction-1'], 'slugs-1-slug': [''],
+                'slugs-2-slug': [''], 'slugs-INITIAL_FORMS': ['0'],
             })
         self.assertEqual(response.status_code, 200)
         self.assertTrue('Successfully posted your blog' in str(response.content))
@@ -475,7 +479,11 @@ class blog_post_creation(TestCase):
                 'status': 'Published',
                 'tags': 'django',
                 'is_superuser': 'True',
-                'slug': 'testing'
+                'slug': 'testing',
+                'slugs-MAX_NUM_FORMS': ['1000'],
+                'slugs-TOTAL_FORMS': ['3'], 'slugs-MIN_NUM_FORMS': ['0'],
+                'slugs-0-slug': ['testing-11223'], 'slugs-1-slug': [''],
+                'slugs-2-slug': [''], 'slugs-INITIAL_FORMS': ['0'],
             })
         self.assertEqual(response.status_code, 200)
         self.assertTrue('Successfully posted your blog' in str(response.content))
@@ -493,7 +501,11 @@ class blog_post_creation(TestCase):
                 'status': 'Published',
                 'tags': 'django',
                 'is_superuser': 'True',
-                'slug': 'nginx-post'
+                'slug': 'nginx-post',
+                'slugs-MAX_NUM_FORMS': ['1000'],
+                'slugs-TOTAL_FORMS': ['3'], 'slugs-MIN_NUM_FORMS': ['0'],
+                'slugs-0-slug': ['testing-11223'], 'slugs-1-slug': [''],
+                'slugs-2-slug': [''], 'slugs-INITIAL_FORMS': ['0'],
             })
         self.assertEqual(response.status_code, 200)
         self.assertTrue('Successfully posted your blog' in str(response.content))
@@ -511,7 +523,11 @@ class blog_post_creation(TestCase):
                 'status': 'Published',
                 'tags': 'django',
                 'is_superuser': 'True',
-                'slug': 'nginx-post'
+                'slug': 'nginx-post',
+                'slugs-MAX_NUM_FORMS': ['1000'],
+                'slugs-TOTAL_FORMS': ['3'], 'slugs-MIN_NUM_FORMS': ['0'],
+                'slugs-0-slug': ['nginx-post-1'], 'slugs-1-slug': [''],
+                'slugs-2-slug': [''], 'slugs-INITIAL_FORMS': ['0'],
             })
         self.assertEqual(response.status_code, 200)
         self.assertTrue('Successfully updated your blog post' in str(response.content))
@@ -543,7 +559,14 @@ class blog_post_creation(TestCase):
                 'status': 'Published',
                 'tags': 'django',
                 'is_superuser': 'True',
-                'slug': 'nginx-post-1'
+                'slug': 'nginx-post-1',
+                'slugs-MAX_NUM_FORMS': ['1000'],
+                'slugs-TOTAL_FORMS': ['4'], 'slugs-MIN_NUM_FORMS': ['0'],
+                'slugs-0-slug': ['python-introduction-1'],
+                'slugs-1-slug': [''], 'slugs-2-slug': [''],
+                'slugs-3-slug': [''], 'slugs-0-id': ['2'],
+                'slugs-INITIAL_FORMS': ['1'], 'slugs-0-is_active': ['on'],
+                'slugs-1-id': [''], 'slugs-2-id': [''], 'slugs-3-id': [''],
             })
         self.assertEqual(response.status_code, 200)
         self.assertTrue('Successfully updated your blog post' in str(response.content))
@@ -557,7 +580,14 @@ class blog_post_creation(TestCase):
                 'status': 'Published',
                 'tags': 'nginx',
                 'is_superuser': 'True',
-                'slug': 'nginx-post-1'
+                'slug': 'nginx-post-1',
+                'slugs-MAX_NUM_FORMS': ['1000'],
+                'slugs-TOTAL_FORMS': ['4'], 'slugs-MIN_NUM_FORMS': ['0'],
+                'slugs-0-slug': ['python-introduction-1'],
+                'slugs-1-slug': [''], 'slugs-2-slug': [''],
+                'slugs-3-slug': [''], 'slugs-0-id': ['2'],
+                'slugs-INITIAL_FORMS': ['1'], 'slugs-0-is_active': ['on'],
+                'slugs-1-id': [''], 'slugs-2-id': [''], 'slugs-3-id': [''],
             })
         self.assertEqual(response.status_code, 200)
         self.assertTrue('Successfully updated your blog post' in str(response.content))
@@ -574,7 +604,14 @@ class blog_post_creation(TestCase):
                 'status': 'Published',
                 'tags': 'nginx',
                 'is_superuser': 'True',
-                'slug': 'nginx-post-1'
+                'slug': 'nginx-post-1',
+                'slugs-MAX_NUM_FORMS': ['1000'],
+                'slugs-TOTAL_FORMS': ['4'], 'slugs-MIN_NUM_FORMS': ['0'],
+                'slugs-0-slug': ['python-introduction-1'],
+                'slugs-1-slug': [''], 'slugs-2-slug': [''],
+                'slugs-3-slug': [''], 'slugs-0-id': ['2'],
+                'slugs-INITIAL_FORMS': ['1'], 'slugs-0-is_active': ['on'],
+                'slugs-1-id': [''], 'slugs-2-id': [''], 'slugs-3-id': [''],
             })
         self.assertEqual(response.status_code, 200)
 
@@ -591,7 +628,11 @@ class blog_post_creation(TestCase):
                 'status': 'Published',
                 'tags': 'django',
                 'is_superuser': 'True',
-                'slug': 'haystack-post'
+                'slug': 'haystack-post',
+                'slugs-MAX_NUM_FORMS': ['1000'],
+                'slugs-TOTAL_FORMS': ['3'], 'slugs-MIN_NUM_FORMS': ['0'],
+                'slugs-0-slug': ['haystack-post-1'], 'slugs-1-slug': [''],
+                'slugs-2-slug': [''], 'slugs-INITIAL_FORMS': ['0'],
             })
         self.assertEqual(response.status_code, 200)
         self.assertTrue('Successfully posted your blog' in str(response.content))

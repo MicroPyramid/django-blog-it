@@ -131,7 +131,7 @@ class PostCreateView(AdminMixin, CreateView):
             Post, Post_Slugs, can_delete=True, extra=3, fields=('slug', 'is_active'), formset=CustomBlogSlugInlineFormSet)
         formset = formset(self.request.POST, instance=self.blog_post)
         if not formset.is_valid():
-            return JsonResponse({'error': True, "response": formset.errors()})
+            return JsonResponse({'error': True, "response": formset.errors})
         self.blog_post.user = self.request.user
         if self.request.user.is_superuser:
             self.blog_post.status = self.request.POST.get('status')
@@ -203,7 +203,7 @@ class PostEditView(AdminMixin, UpdateView):
             Post, Post_Slugs, can_delete=True, extra=3, fields=('slug', 'is_active'), formset=CustomBlogSlugInlineFormSet)
         formset = formset(self.request.POST, instance=self.get_object())
         if not formset.is_valid():
-            return JsonResponse({'error': True, "response": formset.errors()})
+            return JsonResponse({'error': True, "response": formset.errors})
         else:
             formset.save()
         previous_status = self.get_object().status
