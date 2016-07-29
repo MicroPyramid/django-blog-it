@@ -12,9 +12,11 @@ from django.contrib.auth import logout, authenticate, login, load_backend
 from django.contrib.auth.decorators import user_passes_test, login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files import File
-
+from django import forms
+from django.forms import inlineformset_factory
 from .models import Menu, Post, PostHistory, Category, Tags, Image_File, \
-    STATUS_CHOICE, ROLE_CHOICE, UserRole, Page, Theme, Google, Facebook
+    STATUS_CHOICE, ROLE_CHOICE, UserRole, Page, Theme, Google, Facebook, \
+    Post_Slugs
 from .forms import *
 # from django_blog_it import settings
 from django.conf import settings
@@ -125,12 +127,17 @@ class PostCreateView(AdminMixin, CreateView):
 
     def form_valid(self, form):
         self.blog_post = form.save(commit=False)
+        formset = inlineformset_factory(
+            Post, Post_Slugs, can_delete=True, extra=3, fields=('slug', 'is_active'), formset=CustomBlogSlugInlineFormSet)
+        formset = formset(self.request.POST, instance=self.blog_post)
+        if not formset.is_valid():
+            return JsonResponse({'error': True, "response": formset.errors()})
         self.blog_post.user = self.request.user
-
         if self.request.user.is_superuser:
             self.blog_post.status = self.request.POST.get('status')
         self.blog_post.save()
-
+        self.blog_post.store_old_slug(self.blog_post.slug)
+        formset.save()
         if self.request.POST.get('tags', ''):
             splitted = self.request.POST.get('tags').split(',')
             for s in splitted:
@@ -158,6 +165,9 @@ class PostCreateView(AdminMixin, CreateView):
         context['categories_list'] = categories_list
         context['tags_list'] = tags_list
         context['add_blog'] = True
+        self.formset = inlineformset_factory(
+            Post, Post_Slugs, can_delete=True, extra=3, fields=('slug', 'is_active'), formset=CustomBlogSlugInlineFormSet, widgets={'slug': forms.TextInput(attrs={'class': 'form-control'})})
+        context['formset'] = self.formset()
         return context
 
 
@@ -189,6 +199,13 @@ class PostEditView(AdminMixin, UpdateView):
         return JsonResponse({'error': True, 'response': form.errors})
 
     def form_valid(self, form):
+        formset = inlineformset_factory(
+            Post, Post_Slugs, can_delete=True, extra=3, fields=('slug', 'is_active'), formset=CustomBlogSlugInlineFormSet)
+        formset = formset(self.request.POST, instance=self.get_object())
+        if not formset.is_valid():
+            return JsonResponse({'error': True, "response": formset.errors()})
+        else:
+            formset.save()
         previous_status = self.get_object().status
         previous_content = self.get_object().content
         self.blog_post = form.save(commit=False)
@@ -220,7 +237,7 @@ class PostEditView(AdminMixin, UpdateView):
         #         content="changed status from " +
         #         str(previous_status) + " to " + str(blog_post.status)
         #     )
-
+        self.blog_post.store_old_slug(self.kwargs.get("blog_slug"))
         messages.success(self.request, 'Successfully updated your blog post')
         data = {'error': False,
                 'response': 'Successfully updated your blog post'}
@@ -232,6 +249,10 @@ class PostEditView(AdminMixin, UpdateView):
         context['status_choices'] = STATUS_CHOICE,
         context['categories_list'] = categories_list
         context['history_list'] = self.get_object().history.all()
+        self.formset = inlineformset_factory(
+            Post, Post_Slugs, can_delete=True, extra=3, fields=('slug', 'is_active'), formset=CustomBlogSlugInlineFormSet, 
+            widgets={'slug': forms.TextInput(attrs={'class': 'form-control'})})
+        context['formset'] = self.formset(instance=self.get_object())
         return context
 
 

@@ -152,6 +152,16 @@ class Post(models.Model):
                 fail_silently=False,
             )
 
+    def store_old_slug(self, old_slug):
+        query = Post_Slugs.objects.filter(blog=self, slug=old_slug).values_list("slug", flat=True)
+        if not (query and old_slug != self.slug):
+            old_slug, _ = Post_Slugs.objects.get_or_create(blog=self, slug=old_slug)
+            old_slug.is_active = False
+            old_slug.save()
+        active_slug, _ = Post_Slugs.objects.get_or_create(blog=self, slug=self.slug)
+        active_slug.is_active = True
+        active_slug.save()
+
 
 def create_slug(tempslug):
     slugcount = 0
@@ -162,6 +172,15 @@ def create_slug(tempslug):
             tempslug = tempslug + '-' + str(slugcount)
         except ObjectDoesNotExist:
             return tempslug
+
+
+class Post_Slugs(models.Model):
+    blog = models.ForeignKey(Post, related_name='slugs')
+    slug = models.SlugField(max_length=100, unique=True)
+    is_active = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.slug
 
 
 class PostHistory(models.Model):
