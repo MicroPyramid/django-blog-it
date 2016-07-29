@@ -83,6 +83,7 @@ class BlogPostForm(forms.ModelForm):
                 self.fields[field].widget.attrs.update({
                     'class': 'form-control', "placeholder": "Please enter your Blog " + field.capitalize()
                 })
+        self.fields['category'].queryset = Category.objects.filter(is_active=True)
 
     def clean_status(self):
         if self.user_role == "Author":

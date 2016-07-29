@@ -1124,4 +1124,7 @@ class ChangePasswordView(LoginRequiredMixin, FormView):
         user = authenticate(username=user.username, password=form.cleaned_data.get("password"))
         login(self.request, user)
         messages.success(self.request, "your password has been changed!!!")
-        return super(ChangePasswordView, self).form_valid(form)
+        return JsonResponse({"error": False, "success_url": reverse("blog")})
+
+    def form_invalid(self, form):
+        return JsonResponse({"error": True, "errors": form.errors})
