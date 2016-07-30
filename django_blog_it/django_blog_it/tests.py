@@ -4,7 +4,8 @@ from django_blog_it.django_blog_it.models import Category, Post, Tags, PostHisto
 from django.contrib.auth.models import User
 from django_blog_it.django_blog_it.forms import BlogCategoryForm, BlogPostForm, AdminLoginForm
 from django.core.urlresolvers import reverse
-from django_blog_it.django_blog_it.models import Menu
+from django_blog_it.django_blog_it.models import Menu, Theme
+from .forms import UserForm
 
 
 # models test
@@ -424,7 +425,7 @@ class blog_post_creation(TestCase):
         self.employee = User.objects.create_user(
             'mp@micropyramid.com', 'mp', 'mp')
         self.category = Category.objects.create(
-            name='salesforce', description='salesforce desc', user=self.user)
+            name='salesforce', description='salesforce desc', user=self.user, is_active=True)
         self.post = Post.objects.create(title="apache", slug="apache", category=self.category, user=self.user)
 
     def test_blog_post_add(self):
@@ -436,7 +437,7 @@ class blog_post_creation(TestCase):
         self.assertTemplateUsed(response, 'dashboard/blog/new_blog_add.html')
 
         response = self.client.post(
-            '/dashboard/add/',
+            reverse("blog_add"),
             {
                 'title': 'python introduction',
                 'content': 'This is content',
@@ -570,7 +571,7 @@ class blog_post_creation(TestCase):
             })
         self.assertEqual(response.status_code, 200)
         # self.assertTrue('Successfully updated your blog post' in str(response.content))
-
+        self.post = Post.objects.first()
         response = self.client.post(
             reverse("edit_blog", kwargs={"blog_slug": self.post.slug}),
             {
@@ -920,3 +921,171 @@ class Menus(TestCase):
         context['select_status'] = 'False'
         response = self.client.get(url, context)
         self.assertEqual(response.status_code, 200)
+
+
+class TestThemeCreateView(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_superuser('mp@mp.com', 'mp', 'mp')
+
+    def test_theme_create_view(self):
+        is_logged_in = self.client.login(username='mp@mp.com', password='mp')
+        self.assertTrue(is_logged_in)
+        url = reverse("add_theme")
+        context = {
+            "name": "theme-1",
+            "enabled": "True",
+            "description": "theme-1 description",
+        }
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        response = self.client.post(url, context)
+        self.assertEqual(response.status_code, 200)
+
+
+class TestThemesList(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_superuser('mp@mp.com', 'mp', 'mp')
+
+    def test_themes_list(self):
+        is_logged_in = self.client.login(username='mp@mp.com', password='mp')
+        self.assertTrue(is_logged_in)
+        url = reverse("blog")
+        context = {'select_status': 'Published', "search_text": "hi"}
+        response = self.client.post(url, context)
+        self.assertEqual(response.status_code, 200)
+
+
+class TestMenuStatusUpdate(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_superuser('mp@mp.com', 'mp', 'mp')
+        self.menu = Menu.objects.create(title="menu-1", lvl=1)
+
+    def test_menu_status_update(self):
+        login = self.client.login(username='mp@mp.com', password='mp')
+        self.assertTrue(login)
+        url = reverse("menu_status_update", kwargs={"pk": self.menu.pk})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+
+
+class TestThemesBulkActionsView(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_superuser('mp@mp.com', 'mp', 'mp')
+        Theme.objects.bulk_create([
+            Theme(name="theme-1", slug="theme-1", description="desc", enabled=True),
+            Theme(name="theme-2", slug="theme-2", description="desc", enabled=False),
+            Theme(name="theme-3", slug="theme-3", description="desc", enabled=True),
+            Theme(name="theme-4", slug="theme-4", description="desc", enabled=False),
+        ])
+
+    def test_bulk_actions_themes(self):
+        login = self.client.login(username='mp@mp.com', password='mp')
+        self.assertTrue(login)
+        url = reverse("bulk_actions_themes")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        context = {"theme_ids[]": list(Theme.objects.values_list("id", flat=True)), "action": "False"}
+        response = self.client.get(url, context)
+        self.assertEqual(response.status_code, 200)
+        context = {"theme_ids[]": list(Theme.objects.values_list("id", flat=True)), "action": "Delete"}
+        response = self.client.get(url, context)
+        self.assertEqual(response.status_code, 200)
+
+
+class TestThemeStatusUpdate(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_superuser('mp@mp.com', 'mp', 'mp')
+        self.theme = Theme.objects.create(name="theme-1", slug="theme-1", description="desc", enabled=True)
+
+    def test_theme_status_change(self):
+        login = self.client.login(username='mp@mp.com', password='mp')
+        self.assertTrue(login)
+        url = reverse("theme_status_update", kwargs={"theme_slug": self.theme.slug})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+        url = reverse("theme_status_update", kwargs={"theme_slug": self.theme.slug})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+
+    def test_delete_theme(self):
+        login = self.client.login(username='mp@mp.com', password='mp')
+        self.assertTrue(login)
+        url = reverse("delete_theme", kwargs={"pk": self.theme.pk})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+
+
+class TestThemeUpdateView(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_superuser('mp@mp.com', 'mp', 'mp')
+        self.theme = Theme.objects.create(name="theme-1", slug="theme-1", description="desc", enabled=True)
+
+    def test_edit_theme(self):
+        login = self.client.login(username='mp@mp.com', password='mp')
+        self.assertTrue(login)
+        url = reverse("edit_theme", kwargs={"pk": self.theme.pk})
+        context = {
+            "name": "theme-1",
+            "description": "theme-1 descripiton",
+            "enabled": True
+        }
+        response = self.client.post(url, context)
+        self.assertEqual(response.status_code, 200)
+
+
+class TestConfigureContactUs(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_superuser('mp@mp.com', 'mp', 'mp')
+
+    def test_configure_contact_us_get(self):
+        login = self.client.login(username='mp@mp.com', password='mp')
+        self.assertTrue(login)
+        url = reverse("configure_contact_us")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        context = {
+            "from_email": "admin@mp.com",
+            "reply_to_email": "admin1@mp.com",
+            "email_admin": "admin2@mp.com",
+            "subject": "Thank you for contacting us",
+            "body_user": "Thanks! We will contact you soon",
+            "body_admin": "Thanks"
+        }
+        response = self.client.post(url, context)
+        self.assertEqual(response.status_code, 200)
+        response = self.client.post(url, context)
+        self.assertEqual(response.status_code, 200)
+
+
+# test forms
+class TestUserForm(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_superuser('mp@mp.com', 'mp@mp.com', 'mp')
+
+    def test_user_email(self):
+        form = UserForm(data={"username": "mp@mp.com", "email": "mp@mp.com"})
+        self.assertFalse(form.is_valid())
+
+    def test_user_email_instance(self):
+        form = UserForm(data={"username": "mp@mp.com", "email": "mp@mp.com"}, instance=self.user)
+        self.assertFalse(form.is_valid())
+
+    def test_user_save(self):
+        form = UserForm(data={"username": "mp@mp.com", "email": "mp@mp.com", "password": "password", "role": "Admin", "code": "Admin"}, instance=self.user)
+        self.assertTrue(form.is_valid())
+        form.save()
