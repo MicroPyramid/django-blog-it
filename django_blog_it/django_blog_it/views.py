@@ -78,7 +78,6 @@ class PostList(AdminMixin, ListView):
     model = Post
     template_name = 'dashboard/blog/new_blog_list.html'
     context_object_name = 'blog_list'
-    paginate_by = 10
 
     def get_context_data(self, **kwargs):
         context = super(PostList, self).get_context_data(**kwargs)
@@ -813,7 +812,6 @@ class ThemesList(AdminMixin, ListView):
     model = Theme
     template_name = 'dashboard/themes/themes_list.html'
     context_object_name = 'themes_list'
-    paginate_by = 10
 
     def get_context_data(self, **kwargs):
         context = super(ThemesList, self).get_context_data(**kwargs)
@@ -927,10 +925,8 @@ class DeleteThemeView(AdminOnlyMixin, View):
 
     def get(self, request, *args, **kwargs):
         theme = get_object_or_404(Theme, id=kwargs.get('pk'))
-        if request.user.is_superuser is True:
-            if theme:
-                theme.delete()
-                return HttpResponseRedirect(reverse_lazy('themes'))
+        theme.delete()
+        return HttpResponseRedirect(reverse_lazy('themes'))
 
 
 class ThemesBulkActionsView(AdminOnlyMixin, View):
