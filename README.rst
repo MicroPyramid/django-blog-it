@@ -130,8 +130,10 @@ Deploy To Heroku:
 
 .. image:: https://www.herokucdn.com/deploy/button.svg
    :target: https://heroku.com/deploy?template=https://github.com/MicroPyramid/django-blog-it
-   
+
+Visit our Django web development page `Here`_   
 
 We welcome your feedback and support, raise github ticket if you want to report a bug. Need new features? `Contact us here`_
 
 .. _contact us here: https://micropyramid.com/contact-us/
+.. _Here: https://micropyramid.com/django-ecommerce-development/
