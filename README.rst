@@ -59,9 +59,15 @@ Installation
        'django_blog_it.django_blog_it',
        '..................'
     ]
+    
+3. Include the django_blog_it urls in your urls.py::
 
+    urlpatterns = [
+        url(r'^admin/', admin.site.urls),
+        url(r'', include('django_blog_it.urls')),
+    ]
 
-3. After installing/cloning this, add the following settings in the virtual env/bin/activate file to start discussions on blog articles ::
+4. After installing/cloning this, add the following settings in the virtual env/bin/activate file to start discussions on blog articles ::
 
     You can create your disqus account at https://disqus.com/profile/login/
 
@@ -120,7 +126,7 @@ Installation
     export DEFAULT_EMAIL
 
 
-4. Use virtualenv to install requirements::
+5. If you cloned the package from git use virtualenv to install requirements::
 
     pip install -r requirements.txt
 
