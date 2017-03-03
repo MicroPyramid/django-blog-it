@@ -51,6 +51,7 @@ setup(
         'django-storages',
         'Pillow',
         'requests',
-        'wheel'
+        'wheel',
+        'microurl'
     ],
 )
