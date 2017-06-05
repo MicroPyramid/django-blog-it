@@ -36,7 +36,7 @@ def categories_tags_lists():
 
 
 class Home(ListView):
-    template_name = "posts/index.html"
+    template_name = "posts/new_index.html"
     queryset = Post.objects.filter(status='Published', category__is_active=True).order_by('-updated_on')
     context_object_name = "blog_posts"
 
@@ -53,7 +53,7 @@ class Home(ListView):
 
 
 class BlogPostView(DetailView):
-    template_name = 'posts/blog_view.html'
+    template_name = 'posts/new_blog_view.html'
     model = Post
     slug_url_kwarg = "blog_slug"
     context_object_name = "blog_name"
@@ -99,7 +99,7 @@ class BlogPostView(DetailView):
 
 
 class SelectedCategoryView(ListView):
-    template_name = "posts/index.html"
+    template_name = "posts/new_index.html"
     context_object_name = "blog_posts"
 
     def get_queryset(self):
@@ -122,7 +122,7 @@ class SelectedCategoryView(ListView):
 
 
 class SelectedTagView(ListView):
-    template_name = "posts/index.html"
+    template_name = "posts/new_index.html"
     context_object_name = "blog_posts"
 
     def get_queryset(self):
@@ -143,7 +143,7 @@ class SelectedTagView(ListView):
 
 
 class ArchiveView(ListView):
-    template_name = "posts/index.html"
+    template_name = "posts/new_index.html"
     context_object_name = "blog_posts"
 
     def get_queryset(self):
