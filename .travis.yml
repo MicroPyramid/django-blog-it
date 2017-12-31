@@ -4,6 +4,9 @@ python:
 
 #Django & Database
 addons:
+  #Travis CI does not yet support Postgres 10.1
+  #See https://github.com/travis-ci/travis-ci/issues/8537
+  #postgresql: "10.1"
   postgresql: "9.4"
 
 sudo: false
