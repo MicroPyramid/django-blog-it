@@ -24,7 +24,8 @@ STATUS_CHOICE = (
 class UserRole(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
     role = models.CharField(max_length=10, choices=STATUS_CHOICE)
-
+    class Meta:
+        ordering = ['-id']
 
 class Theme(models.Model):
     name = models.CharField(max_length=20, unique=True)
@@ -48,6 +49,9 @@ class Category(models.Model):
     meta_description = models.TextField(max_length=160, null=True, blank=True)
     meta_keywords = models.TextField(max_length=255, null=True, blank=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
+
+    class Meta:
+        ordering = ['-id']
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
@@ -102,6 +106,9 @@ class Post(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICE, default='Drafted')
     keywords = models.TextField(max_length=500, blank=True)
     featured_image = models.ImageField(upload_to='static/blog/uploads/%Y/%m/%d/', blank=True, null=True)
+
+    class Meta:
+        ordering = ['-updated_on']
 
     def save(self, *args, **kwargs):
         tempslug = slugify(self.title)
@@ -215,6 +222,9 @@ class Page(models.Model):
     meta_description = models.TextField()
     keywords = models.TextField()
     meta_title = models.TextField()
+
+    class Meta:
+        ordering = ['-id']
 
     def save(self, *args, **kwargs):
         tempslug = slugify(self.title)
