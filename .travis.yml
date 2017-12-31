@@ -1,17 +1,17 @@
 language: python
 python:
-  - "3.6.3"
+  - "3.4"
 
 #Django & Database
 addons:
-  postgresql: "10.1"
+  postgresql: "9.4"
 
 sudo: false
 
 env:
-  -DJANGO=1.10 DB=mysql
-  -DJANGO=1.10 DB=sqlite3
-  -DJANGO=1.10 DB=postgresql
+  -DJANGO=1.9 DB=mysql
+  -DJANGO=1.9 DB=sqlite3
+  -DJANGO=1.9 DB=postgresql
 
 install:
   - pip install -r requirements.txt
