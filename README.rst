@@ -59,8 +59,10 @@ Installation
        'django_blog_it.django_blog_it',
        '..................'
     ]
-    
+
 3. Include the django_blog_it urls in your urls.py::
+
+    from django.conf.urls import include
 
     urlpatterns = [
         url(r'^admin/', admin.site.urls),
@@ -76,7 +78,7 @@ Installation
     DISQUSSHORTNAME="Your Disquss Short Name"
 
     export DISQUSSHORTNAME
-   
+
    # google api key for short url
 
     API_KEY="google api key"
@@ -92,7 +94,7 @@ Installation
     GOOGLE_CAPTCHA_SECRET_KEY="Secret key"
 
     export GOOGLE_CAPTCHA_SECRET_KEY
-   
+
    # Google Analytics Account
 
     GOOGLE_ANALYTICS_ID="UA-123456789"
@@ -100,17 +102,17 @@ Installation
     export GOOGLE_ANALYTICS_ID
 
    # Google Login
-   
+
     GP_CLIENT_ID="google client id"
-   
+
     export GP_CLIENT_ID
 
     GP_CLIENT_SECRET="secret key"
 
     export GP_CLIENT_SECRET
-   
-   # Facebook Login 
-   
+
+   # Facebook Login
+
     FB_APP_ID="facebook app id"
 
     export FB_APP_ID
@@ -118,7 +120,7 @@ Installation
     FB_SECRET="023df180c6d868e76a02aec17134c843"
 
     export FB_SECRET
-   
+
    # Default E-mail
 
     DEFAULT_EMAIL="noreply@djangoblogit.com"
@@ -137,7 +139,7 @@ Deploy To Heroku:
 .. image:: https://www.herokucdn.com/deploy/button.svg
    :target: https://heroku.com/deploy?template=https://github.com/MicroPyramid/django-blog-it
 
-Visit our Django web development page `Here`_   
+Visit our Django web development page `Here`_
 
 We welcome your feedback and support, raise github ticket if you want to report a bug. Need new features? `Contact us here`_
 
