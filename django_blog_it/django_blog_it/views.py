@@ -25,7 +25,7 @@ try:
     User = get_user_model()
 except ImportError:
     from django.contrib.auth.models import User
-from django.contrib.auth.mixins import LoginRequiredMixin 
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, DeleteView,\
     UpdateView, FormView, TemplateView, View
@@ -88,7 +88,7 @@ class PostList(AdminMixin, ListView):
         return context
 
     def post(self, request, *args, **kwargs):
-        blog_list = self.model.objects.all()
+        blog_list = self.model.objects.all().order_by('id')
 
         if request.POST.get('select_status', ''):
             blog_list = blog_list.filter(
@@ -249,7 +249,7 @@ class PostEditView(AdminMixin, UpdateView):
         context['categories_list'] = categories_list
         context['history_list'] = self.get_object().history.all()
         self.formset = inlineformset_factory(
-            Post, Post_Slugs, can_delete=True, extra=3, fields=('slug', 'is_active'), formset=CustomBlogSlugInlineFormSet, 
+            Post, Post_Slugs, can_delete=True, extra=3, fields=('slug', 'is_active'), formset=CustomBlogSlugInlineFormSet,
             widgets={'slug': forms.TextInput(attrs={'class': 'form-control'})})
         context['formset'] = self.formset(instance=self.get_object())
         return context
@@ -486,7 +486,7 @@ class UserListView(AdminOnlyMixin, ListView):
             ) | queryset.filter(
                 last_name__icontains=self.request.GET.get('search_text')
             )
-        return queryset
+        return queryset.order_by('-id')
 
     def get_context_data(self, *args, **kwargs):
         context = super(UserListView, self).get_context_data(*args, **kwargs)
