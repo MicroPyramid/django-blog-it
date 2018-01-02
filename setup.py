@@ -22,7 +22,7 @@ for dirpath, dirnames, filenames in os.walk(PROJECT_NAME):
 
 setup(
     name='django-blog-it',
-    version='0.2.2',
+    version='0.2.4',
     packages=find_packages(exclude=['tests', 'tests.*']),
     include_package_data=True,
     description='A simple installable app for writing blog posts',
