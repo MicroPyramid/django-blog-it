@@ -8,7 +8,7 @@ from django_blog_it import settings
 register = template.Library()
 
 
-@register.assignment_tag(takes_context=True)
+@register.simple_tag(takes_context=True)
 def get_archives(context):
     archives = []
     dates = []
@@ -75,7 +75,7 @@ def user_published_posts(user):
                                ).count()
 
 
-@register.assignment_tag
+@register.simple_tag
 def blog_title():
     return settings.BLOG_TITLE
 
@@ -85,6 +85,6 @@ def category_posts(category):
     return Post.objects.filter(category=category).count()
 
 
-@register.assignment_tag
+@register.simple_tag
 def google_analytics_id():
     return os.getenv("GOOGLE_ANALYTICS_ID")
