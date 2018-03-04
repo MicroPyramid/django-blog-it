@@ -1,0 +1,152 @@
+{% extends 'dashboard/new_base.html' %}
+{% load paginate %}
+{% load blog_tags %}
+{% block title %}Users{% endblock %}
+{% block extra_css %}
+<style type="text/css">
+  table td {
+  padding: 6px;
+  }
+</style>
+{% endblock %}
+{% block content %}
+  <div class="row no_row_margin heading_count">
+    <div class="heading col-md-6">Users</div>
+    <div class="count_add-new col-md-6 text-right">
+      <ul class="list-inline">
+        <li><a href="#">All ({{ users_list|length }}) </a></li>
+      </ul>
+      <span class="add_new"><a href="{% url 'add_user' %}"><i class="fa fa-plus"></i> Add User</a></span>
+    </div>
+  </div>
+  <div class="filters_row">
+      <div class="col-md-6 filter_left">
+        {% if request.user.is_superuser %}
+          <form class="bulk_actions_form" method='get'>
+            {% csrf_token %}
+            <select class="form-control" name="bulk_actions_select" id='bulk_actions_select'>
+              <option>Choose An Action</option>
+              <option value="True">Active</option>
+              <option value="False">In-Active</option>
+              <option value="Delete">Delete</option>
+            </select>
+            <button class="btn btn-default" type="submit">Apply Action</button>
+          </form>
+        {% endif %}
+      </div>
+      <div class="col-md-6 filter_right">
+          <form action="" method="GET" id="users_data" class="form-inline">
+              <input type="text" placeholder="Filter By Title" value="{{ request.GET.search_text }}" name='search_text' class="form-control" />
+              <select class='input form-control' id="select_role" name="select_role">
+                <option value="" default>Role</option>
+                {% for role in roles %}
+                    <option value="{{ role.0 }}" {% ifequal request.GET.select_role role.0 %}Selected{% endifequal %}>{{ role.1 }}</option>
+                {% endfor %}
+              </select>
+              <button class="btn btn-default" type="submit">Apply Filter</button>
+          </form>
+      </div>
+      <br clear="all">
+  </div>
+
+  {% if users_list %}
+  <div class="row no_row_margin table_row">
+    <div class="container-fluid">
+    {% paginate 5 users_list %}
+    {% show_pageitems %}
+    {% with request.user.userrole_set.last as user_role %}
+      <table class="table table-bordered table-hover" id="my_table">
+        <thead>
+          <tr>
+          {% if user_role.role != "Author" and user_role.role != "Publisher"%}
+            <th width='5%' class="text-center"><input name="bulk_actions" id="selectAll" type="checkbox"></th>
+          {% endif %}
+            <th width='15%'>Username</th>
+            <th width='10%'>First Name</th>
+            <th width='10%'>Last Name</th>
+            <th width='20%'>Email</th>
+            <th width='10%'>Role</th>
+            <th width="5%" class="text-center">Status</th>
+          {% if request.user.is_superuser or request.user|get_user_role_name == 'Admin' %}
+            <th width="5%" class="text-center">Posts</th>
+          {% endif %}
+          {% if request.user.is_superuser or request.user|get_user_role_name == 'Admin' %}
+            <th width='15%' colspan="2">Actions</th>
+          {% endif %}
+          </tr>
+        </thead>
+        {% for user in users_list %}
+        <tbody>
+          <tr>
+          {% if user_role.role != "Author" and user_role.role != "Publisher"%}
+            <td class="text-center"><input name="bulk_actions" class="bulk_actions" value="{{ user.id }}" type="checkbox"></td>
+          {% endif %}
+            <td><a href="#">{{ user.username }}</a></td>
+            <td>{% if user.first_name %}{{ user.first_name }}{% else %}<center> -- </center>{% endif %}</td>
+            <td>{% if user.last_name %}{{ user.last_name }}{% else %}<center> -- </center>{% endif %}</td>
+            <td><a href="#">{{ user.email }}</a></td>
+            <td>{{ user.userrole_set.last.role }}</td>
+            <td class="status_on_off text-center">
+              <a href="{% url 'user_status_update' user.id %}" {% if user.is_active %}class="status_on" title="Active"{% else %} class="status_off" title="In-Active"{% endif %} data-toggle="tooltip" data-placement="bottom"><i class="fa fa-circle" aria-hidden="true"></i></a>
+            </td>
+            {% if request.user.is_superuser or request.user|get_user_role_name == 'Admin' %}
+            <td class="text-center post_count"><a href="#"><span data-toggle="tooltip" data-placement="bottom" title="Drafted">{{ user|user_drafted_posts }}</span> / <span data-toggle="tooltip" data-placement="bottom" title="Published">{{ user|user_published_posts }}</span></a></td>
+            <td class="actions">
+              <a href="{% url 'edit_user' user.id %}" class="edit"><i class="fa fa-edit"></i> Edit</a>
+              <a href="{% url 'delete_user' user.id %}" class="delete" data-confirm="true"><i class="fa fa-trash-o"></i> Delete</a>
+            </td>
+            {% endif %}
+          </tr>
+        </tbody>
+        {% endfor %}
+      </table>
+      {% endwith %}
+      <!-- end div of table -->
+      <!-- pagination -->
+      <div class="pagination_wrap text-center">
+        {% show_pages %}
+      </div>
+      <!--/ pagination -->
+    </div>
+    {% else %}
+      <h2 align="center">There are no users here!</h2>
+    {% endif %}
+  </div>
+{% endblock %}
+{% block js_script %}
+<script type="text/javascript">
+  $('.users').addClass('active');
+  $(function () {
+    $('[data-toggle="tooltip"]').tooltip()
+  })
+
+  $('.select2_category').select2({placeholder: "Select Categories"});
+
+  $("#selectAll").change(function() {
+    $(".bulk_actions:checkbox").prop('checked', $(this).prop("checked"));
+  });
+
+  $('.bulk_actions_form').submit(function(e){
+      e.preventDefault();
+      var user_ids = [];
+      $.each($(".bulk_actions:checked"), function(){
+          user_ids.push(parseInt($(this).val(), 0));
+      });
+      var action = $('#bulk_actions_select :selected').val();
+
+      $.get("{% url 'bulk_actions_users' %}", {'user_ids':user_ids, 'action': action}, function(data){
+          if(data.response){
+              window.location="{% url 'users' %}";
+          }else{
+              window.location="{% url 'users' %}";
+          }
+      }, 'json');
+  })
+
+  // $('.pagination li a').click(function(event){
+  //     event.preventDefault();
+  //     $('#users_data').attr('action', $(this).attr('href'));
+  //     $('#users_data').submit();
+  // });
+</script>
+{% endblock %}

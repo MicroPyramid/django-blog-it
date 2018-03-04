@@ -1,0 +1,106 @@
+{% extends 'dashboard/new_base.html' %}
+{% block title %}
+{% if user %}
+    Add
+{% else %}
+    Edit
+{% endif %} Page
+{% endblock %}
+{% block content %}
+<div class="row no_row_margin heading_count">
+  <div class="heading col-md-6" id='page_title'>
+    {% if user %}Edit {{ user.username }} {% else %}Add {% endif %}User
+  </div>
+</div>
+<!-- end class of row -->
+<div class="row no_row_margin">
+  <div class="container-fluid">
+    <form action="" id="post-form" enctype="multipart/form-data" method="post" role="form">
+      {% csrf_token %}
+      <div class="row form_row no_row_margin">
+        <div class="col-md-12">
+          <div class="col-md-6">
+            {% for field in form %}
+              {% if field.name != 'email' and field.name != 'is_active' %}
+                <div class="form-group col-md-12">
+                  <label>{{ field.label }} :</label>
+                  <div class="controls">
+                    {{ field }}
+                    {% if field.help_text %}
+                    <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                    {% endif %}
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+          <div class="col-md-6">
+            {% for field in form %}
+                {% if field.name == 'email' %}
+                  <div class="form-group col-md-12">
+                    <label>{{ field.label }} :</label>
+                    <div class="controls">
+                      {{ field }}
+                      {% if field.help_text %}
+                      <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                      {% endif %}
+                    </div>
+                  </div>
+                {% endif %}
+                {% if field.name == 'is_active' %}
+                  <div class="form-group col-md-12">
+                    <label>{{ field.label }}</label>
+                    <div class="controls">
+                      <select class="form-control" id="id_is_active" name="is_active">
+                        <option value="True" {% if field.value %}selected{% endif %} >Active</option>
+                        <option value="False" {% if not field.value %}selected{% endif %}>Inactive</option>
+                      </select>
+                      {% if field.help_text %}
+                      <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                      {% endif %}
+                    </div>
+                  </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        <br clear="all">
+        <div class=" col-md-12 buttons_row text-left">
+          <div class="form-group">
+            <button type="submit" class="btn btn-default green_btn"> <i class="fa fa-floppy-o" aria-hidden="true"></i> Save</button>
+            <button type="reset" class="btn btn-default blue_btn"> <i class="fa fa-refresh" aria-hidden="true"></i> Reset</button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<!-- end div row of form -->
+{% endblock %}
+{% block js_script %}
+<script type="text/javascript">
+
+  if(window.location.pathname == "{% url 'add_user' %}"){
+      $('#page_title').text('Add User');
+  }
+  else {
+      var user = '{{ user }}';
+      $('#page_title').text('Edit User: '+ user);
+  }
+
+  $('#post-form').submit(function(event){
+      event.preventDefault();
+      $.post(".",$('#post-form').serialize(), function(data){
+          $('p.error').remove();
+          if(data.error){
+              $.each(data.response, function(field_name, error){
+                error = "<p class=\"error\">" + error + "</p>"
+                $("[name=" + field_name + "]").after(error)
+              });
+          }else{
+              //alert(data['response']);
+              window.location="{% url 'users' %}";
+          }
+      }, 'json');
+  });
+</script>
+{% endblock %}

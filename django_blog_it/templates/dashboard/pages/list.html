@@ -1,0 +1,171 @@
+{% extends 'dashboard/base.html' %}
+{% load paginate %}
+{% load blog_tags %}
+{% block title %}Pages{% endblock %}
+{% block extra_css %}
+<style type="text/css">
+  table td {
+  padding: 6px;
+  }
+</style>
+{% endblock %}
+{% block content %}
+<div class="row" id="head_style">
+  <h1 align="center"><i class="fa fa-database"></i> Pages list</h1>
+  <p align="center" class="lead">
+    <a href="{% url 'add_page' %}" >
+    <button class="btn btn-default"><i class="fa fa-plus"></i> Add Page</button>
+    </a>
+  </p>
+  <!-- end div of add blog button -->
+  {% if request.user.is_superuser %}
+  <div class="bulk_button pull-left">
+    <!-- Bulk actions -->
+    <div class="btn-group">
+      <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      <span class="fa fa-gear"></span> Bulk <span class="caret"></span>
+      <span class="sr-only">Toggle Dropdown</span>
+      </button>
+      <ul class="dropdown-menu">
+        <li id="true"><a href="#" style="white-space: unset;"> Active <span class="fa fa-check-square-o pull-right"></span></a></li>
+        <li id="false"><a href="#" style="white-space: unset;"> Inactive <span class="fa fa-minus-square-o pull-right"></span></a></li>
+        <li id="delete"><a href="#" style="white-space: unset;"> Delete <span class="fa fa-trash-o pull-right"></span></a></li>
+      </ul>
+    </div>
+    <!--Bulk actions end-->
+  </div>
+  {% endif %}
+  <!-- filter -->
+  <div class="pull-right">
+    <form action="" method="post" id="categories_data" class="form-inline">
+      {% csrf_token %}
+      <div class="form-group">
+        <select class='input form-control' id="select_status" name="select_status">
+          <option value="" default>Status</option>
+          <option value="True" {% ifequal request.POST.select_status "True" %}Selected{% endifequal %}>Active</option>
+          <option value="False" {% ifequal request.POST.select_status "False" %}Selected{% endifequal %}>Inactive</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <button type="submit" class="btn btn-default" id="search_new_button"><i class='fa fa-search'></i> Search</button>
+      </div>
+      <div class="clearfix"></div>
+    </form>
+  </div>
+  <!--/ filter -->
+</div>
+<br clear="all">
+{% if pages_list %}
+{% paginate 5 pages_list %}
+{% show_pageitems %}
+<div class="row">
+  <table class="table table-bordered table-hover" id="my_table">
+    <thead>
+      <tr>
+        <th><input name="bulk_actions" id="selectAll" type="checkbox"></th>
+        <th>Title</th>
+        <th>Status</th>
+        <th colspan="3">Actions</th>
+      </tr>
+    </thead>
+    {% for page in pages_list %}
+    <tbody>
+      <tr>
+        <td><input name="bulk_actions" class="bulk_actions" value="{{ page.id }}" type="checkbox"></td>
+        <td>{{ page.title }}</td>
+        {% if page.is_active %}
+        <td><i class="fa fa-check-square-o"></i> Active</td>
+        {% else %}
+        <td><i class="fa fa-minus-square-o"></i> Inactive</td>
+        {% endif %}
+        {% if request.user.is_superuser or request.user|get_user_role_name != 'Author' %}
+        <td><a href="{% url 'page_view' page_slug=page.slug %}"><button class="btn btn-warning"><i class="fa fa-trash-o"></i> View</button></a></td>
+        <td><a href="{% url 'edit_page' page_slug=page.slug %}"><button class="btn btn-info"><i class="fa fa-edit"></i> Edit</button></a></td>
+        <td><a href="{% url 'delete_page' page_slug=page.slug %}"><button class="btn btn-danger"><i class="fa fa-trash-o"></i> Delete</button></a></td>
+        {% endif %}
+      </tr>
+    </tbody>
+    {% endfor %}
+  </table>
+  <!-- end div of table -->
+  <!-- pagination -->
+  <div class="pagination_wrap">
+    {% show_pages %}
+  </div>
+  <!--/ pagination -->
+  {% else %}
+  <h2 align="center">There are no pages here!</h2>
+  {% endif %}
+</div>
+{% endblock %}
+{% block js_script %}
+<script type="text/javascript">
+  $('#pages').addClass('active');
+</script>
+<script type="text/javascript">
+  $('.select2_category').select2({placeholder: "Select Categories"});
+</script>
+<script type="text/javascript">
+  $("#selectAll").change(function() {
+      $(".bulk_actions:checkbox").attr('checked', this.checked);
+  });
+  $('#true').click(function(){
+
+      var page_ids = [];
+      $.each($(".bulk_actions:checked"), function(){
+          page_ids.push(parseInt($(this).val(), 0));
+      });
+
+      $.get("{% url 'bulk_actions_pages' %}", {'page_ids':page_ids, 'action': 'True'}, function(data){
+          if(data.response){
+              window.location="{% url 'pages' %}";
+          }else{
+              window.location="{% url 'pages' %}";
+          }
+      }, 'json');
+
+  });
+
+  $('#false').click(function(){
+
+      var page_ids = [];
+      $.each($(".bulk_actions:checked"), function(){
+          page_ids.push(parseInt($(this).val(), 0));
+      });
+
+      $.get("{% url 'bulk_actions_pages' %}", {'page_ids':page_ids, 'action': 'False'}, function(data){
+          if(data.response){
+              window.location="{% url 'pages' %}";
+          }else{
+              window.location="{% url 'pages' %}";
+          }
+      }, 'json');
+
+  });
+
+  $('#delete').click(function(){
+      var page_ids = [];
+      $.each($(".bulk_actions:checked"), function(){
+          page_ids.push(parseInt($(this).val(), 0));
+      });
+
+      $.get("{% url 'bulk_actions_pages' %}", {'page_ids':page_ids, 'action': 'Delete'}, function(data){
+          if(data.response){
+              //alert('Record(s) successfully Deleted!');
+              window.location="{% url 'pages' %}";
+          }else{
+              //alert('Please select at least one record !');
+              window.location="{% url 'pages' %}";
+          }
+      }, 'json');
+
+  });
+</script>
+<script type="text/javascript">
+  $('.pagination li a').click(function(event){
+      event.preventDefault();
+      $('#categories_data').attr('action', $(this).attr('href'));
+      $('#categories_data').submit();
+  });
+</script>
+{% endblock %}

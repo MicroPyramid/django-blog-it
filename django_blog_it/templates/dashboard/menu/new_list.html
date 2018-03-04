@@ -1,0 +1,153 @@
+{% extends 'dashboard/new_base.html' %}
+{% load paginate %}
+{% load blog_tags %}
+{% load recurse %}
+
+{% block title %}Menu{% endblock %}
+{% block extra_css %}
+<style type="text/css">
+    table td {
+        padding: 6px;
+    }
+</style>
+{% endblock %}
+{% block content %}
+{% with request.user.userrole_set.last as user_role %}
+    <div class="row no_row_margin heading_count">
+      <div class="heading col-md-6">Menu Items</div>
+      <div class="count_add-new col-md-6 text-right">
+        <ul class="list-inline">
+          <li><a href="#">All ({{menu_list|length}}) </a></li>
+        </ul>
+        <span class="add_new"><a href="{% url 'add_menu' %}"><i class="fa fa-plus"></i> Add New Menu</a></span>
+      </div>
+    </div>
+    <div class="filters_row">
+        <div class="col-md-6 filter_left">
+        {% if request.user.is_superuser or user_role.role == "Admin"%}
+          <form class="bulk_actions_form" method='get'>
+            {% csrf_token %}
+            <select class="form-control" name="bulk_actions_select" id='bulk_actions_select'>
+              <option>Choose An Action</option>
+              <option value="True">Active</option>
+              <option value="False">In-Active</option>
+              <option value="Delete">Delete</option>
+            </select>
+            <button class="btn btn-default" type="submit">Apply Action</button>
+          </form>
+        {% endif %}
+        </div>
+        <div class="col-md-6 filter_right">
+            <form action="" method="GET" id="menus_data" class="form-inline">
+                <input type="text" placeholder="Filter By Title" value="{{ request.GET.search_text }}" name='search_text' class="form-control" />
+                <select class="form-control" id="select_status" name="select_status">
+                    <option value="" default>Status</option>
+                    <option value="True" {% ifequal request.GET.select_status "True" %}Selected{% endifequal %}>Active</option>
+                    <option value="False" {% ifequal request.GET.select_status "False" %}Selected{% endifequal %}>Inactive</option>
+                </select>
+                <button class="btn btn-default" type="submit">Apply Filter</button>
+            </form>
+        </div>
+        <br clear="all">
+    </div>
+
+    {% if menu_list %}
+        <div class="row no_row_margin table_row">
+          <div class="container-fluid">
+            {% paginate 5 menu_list %}
+            {% show_pageitems %}
+            <table class="table table-bordered table-striped" id="my_table">
+                <thead>
+                    <tr>
+                    {% if request.user.is_superuser or user_role.role == "Admin"%}
+                        <th width='5%' class="text-center"><input name="bulk_actions" id="selectAll" type="checkbox"></th>
+                    {% endif %}
+                        <th width='40%'>Menu Title</th>
+                        <th width='30%'>URL</th>
+                        <th width="10%" class="text-center">Status</th>
+                    {% if request.user.is_superuser or user_role.role == "Admin"%}
+                        <th width='15%' colspan="2">Actions</th>
+                    {% endif %}    
+                    </tr>
+                </thead>
+                <tbody>
+                {% recurse menu_list.menu_set.all|dictsort:"lvl"  with menu_list as menu_list %}
+                {% loop %}
+                    <tr>
+                    {% if request.user.is_superuser or user_role.role == "Admin"%}
+                        <td class="text-center">
+                            <input name="bulk_actions" class="bulk_actions" value="{{ menu_list.id }}" type="checkbox" />
+                        </td>
+                    {% endif %}
+                        <td class="{% if level|add:"-1"|get_range %}sub_menu{% endif %}">
+                            {% for i in level|add:"-1"|get_range %}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{% endfor %}<a href="#">{{ menu_list.title }}</a>
+                        </td>
+                        <td>{{ menu_list.url }}</td>
+                        <td class="status_on_off text-center">
+                            <a href="{% url 'menu_status_update' menu_list.id %}" {% if menu_list.status %}class="status_on" title="Active" {% else %}class="status_off" title="In Active"{% endif %} data-toggle="tooltip" data-placement="bottom"><i class="fa fa-circle" aria-hidden="true"></i></a>
+                        </td>
+
+                        {% if request.user.is_superuser or user_role.role == "Admin"%}
+                        <td class="actions">
+                            <a href="{% url 'edit_menu' menu_list.id %}" class="edit"><i class="fa fa-edit"></i> Edit</a>
+                            <a href="#" class="delete" data-confirm="true"><i class="fa fa-trash"></i> Delete</a>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% child %}
+                    {% endloop %}
+                {% endrecurse %}
+                </tbody>
+            </table>
+            <!-- end div of table -->
+
+        <!-- pagination -->
+          <div class="pagination_wrap text-center">
+              {% show_pages %}
+          </div>
+        <!--/ pagination -->
+        {% else %}
+            <h2 align="center">There are no menus here!</h2>
+        {% endif %}
+        </div>
+    </div>
+{% endwith %}
+{% endblock %}
+{% block js_script %}
+    <script type="text/javascript">
+        $('.menu').addClass('active');
+
+        $('.select2_category').select2({placeholder: "Select Categories"});
+
+        $(function () {
+          $('[data-toggle="tooltip"]').tooltip()
+        })
+
+        $("#selectAll").change(function() {
+          $(".bulk_actions:checkbox").prop('checked', $(this).prop("checked"));
+        });
+
+        $('.bulk_actions_form').submit(function(e){
+            e.preventDefault();
+            var menu_ids = [];
+            $.each($(".bulk_actions:checked"), function(){
+                menu_ids.push(parseInt($(this).val(), 0));
+            });
+            var action = $('#bulk_actions_select :selected').val();
+
+            $.get("{% url 'bulk_actions_menu' %}", {'menu_ids':menu_ids, 'action': action}, function(data){
+                if(data.response){
+                    window.location="{% url 'menus' %}";
+                }else{
+                    window.location="{% url 'menus' %}";
+                }
+            }, 'json');
+        })
+
+        // $('.pagination li a').click(function(event){
+        //     event.preventDefault();
+        //     $('#menus_data').attr('action', $(this).attr('href'));
+        //     $('#menus_data').submit();
+        // });
+    </script>
+{% endblock %}

@@ -1,0 +1,266 @@
+{% extends 'posts/new_base.html' %}
+{% load blog_tags %}
+{% block title %} {{ blog_name.title }} {% endblock %}
+{% block blog_content %}
+<!-- breadcrumbs-schema -->
+<ol itemscope itemtype="http://schema.org/BreadcrumbList" class="breadcrumb">
+  <li itemprop="itemListElement" itemscope
+      itemtype="http://schema.org/ListItem">
+    <a itemprop="item" href="/">
+        <span itemprop="name">Blog</span></a>
+    <meta itemprop="position" content="1" />
+  </li>
+  <li itemprop="itemListElement" itemscope
+      itemtype="http://schema.org/ListItem">
+    <a itemprop="item" href="{% url 'selected_category' category_slug=blog_name.category.slug %}">
+      <span itemprop="name"> {{ blog_name.category }}</span></a>
+    <meta itemprop="position" content="2" />
+  </li>
+  <li itemprop="itemListElement" itemscope
+      itemtype="http://schema.org/ListItem">
+    <a itemprop="item" href="">
+      <span itemprop="name"> {{ blog_name.title }}</span></a>
+    <meta itemprop="position" content="3" />
+  </li>
+</ol>
+<!-- end -->
+  <!-- blog_detail_container starts here -->
+    <div class="blog_detail_container" itemscope itemtype="http://schema.org/BlogPosting">
+      <div class="blog_details">
+        <div class="panel panel-default blog_panel">
+          <div class="panel-body">
+            <div class="blog_detail_content">
+              <div class="blog_heading">
+                <span class="head_line"></span>
+                  <span class="heading">{{ blog_name.updated_on|date:"F d, Y" }}</span>
+                    </div>
+                    <div class="blog_title" itemprop="blog-article">
+                      <a href="{% url 'blog_post_view' blog_slug=blog_name.slug %}" itemprop="name headline">{{ blog_name.title }}</a>
+                    </div>
+                    <div class="blog_cat_author text-center">
+                        <a href="#" class="author" itemprop="author" itemtype="http://schema.org/Person">By <span itemprop="name">{{ blog_name.user }}</span></a>
+                        <a href="{% url 'selected_category' category_slug=blog_name.category.slug %}" class="category" itemprop="category" itemtype="http://schema.org/category"><span itemprop="name">{{ blog_name.category }}</span></a>
+                        <br clear="all">
+                    </div>
+                    {% if blog_name.featured_image %}
+                      <div class="blog_img">
+                      <img src="{{ blog_name.featured_image.url }}" />
+                      </div>
+                    {% endif %}
+                    <div class="blog_description" itemprop="description">
+                      {{ blog_name.content|safe }}
+                    </div>
+                    <div class="col-md-12">
+                      <div class="col-md-6">
+                        <span>
+                          <strong>Keywords</strong>: <span itemprop="keywords" itemtype="http://schema.org/keywords">{{ blog_name.keywords|safe }}</span>
+                        </span>
+                      </div>
+                      <div class="col-md-6">
+                        <span>
+                          <strong>Tags</strong>:
+                          {% for tag in blog_name.tags.all %}
+                            <a href="{% url 'selected_tag' tag_slug=tag.slug %}" ><i class="fa fa-tags"></i> {{ tag }}</a>
+                          {% endfor %}
+                        </span>
+                      </div>
+                    </div>
+                    <br />
+                    <div class="blog_detail_options">
+                    <span class="reply"><a href="#"><i class="fa fa-reply"></i>Replies 123 </a></span>
+                      <span class="likes"><a href="#"><i class="fa fa-thumbs-up" aria-hidden="true"></i> Likes 23 </a></span>
+                    </div>
+                    <div class="social_block">
+                       <ul class="social_connections">
+                        <li class="text-center">
+                          <a target="_blank" href="https://www.facebook.com/sharer/sharer.php?u={{short_url}}&t={{blog_name.title}}" class="facebook">
+                            <i class="fa fa-facebook"></i>
+                            Facebook
+                          </a>
+                        </li>
+                        <li class="text-center">
+                          <a target="_blank" href="https://twitter.com/intent/tweet?text={{blog_name.title}}&url={{short_url}}&via={{blog_title}}" class="twitter">
+                            <i class="fa fa-twitter"></i>
+                            Twitter
+                          </a>
+                        </li>
+                         <li class="text-center">
+                          <a target="_blank" href="https://plus.google.com/share?hl=en-US&url={{short_url}}" class="google">
+                            <i class="fa fa-google"></i>
+                            Google Plus
+                          </a>
+                        </li>
+                        <li class="text-center">
+                          <a target="_blank" href="https://www.linkedin.com/cws/share?url={{ short_url }}&token=&isFramed=true" class="youtube">
+                            <i class="fa fa-linkedin"></i>
+                            Linkedin
+                          </a>
+                        </li>
+                        <br clear="all">
+                   </ul>
+                    </div>
+                    <span class="more"><a href="#">Leave Comment</a></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- you_may_like starts here -->
+            {% if related_posts %}
+              <div class="you_may_like">
+                <div class="panel panel-default related_blog_panel">
+                  <div class="panel-body">
+                   <div class="blog_heading">
+                      <span class="head_line"></span>
+                      <span class="heading">You may Like</span>
+                    </div>
+                    <div class="row">
+                      {% for post in related_posts %}
+                        <!-- recent_blog starts here -->
+                        <div class="col-md-4">
+                          <div class="blog_block">
+                           <div class="blog_date">
+                              {{ post.updated_on|date:"F d, Y" }}
+                            </div>
+                            <div class="blog_title">
+                               <a href="{% url 'blog_post_view' blog_slug=post.slug %}">{{ post.title }}</a>
+                            </div>
+                            <div class="blog_cat_author">
+                              <a href="#" class="author">By {{ post.user }}</a>
+                              <a href="{% url 'selected_category' category_slug=post.category.slug %}" class="category">{{ post.category }}</a>
+                            </div>
+                            <br clear="all">
+                            <div class="blog_content">
+                              {{ post.content|safe|truncatewords_html:20  }}
+                            </div>
+                          </div>
+                        </div>
+                        <!-- recent blog ends here -->
+                      {% endfor %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+            <!-- you_may_like ends here -->
+              <!-- view_comment starts here -->
+            <div class="view_comment">
+              <div class="panel panel-default view_comment_panel">
+                <div class="panel-body">
+                 <div class="blog_heading">
+                    <span class="head_line"></span>
+                    <span class="heading">View Comments</span>
+                  </div>
+                  <div class="comments_box">
+                    <div class="row">
+                      <div class="col-md-12">
+                          <div class="blog-comment">
+                          <ul class="comments">
+                          <li class="clearfix">
+                            <img src="http://bootdey.com/img/Content/user_1.jpg" class="avatar" alt="">
+                            <div class="post-comments">
+                                <p class="meta">Dec 18, 2014 <a href="#">JohnDoe</a> says : <i class="pull-right"><a href="#"><small>Reply</small></a></i></p>
+                                <p>
+                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                                    Etiam a sapien odio, sit amet
+                                </p>
+                            </div>
+                          </li>
+                          <li class="clearfix">
+                            <img src="http://bootdey.com/img/Content/user_2.jpg" class="avatar" alt="">
+                            <div class="post-comments">
+                                <p class="meta">Dec 19, 2014 <a href="#">JohnDoe</a> says : <i class="pull-right"><a href="#"><small>Reply</small></a></i></p>
+                                <p>
+                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                                    Etiam a sapien odio, sit amet
+                                </p>
+                            </div>
+                            <ul class="comments">
+                                <li class="clearfix">
+                                    <img src="http://bootdey.com/img/Content/user_3.jpg" class="avatar" alt="">
+                                    <div class="post-comments">
+                                        <p class="meta">Dec 20, 2014 <a href="#">JohnDoe</a> says : <i class="pull-right"><a href="#"><small>Reply</small></a></i></p>
+                                        <p>
+                                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                                            Etiam a sapien odio, sit amet
+                                        </p>
+                                    </div>
+                                </li>
+                            </ul>
+                          </li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- leave_comment starts here -->
+             <!-- leave_comment starts here -->
+            <div class="leave_comment">
+              <div class="panel panel-default leave_comment_panel">
+                <div class="panel-body">
+                 <div class="blog_heading">
+                    <span class="head_line"></span>
+                    <span class="heading">Leave Comment</span>
+                  </div>
+                  <div class="leave_comment_form row">
+                    <form action="#" method="post">
+                      <div class="clearfix">
+
+                        <div class="leave-comment-field col col-md-4">
+                          <input name="author" type="text" value="" size="30" class=" form-control" placeholder="NAME *" aria-required="true">
+                        </div><!-- .leave-comment-name -->
+
+                        <div class="leave-comment-field col col-md-4">
+                          <input name="email" type="text" value="" class=" form-control" size="30" placeholder="EMAIL *" aria-required="true">
+                        </div><!-- .leave-comment-email -->
+
+                        <div class="leave-comment-field col col-md-4 col-last">
+                          <input name="url" type="text" value="" class=" form-control" size="30" placeholder="WEBSITE">
+                        </div><!-- .leave-comment-website -->
+
+                      </div><!-- .clearfix -->
+
+                      <div class="leave-comment-field col-md-12">
+                        <textarea name="comment" placeholder="COMMENT" aria-required="true"></textarea>
+                      </div><!-- .leave-comment-message -->
+
+                      <div class="leave-comment-submit">
+                        <input name="submit" type="submit" id="submit" class="submit" value="SUBMIT YOUR COMMENT">
+                      </div><!-- .leave-comment-submit -->
+
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- leave_comment starts here -->
+            <div id="disqus_thread"></div>
+            <script>
+                /**
+                 *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+                 *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+                 */
+                var disqus_config = function () {
+                    this.page.identifier = '{{ blog_name.slug }}';
+                    this.page.title = '{{ blog_name.title }}';
+                };
+                var disqus_shortname = '{{ disqus_shortname }}';
+                (function() {  // REQUIRED CONFIGURATION VARIABLE: EDIT THE SHORTNAME BELOW
+                    var d = document, s = d.createElement('script');
+
+                    s.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                    // IMPORTANT: Replace EXAMPLE with your forum shortname!
+
+                    s.setAttribute('data-timestamp', +new Date());
+                    (d.head || d.body).appendChild(s);
+                })();
+            </script>
+            <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+          </div>
+        <!-- blog_detail_container ends here -->
+{% endblock %}
+{% block js_script %}
+<script type="text/javascript"></script>
+{% endblock %}

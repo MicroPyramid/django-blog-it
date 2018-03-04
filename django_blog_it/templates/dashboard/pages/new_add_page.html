@@ -1,0 +1,104 @@
+{% extends 'dashboard/new_base.html' %}
+{% block title %}
+{% if page %}
+    Add
+{% else %}
+    Edit
+{% endif %} Page
+{% endblock %}
+{% block content %}
+<div class="row no_row_margin heading_count">
+  <div class="heading col-md-6" id='page_title'>
+    {% if page %}Edit Page: {{ page.title }}{% else %}Add Page{% endif %}
+  </div>
+</div>
+<!-- end class of row -->
+<div class="row no_row_margin">
+  <div class="container-fluid">
+    <form action="" id="post-form" enctype="multipart/form-data" method="post" role="form">
+      {% csrf_token %}
+      <div class="row form_row no_row_margin">
+        <div class="col-md-12">
+          <div class="col-md-6">
+            {% for field in form %}
+              {% if field.name != 'content' %}
+                {% if field.name == 'is_active' %}
+                  <div class="form-group">
+                    <label>{{ field.label }}</label>
+                    <div class="controls">
+                      <select class="form-control" id="id_is_active" name="is_active">
+                        <option value="True" {% if field.value %}selected{% endif %} >Active</option>
+                        <option value="False" {% if not field.value %}selected{% endif %}>Inactive</option>
+                      </select>
+                      {% if field.help_text %}
+                      <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                      {% endif %}
+                    </div>
+                  </div>
+                {% else %}
+                  <div class="form-group">
+                    <label>{{ field.label }}</label>
+                    <div class="controls">
+                      {{ field }}
+                      {% if field.help_text %}
+                      <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                      {% endif %}
+                    </div>
+                  </div>
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+          </div>
+          <div class="col-md-6">
+            {% for field in form %}
+              {% if field.name == 'content' %}
+                <div class="form-group">
+                  <label>Description</label>
+                  <div class="controls">
+                    {{ field }}
+                    {% if field.help_text %}
+                    <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                    {% endif %}
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+        <div class=" col-md-12 buttons_row text-left">
+          <div class="form-group">
+            <button type="submit" class="btn btn-default green_btn"> <i class="fa fa-floppy-o" aria-hidden="true"></i> Save</button>
+            <button type="reset" class="btn btn-default blue_btn"> <i class="fa fa-refresh" aria-hidden="true"></i> Reset</button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<!-- end div row of form -->
+{% endblock %}
+{% block js_script %}
+<script type="text/javascript">
+CKEDITOR.config.allowedContent = true;
+  var editor = CKEDITOR.replace('content', {
+    uiColor: '#ffffff',
+    height:260,
+  });
+
+  $('#post-form').submit(function(event){
+      event.preventDefault();
+      $('#id_content').val(CKEDITOR.instances.id_content.getData());
+      $.post(".",$('#post-form').serialize(), function(data){
+          if(data.error){
+              $('p.error_required').remove();
+              for (var key in data.response) {
+                  $('#id_' + key).after('<p class="error_required">* ' + data.response[key] + '</p>');
+              }
+          }else{
+              //alert(data['response']);
+              window.location="{% url 'pages' %}";
+          }
+      }, 'json');
+  });
+</script>
+{% endblock %}

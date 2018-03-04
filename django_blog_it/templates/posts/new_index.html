@@ -1,0 +1,152 @@
+{% extends 'posts/new_base.html' %}
+{% load paginate %}
+{% load blog_tags %}
+    {% block blog_content %}
+
+        <!--
+        <div class="row col-sm-12 col-md-9 blog-container-left">
+            <div class="blogs">
+                <ul class="blog-list">
+                    {% if blog_posts %}
+                        {% paginate 5 blog_posts %}
+                        {% for blog in blog_posts %}
+                            <li class="list-item">
+                                <div class="blog-left">
+                                    <h3 class="title" itemprop="headline"><a href="{% url 'blog_post_view' blog_slug=blog.slug %}">{{ blog }}</a></h3>
+                                </div>
+                                <div class="desc">
+                                        <span> {{ blog.user|title }} | {{ blog.updated_on|date:"d F Y" }}</span>
+                                        {{ blog.content|safe|truncatewords_html:50 }}
+                                        {% for tag in blog.tags.all %}
+                                            <span class="tags">
+                                                <a href="{% url 'selected_tag' tag_slug=tag.slug %}" ><i class="fa fa-tags"></i> {{ tag }}</a>
+                                            </span>
+                                        {% endfor %}
+                                    <p class="continue-read"><a href="{% url 'blog_post_view' blog_slug=blog.slug %}">Continue reading ....</a></p>
+                                </div>
+                            </li>
+                            <hr />
+                        {% endfor %}
+                    {% endif %}
+
+                </ul>
+            </div>
+        </div>
+        -->
+        <!-- breadcrumbs-schema -->
+        {% if tag or date or category %}
+        <ol itemscope itemtype="http://schema.org/BreadcrumbList" class="breadcrumb">
+          <li itemprop="itemListElement" itemscope
+              itemtype="http://schema.org/ListItem">
+            <a itemprop="item" href="/">
+                <span itemprop="name">Blog</span></a>
+            <meta itemprop="position" content="1" />
+          </li>
+          {% if tag %}
+            <li itemprop="itemListElement" itemscope
+              itemtype="http://schema.org/ListItem">
+            <a itemprop="item" href="/">
+                <span itemprop="name">Tag</span></a>
+            <meta itemprop="position" content="2" />
+          </li>
+          <li itemprop="itemListElement" itemscope
+              itemtype="http://schema.org/ListItem">
+            <a itemprop="item" href="/">
+                <span itemprop="tag">{{ tag }}</span></a>
+            <meta itemprop="position" content="3" />
+          </li>
+          {% endif %}
+          {% if date %}
+            <li itemprop="itemListElement" itemscope
+              itemtype="http://schema.org/ListItem">
+            <a itemprop="item" href="/">
+                <span itemprop="name">Archive</span></a>
+            <meta itemprop="position" content="2" />
+          </li>
+          <li itemprop="itemListElement" itemscope
+              itemtype="http://schema.org/ListItem">
+            <a itemprop="item" href="/">
+                <span itemprop="month">{{ date|date:"F Y"}}</span></a>
+            <meta itemprop="position" content="3" />
+          </li>
+          {% endif %}
+          {% if category %}
+          <li itemprop="itemListElement" itemscope
+              itemtype="http://schema.org/ListItem">
+            <a itemprop="item" href="/">
+                <span itemprop="name">Category</span></a>
+            <meta itemprop="position" content="2" />
+          </li>
+          <li itemprop="itemListElement" itemscope
+              itemtype="http://schema.org/ListItem">
+            <a itemprop="item" href="">
+              <span itemprop="name"> {{ category }}</span></a>
+            <meta itemprop="position" content="3" />
+          </li>
+          {% endif %}
+          </ol>
+        {% endif %}
+        <!-- end -->
+        <!-- blog_list_container starts here -->
+            <div class="blog_list_container" itemscope itemtype='https://schema.org/blogPosts'>
+                {% if blog_posts %}
+                    {% paginate 5 blog_posts %}
+                    {% for blog in blog_posts %}
+                        <!-- blog_container starts here -->
+                        <div class="blog_container" itemprop="liveBlogUpdate" itemscope itemtype="http://schema.org/BlogPosting">
+                            <div class="share_more">
+                               <!--  <span class="share">
+                                  <ul class="list-inline">
+                                    <li><a href="#"><i class="fa fa-facebook"></i></a></li>
+                                    <li><a href="#"><i class="fa fa-twitter"></i></a></li>
+                                    <li><a href="#"><i class="fa fa-google-plus"></i></a></li>
+                                  </ul>
+                                </span> -->
+                                <span class="more"><a href="{% url 'blog_post_view' blog_slug=blog.slug %}">Continue Reading</a></span>
+                            </div>
+                            {% if blog.featured_image %}
+                                <div class="blog_img">
+                                  <img src="{{ blog.featured_image.url }}" />
+                                </div>
+                            {% endif %}
+                            <div class="blog_content_container">
+                              <div class="author_category">
+                                <a href="#" class="author" itemprop="author" itemtype="http://schema.org/Person">By <span itemprop="name">{{ blog.user }}</span></a>
+                                <a href="{% url 'selected_category' category_slug=blog.category.slug %}" class="category" itemprop="category" itemtype="http://schema.org/category"><span itemprop="name">{{ blog.category }}</span></a>
+                              </div>
+                              <div class="blog_title" itemprop="blog-article">
+                                <a href="{% url 'blog_post_view' blog_slug=blog.slug %}" itemprop="name headline">{{ blog }}</a>
+                              </div>
+                              <div class="blog_desc" itemprop="description">
+                                {{ blog.content|safe|truncatewords_html:50 }}
+                              </div>
+                              <div class="blog_detail_options">
+                                <span class="activity">Posted on <span itemprop="datePublished" itemtype="https://schema.org/datePublished">{{ blog.updated_on|date:"F d, Y" }}</span></span>
+                                <span class="reply"><a href="#"><i class="fa fa-reply"></i>Replies 123 </a></span>
+                                <span class="views"><a href="#"><i class="fa fa-eye"></i> Views 123 </a></span>
+                                <span class="likes"><a href="#"><i class="fa fa-thumbs-up" aria-hidden="true"></i> Likes 23 </a></span>
+                              </div>
+                            </div>
+                        </div>
+                        <!-- blog_container ends here -->
+                    {% endfor %}
+                    <!-- pagination -->
+                        <div class="pagination_wrap">
+                            {% show_pages %}
+                        </div>
+                    <!--/ pagination -->
+                {% else %}
+                    <h2 align="center">There are no Blog-posts are here !</h2>
+                {% endif %}
+            </div>
+            <!-- blog_list_container ends here -->
+
+    {% endblock %}
+
+    {% block js_script %}
+        <script type="text/javascript">
+
+            $('#home').addClass('active');
+
+        </script>
+    {% endblock %}

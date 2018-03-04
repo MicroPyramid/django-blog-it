@@ -1,0 +1,50 @@
+{% extends 'dashboard/new_base.html' %}
+{% block title %}
+User Role
+{% endblock %}
+{% block content %}
+<div class="row no_row_margin heading_count">
+  <div class="heading col-md-6" id='page_title'>Edit User Role</div>
+</div>
+<!-- end class of row -->
+<div class="row no_row_margin">
+  <div class="container-fluid">
+    <form action="" id="post-form" enctype="multipart/form-data" method="post" role="form">
+      {% csrf_token %}
+      <div class="row form_row no_row_margin">
+        <div class="form-group">
+          <select class='input form-control' id="role" name="role">
+            <option value="">Role</option>
+            {% for role in roles %}
+                <option value="{{ role.0 }}" {% ifequal user_role.0.role role.0 %}Selected{% endifequal %}>{{ role.1 }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class=" col-md-12 buttons_row text-left">
+          <button type="submit" class="btn btn-default green_btn"> <i class="fa fa-floppy-o" aria-hidden="true"></i> Save</button>
+          <button type="reset" class="btn btn-default blue_btn"> <i class="fa fa-refresh" aria-hidden="true"></i> Reset</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<!-- end div row of form -->
+{% endblock %}
+{% block js_script %}
+<script type="text/javascript">
+  $('#post-form').submit(function(event){
+      event.preventDefault();
+      $.post("",$('#post-form').serialize(), function(data){
+          if(data.error){
+              $('p.error_required').remove();
+              for (var key in data.response) {
+                  $('#' + key).after('<p class="error_required">* ' + data.response[key] + '</p>');
+              }
+          }else{
+              //alert(data['response']);
+              window.location="{% url 'users' %}";
+          }
+      }, 'json');
+  });
+</script>
+{% endblock %}
