@@ -13,7 +13,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.template import Context
 from django.views.generic import ListView, DetailView
 from django.shortcuts import render_to_response
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from microurl import google_mini
 from django_blog_it.django_blog_it.models import ContactUsSettings, Post_Slugs
 

@@ -22,7 +22,7 @@ STATUS_CHOICE = (
 
 
 class UserRole(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     role = models.CharField(max_length=10, choices=STATUS_CHOICE)
     class Meta:
         ordering = ['-id']
@@ -48,7 +48,7 @@ class Category(models.Model):
     is_active = models.BooleanField(default=False)
     meta_description = models.TextField(max_length=160, null=True, blank=True)
     meta_keywords = models.TextField(max_length=255, null=True, blank=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     class Meta:
         ordering = ['-id']
@@ -99,9 +99,9 @@ class Post(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateField(auto_now=True)
     meta_description = models.TextField(max_length=160, null=True, blank=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     content = models.TextField()
-    category = models.ForeignKey(Category)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
     tags = models.ManyToManyField(Tags, related_name='rel_posts')
     status = models.CharField(max_length=10, choices=STATUS_CHOICE, default='Drafted')
     keywords = models.TextField(max_length=500, blank=True)
@@ -182,7 +182,7 @@ def create_slug(tempslug):
 
 
 class Post_Slugs(models.Model):
-    blog = models.ForeignKey(Post, related_name='slugs')
+    blog = models.ForeignKey(Post, related_name='slugs', on_delete=models.CASCADE)
     slug = models.SlugField(max_length=100, unique=True)
     is_active = models.BooleanField(default=False)
 
@@ -191,8 +191,8 @@ class Post_Slugs(models.Model):
 
 
 class PostHistory(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL)
-    post = models.ForeignKey(Post, related_name='history')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, related_name='history', on_delete=models.CASCADE)
     content = models.CharField(max_length=200)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -242,7 +242,7 @@ class Page(models.Model):
 
 
 class Menu(models.Model):
-    parent = models.ForeignKey('self', blank=True, null=True)
+    parent = models.ForeignKey('self', blank=True, null=True, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     url = models.URLField(max_length=255, blank=True)
     status = models.BooleanField(default=True)
@@ -270,7 +270,7 @@ class ContactUsSettings(models.Model):
 
 
 class Google(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='google')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='google', on_delete=models.CASCADE)
     google_id = models.CharField(max_length=200, default='')
     google_url = models.CharField(max_length=1000, default='')
     verified_email = models.CharField(max_length=200, default='')
@@ -287,7 +287,7 @@ class Google(models.Model):
 
 
 class Facebook(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='facebook')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='facebook', on_delete=models.CASCADE)
     facebook_id = models.CharField(max_length=100)
     facebook_url = models.CharField(max_length=200, default='')
     first_name = models.CharField(max_length=200, default='')

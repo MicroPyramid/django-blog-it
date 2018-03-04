@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                 ('slug', models.CharField(unique=True, max_length=20)),
                 ('description', models.CharField(max_length=500)),
                 ('is_active', models.BooleanField(default=False)),
-                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
         ),
         migrations.CreateModel(
@@ -46,8 +46,8 @@ class Migration(migrations.Migration):
                 ('tags', models.TextField(null=True, blank=True)),
                 ('status', models.CharField(default=b'Drafted', max_length=10, choices=[(b'Drafted', b'Drafted'), (b'Published', b'Published'), (b'Rejected', b'Rejected')])),
                 ('keywords', models.TextField(max_length=500, blank=True)),
-                ('category', models.ForeignKey(to='django_blog_it.Category')),
-                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+                ('category', models.ForeignKey(to='django_blog_it.Category', on_delete=models.CASCADE)),
+                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
         ),
         migrations.CreateModel(

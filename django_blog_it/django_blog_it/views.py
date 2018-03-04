@@ -26,7 +26,7 @@ try:
 except ImportError:
     from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.urlresolvers import reverse, reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, DeleteView,\
     UpdateView, FormView, TemplateView, View
 from django.views.generic.edit import ProcessFormView

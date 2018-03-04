@@ -19,8 +19,8 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('content', models.CharField(max_length=200)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('post', models.ForeignKey(related_name='history', to='django_blog_it.Post')),
-                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+                ('post', models.ForeignKey(related_name='history', to='django_blog_it.Post', on_delete=models.CASCADE)),
+                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
         ),
     ]
