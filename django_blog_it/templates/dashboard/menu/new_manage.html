@@ -1,0 +1,102 @@
+{% extends 'dashboard/new_base.html' %}
+{% block title %}
+{% if add_menu %}
+    Add
+{% else %}
+    Edit
+{% endif %} Menu
+{% endblock %}
+{% block content %}
+  <div class="row no_row_margin heading_count">
+    <div class="heading col-md-6 page_title"></div>
+  </div>
+<!-- end class of row -->
+  <div class="row no_row_margin">
+    <div class="container-fluid">
+      <form action="" id="menu-form" method="post" role="form">
+        <div class="row form_row no_row_margin">
+          {% csrf_token %}
+          <div class="col-md-12">
+            {% for field in form %}
+              <div class="form-group col-md-6">
+                {% if field.name == 'title' %}
+                  <label>MENU TITLE</label>
+                  <div class="controls">
+                    {{ field }}
+                    {% if field.help_text %}
+                    <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                    {% endif %}
+                  </div>
+                {% endif %}
+                {% if field.name == 'parent' %}
+                  <label>Parent</label>
+                  <div class="controls">
+                    {{ field }}
+                    {% if field.help_text %}
+                    <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                    {% endif %}
+                  </div>
+                {% endif %}
+                {% if field.name == 'url' %}
+                  <label>URL</label>
+                  <div class="controls">
+                    {{ field }}
+                    {% if field.help_text %}
+                    <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                    {% endif %}
+                  </div>
+                {% endif %}
+                {% if field.name == 'status' %}
+                  <label>STATUS</label>
+                  <div class="controls">
+                    <select class="form-control" id="id_status" name="status">
+                      <option value="True" {% if field.value %}selected{% endif %} >Active</option>
+                      <option value="False" {% if not field.value %}selected{% endif %}>Inactive</option>
+                    </select>
+                    {% if field.help_text %}
+                    <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                    {% endif %}
+                  </div>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+          <br clear="all">
+          <div class=" col-md-12 buttons_row text-left">
+            <button type="submit" class="btn btn-default green_btn"> <i class="fa fa-floppy-o" aria-hidden="true"></i> Save</button>
+            <button type="reset" class="btn btn-default blue_btn"> <i class="fa fa-refresh" aria-hidden="true"></i> Reset</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+<!-- end div row of form -->
+{% endblock %}
+{% block js_script %}
+<script type="text/javascript">
+  $('#menu-form').submit(function(event){
+      event.preventDefault();
+      $.post("",$('#menu-form').serialize(), function(data){
+          if(data.error){
+              $('p.error_required').remove();
+              for (var key in data.response) {
+                  $('#id_' + key).after('<p class="error_required">* ' + data.response[key] + '</p>');
+              }
+          }else{
+              //alert(data['response']);
+              window.location='{% url "menus" %}';
+          }
+      }, 'json');
+  });
+</script>
+<script type="text/javascript">
+  if(window.location.pathname == "{% url 'add_menu' %}"){
+      $('.page_title').text('Add Menu');
+  }
+  else {
+      var menu = '{{ menu_obj.title }}';
+      $('.page_title').text('Edit Menu: '+ menu);
+  }
+
+</script>
+{% endblock %}

@@ -1,0 +1,102 @@
+{% extends 'new_base.html' %}
+{% load static %}
+{% load blog_tags %}
+{% block title %} Home {% endblock %}
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/frontend_main.css' %}" type="text/css">
+{% endblock extra_css %}
+{% block main_content %}
+    <div class="row middle_container">
+      <div class="main_left_container col-md-9 col-sm-8 col-xs-12">
+      {% block blog_content %}
+      {% endblock blog_content %}
+      </div>
+      <div class="main_right_container col-md-3 col-sm-4 col-xs-12">
+        <!-- recent_posts starts here -->
+             <div class="recent_posts_container">
+                <div class="panel panel-default">
+                  <div class="panel-heading">
+                      <span class="head_line"></span>
+                      <span class="heading">Recent Posts</span>
+                  </div>
+                  <div class="panel-body">
+                    {% for post in recent_posts %}
+                      <!-- recent_blog starts here -->
+                      <div class="blog_block">
+                       <div class="blog_date">
+                          {{ post.updated_on|date:"F d, Y" }}
+                        </div>
+                        <div class="blog_title">
+                           <a href="{% url 'blog_post_view' blog_slug=post.slug %}">{{ post.title }}</a>
+                        </div>
+                        <div class="blog_cat_author">
+                          <a href="#" class="author">By {{ post.user }}</a>
+                          <a href="{% url 'selected_category' category_slug=post.category.slug %}" class="category">{{ post.category }}</a>
+                        </div>
+                        <br clear="all">
+                        <div class="blog_content">
+                        {{ post.content|safe|truncatewords_html:20 }}
+                        </div>
+                      </div>
+                      <!-- recent blog ends here -->
+                    {% endfor %}
+                  </div>
+                </div>
+             </div>
+             <!-- recent_posts ends here -->
+        <!-- categories starts here -->
+         <div class="recent_posts_container">
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                  <span class="head_line"></span>
+                  <span class="heading">Categories</span>
+              </div>
+              <div class="panel-body">
+                <ul class="category_list">
+                  {% for category in categories_list %}
+                    <li class="cat-item cat-item-2"><a href="{% url 'selected_category' category_slug=category.slug %}">{{ category }} ({{ category|category_posts }})</a></li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+         </div>
+         <!-- categories ends here -->
+         <!-- Blog-posts starts here -->
+         <div class="recent_posts_container">
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                  <span class="head_line"></span>
+                  <span class="heading">Blog-Posts</span>
+              </div>
+              <div class="panel-body">
+                <ul class="category_list">
+                  {% get_archives as archives %}
+                  {% for archive in archives %}
+                  <li><a href="{% url 'archive_posts' year=archive|date:'Y' month=archive|date:'m' %}">{{ archive|date:"F Y" }}</a></li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+         </div>
+         <!-- Blog-posts ends here -->
+        <!-- tags starts here -->
+         <div class="recent_posts_container">
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                  <span class="head_line"></span>
+                  <span class="heading">Tags</span>
+              </div>
+              <div class="panel-body">
+               <div class="tags_block">
+                  {% for tag in tags_list %}
+                    <a href="{% url 'selected_tag' tag_slug=tag.slug %}"><i class="fa fa-tag"></i> {{ tag }}</a>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+         </div>
+         <!-- tags ends here -->
+      </div>
+    </div>
+  </div>
+{% endblock main_content %}

@@ -1,0 +1,97 @@
+{% extends 'dashboard/new_base.html' %}
+{% load staticfiles %}
+{% block title %}
+Configure Contact Us.
+{% endblock %}
+{% block extra_css %}
+{% endblock %}
+{% block content %}
+<div class="row no_row_margin heading_count">
+  <div class="heading col-md-6" id='page_title'></div>
+</div>
+<div class="row no_row_margin">
+  <div class="container-fluid">
+    <form action="" method="post" id="contact-us-configure-form" role="form">
+      {% csrf_token %}
+      <div class="row form_row no_row_margin">
+        <div class="col-md-12">
+          <div class="col-md-6">
+            {% for field in form %}
+              {% if field.name != 'email_admin' and field.name != 'subject' and field.name != 'body_admin' %}
+                <div class="form-group">
+                  <label>{{ field.label }} :</label>
+                  <div class="controls">
+                    {{ field }}
+                    {% if field.help_text %}
+                    <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                    {% endif %}
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+          <div class="col-md-6">
+            {% for field in form %}
+              {% if field.name == 'email_admin' or field.name == 'subject' or field.name == 'body_admin' %}
+                <div class="form-group">
+                  <label>{{ field.label }} :</label>
+                  <div class="controls">
+                    {{ field }}
+                    {% if field.help_text %}
+                    <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                    {% endif %}
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+        <br clear="all">
+        <div class=" col-md-12 buttons_row text-left">
+          <button type="submit" class="btn btn-default green_btn"> <i class="fa fa-floppy-o" aria-hidden="true"></i> Save</button>
+          <button type="reset" class="btn btn-default blue_btn"> <i class="fa fa-refresh" aria-hidden="true"></i> Reset</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<!-- end of add form div -->
+{% endblock content %}
+{% block js_script %}
+
+<script type="text/javascript">
+  $(document).ready(function(){
+
+    // for form submission
+    CKEDITOR.replace('body_user',{
+      filebrowserUploadUrl: '{% url "upload_photos" %}',
+      filebrowserBrowseUrl: '{% url "recent_photos" %}',
+      uiColor: '#ffffff',
+      height: 175,
+    });
+    CKEDITOR.replace('body_admin',{
+      filebrowserUploadUrl: '{% url "upload_photos" %}',
+      filebrowserBrowseUrl: '{% url "recent_photos" %}',
+      uiColor: '#ffffff',
+      height: 175,
+    });
+  });
+
+  $('#contact-us-configure-form').submit(function(event){
+      event.preventDefault();
+      $('#id_body_user').val(CKEDITOR.instances.id_body_user.getData());
+      $('#id_body_admin').val(CKEDITOR.instances.id_body_admin.getData());
+      $.post("",$('#contact-us-configure-form').serialize(), function(data){
+          if(data.error){
+              $('p.error_required').remove();
+              for (var key in data.response) {
+                  $('#id_' + key).after('<p class="error_required">* ' + data.response[key] + '</p>');
+              }
+          }else{
+              //alert(data['response']);
+              window.location='{% url "blog" %}';
+          }
+      }, 'json');
+  });
+</script>
+{% endblock %}

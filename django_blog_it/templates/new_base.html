@@ -1,0 +1,145 @@
+{% load staticfiles %}
+{% load blog_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title{% blog_title as blogtitle %}{{ blogtitle }} - {% block title %}Home{% endblock %}</title>
+  <link rel="shortcut icon" href="{% static 'images/favicon.png' %}">
+    {% block description %}
+    <link rel="canonical" href="{{ request.build_absolute_uri }}"/>
+    <meta property="og:url" content="{{ request.build_absolute_uri }}" />
+    <meta property="og:image" content="{{ og_image }}" />
+    <meta property="og:title"  content="{{ title }}" />
+    <meta property="og:description" content="{{ description|truncatechars:160 }}" />
+
+    <meta name="title" content="{{ title }}" />
+    <meta name="description" content="{{ description|truncatechars:160 }}" />
+    <meta name="keywords" content="{{ keywords }}" />
+    <meta name="author" content="{{ author }}" />
+    <meta name="robots" content="index, follow">
+    {% endblock %}
+  <!-- Latest compiled and minified CSS -->
+  <link href='https://fonts.googleapis.com/css?family=Poppins:400,300,500,600,700' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" type="text/css">
+  <link rel="stylesheet" href="{% static 'css/frontend_main.css' %}" type="text/css">
+  <!--
+  -->
+  <link rel="stylesheet" href="{% static 'css/menu/sm-core-css.css' %}" type="text/css">
+  <link rel="stylesheet" href="{% static 'css/menu/sm-blue.css' %}" type="text/css">
+  <!-- for online links -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="{% static 'css/menu/dropdown_submenu.css' %}" type="text/css">
+  {% block extra_css %}
+  {% endblock %}
+</head>
+<body>
+  <header>
+  {% block menu_block %}
+    {% load_menu %}
+  {% endblock %}
+  </header>
+  <div class="main_container">
+    <div class="container">
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{% if message.tags %}{{ message.tags }}{% endif %} alert-dismissible my_alert" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <strong>{% if message.tags %}{{ message.tags|title }} !{% endif %}</strong> {{ message }}.
+          </div>
+        {% endfor %}
+      {% endif %}
+      {% block main_content %}
+      <div class="row" id="head_style">
+        {% block content %}
+        {% endblock content %}
+      </div>
+      {% endblock main_content %}
+
+      <footer class="my_footer">
+      </footer>
+
+    </div>
+  </div>
+  <!-- end div container -->
+
+  <!-- for online links  -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.smartmenus/1.0.0/jquery.smartmenus.js"></script> -->
+
+  <script type="text/javascript">
+
+    // for pagination
+    // $(function() {
+    //   $('#main-menu').smartmenus({
+    //     subMenusSubOffsetX: 1,
+    //     subMenusSubOffsetY: -8
+    //   });
+    // });
+    $( document ).ready(function() {
+      $('#myModal').modal('hide');
+      $('#myModal').on('hidden', function () {
+        // Load up a new modal...
+        $('#myModal1').modal('show')
+      })
+    });
+
+    $('.pagination li a.active').each(function(){
+        $(this).css('background', '#337AB7');
+        $(this).css('color', '#fff');
+    });
+
+   if($('.pagination li:first').find('a span').text() == '<<'){
+        $('.pagination li:first').find('a span').text('First');
+    }
+
+    if($('.pagination li:nth-child(2)').find('a span').text() == '<'){
+        $('.pagination li:nth-child(2)').find('a span').text('Prev');
+    }
+
+    if($('.pagination li:last').find('a span').text() == '>>'){
+        $('.pagination li:last').find('a span').text('Last');
+    }
+    if($('.pagination li:nth-last-child(2)').find('a span').text() == '>'){
+        $('.pagination li:nth-last-child(2)').find('a span').text('Next');
+    }
+
+  </script>
+{% google_analytics_id as GOOGLE_ANALYTICS_ID %}
+{% if GOOGLE_ANALYTICS_ID %}
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', '{{GOOGLE_ANALYTICS_ID}}', 'auto');
+ga('send', 'pageview');
+
+</script>
+{% endif %}
+  <script type="text/javascript">
+    $(document).ready(function() {
+            setTimeout(function() {
+                  $('.my_alert').fadeOut(2000, function(){
+                });
+                  }, 3000);
+
+    });
+    //window.setTimeout(function() {
+    //    $(".alert-message").fadeTo(500, 0).slideUp(500, function(){
+    //        $(this).remove();
+    //    });
+    //}, 5000);
+  </script>
+
+  {% block js_script %}
+
+  {% endblock %}
+
+</body>
+</html>
