@@ -18,7 +18,6 @@ from .models import Menu, Post, PostHistory, Category, Tags, Image_File, \
     STATUS_CHOICE, ROLE_CHOICE, UserRole, Page, Theme, Google, Facebook, \
     Post_Slugs
 from .forms import *
-# from django_blog_it import settings
 from django.conf import settings
 try:
     from django.contrib.auth import get_user_model
@@ -127,7 +126,8 @@ class PostCreateView(AdminMixin, CreateView):
     def form_valid(self, form):
         self.blog_post = form.save(commit=False)
         formset = inlineformset_factory(
-            Post, Post_Slugs, can_delete=True, extra=3, fields=('slug', 'is_active'), formset=CustomBlogSlugInlineFormSet)
+            Post, Post_Slugs, can_delete=True, extra=3, fields=('slug', 'is_active'),
+            formset=CustomBlogSlugInlineFormSet)
         formset = formset(self.request.POST, instance=self.blog_post)
         if not formset.is_valid():
             return JsonResponse({'error': True, "response": formset.errors})
@@ -165,7 +165,9 @@ class PostCreateView(AdminMixin, CreateView):
         context['tags_list'] = tags_list
         context['add_blog'] = True
         self.formset = inlineformset_factory(
-            Post, Post_Slugs, can_delete=True, extra=3, fields=('slug', 'is_active'), formset=CustomBlogSlugInlineFormSet, widgets={'slug': forms.TextInput(attrs={'class': 'form-control'})})
+            Post, Post_Slugs, can_delete=True, extra=3, fields=('slug', 'is_active'),
+            formset=CustomBlogSlugInlineFormSet,
+            widgets={'slug': forms.TextInput(attrs={'class': 'form-control'})})
         context['formset'] = self.formset()
         return context
 
@@ -249,7 +251,8 @@ class PostEditView(AdminMixin, UpdateView):
         context['categories_list'] = categories_list
         context['history_list'] = self.get_object().history.all()
         self.formset = inlineformset_factory(
-            Post, Post_Slugs, can_delete=True, extra=3, fields=('slug', 'is_active'), formset=CustomBlogSlugInlineFormSet,
+            Post, Post_Slugs, can_delete=True, extra=3, fields=('slug', 'is_active'),
+            formset=CustomBlogSlugInlineFormSet,
             widgets={'slug': forms.TextInput(attrs={'class': 'form-control'})})
         context['formset'] = self.formset(instance=self.get_object())
         return context
@@ -459,7 +462,6 @@ def get_user_role(user):
 @csrf_exempt
 def recent_photos(request):
     ''' returns all the images from the data base '''
-
     imgs = []
     for obj in Image_File.objects.filter(is_image=True).order_by("-date_created"):
         upurl = obj.upload.url

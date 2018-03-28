@@ -4,11 +4,15 @@ from .views import *
 urlpatterns = [
     url(r'^$', admin_login, name='admin_login'),
     url(r'^logout/$', admin_logout, name='admin_logout'),
+
+    # Blog
     url(r'^blog/$', PostList.as_view(), name='blog'),
     url(r'^add/$', PostCreatView.as_view(), name='blog_add'),
     url(r'^view/(?P<blog_slug>[-\w]+)/$', PostDetailView.as_view(), name='view_blog'),
     url(r'^delete/(?P<blog_slug>[-\w]+)/$', PostDeleteView.as_view(), name='delete_blog'),
     url(r'^edit/(?P<blog_slug>[-\w]+)/$', edit_blog, name='edit_blog'),
+
+    # Categories
     url(r'^add_category/$', add_category, name='add_category'),
     url(r'^category/$', categories, name='categories'),
     url(r'^delete_category/(?P<category_slug>[-\w]+)/$', delete_category, name='delete_category'),
