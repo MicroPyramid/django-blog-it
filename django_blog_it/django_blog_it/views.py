@@ -426,7 +426,7 @@ def upload_photos(request):
         obj = Image_File.objects.create(upload=f, is_image=True)
         obj.save()
         thumbnail_name = 'thumb' + f.name
-        if getattr(settings, 'AWS_ENABLED', 'False'):
+        if getattr(settings, 'AWS_ENABLED', False):
             image_file = requests.get(obj.upload.url, stream=True)
             with open(thumbnail_name, 'wb') as destination:
                 for chunk in image_file.iter_content():
@@ -440,16 +440,16 @@ def upload_photos(request):
         size = (128, 128)
         im.thumbnail(size)
         im.save(thumbnail_name)
-        imdata = open(thumbnail_name)
-        obj.thumbnail.save(thumbnail_name, File(imdata))
+        with open(thumbnail_name, 'rb') as imdata:
+            obj.thumbnail.save(thumbnail_name, File(imdata))
         obj.save()
         os.remove(os.path.join(settings.BASE_DIR, thumbnail_name))
-        upurl = obj.upload.url
+        upurl = "/" + obj.upload.url
     return HttpResponse(
-            """<script type='text/javascript'>
-            window.parent.CKEDITOR.tools.callFunction({0}, '{1}');
-            </script>""".format(request.GET['CKEditorFuncNum'], upurl)
-        )
+        """<script type='text/javascript'>
+        window.parent.CKEDITOR.tools.callFunction({0}, '{1}');
+        </script>""".format(request.GET['CKEditorFuncNum'], upurl)
+    )
 
 
 def get_user_role(user):
@@ -464,8 +464,10 @@ def recent_photos(request):
     ''' returns all the images from the data base '''
     imgs = []
     for obj in Image_File.objects.filter(is_image=True).order_by("-date_created"):
-        upurl = obj.upload.url
-        thumburl = obj.thumbnail.url
+        upurl = "/" + obj.upload.url
+        thumburl = ""
+        if obj.thumbnail:
+            thumburl = "/" + obj.thumbnail.url
         imgs.append({'src': upurl, 'thumb': thumburl, 'is_image': True})
     return render_to_response('dashboard/browse.html', {'files': imgs})
 
