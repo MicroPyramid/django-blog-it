@@ -21,6 +21,11 @@ django-blog-it
    :target: https://landscape.io/github/MicroPyramid/django-blog-it/master
    :alt: Code Health
 
+.. image:: https://api.codacy.com/project/badge/Grade/7eab875ee3b943d1a3a443f9b5d274b9
+   :alt: Codacy Badge
+   :target: https://app.codacy.com/app/ashwin/django-blog-it?utm_source=github.com&utm_medium=referral&utm_content=MicroPyramid/django-blog-it&utm_campaign=badger
+
+
 Simple blog package developed with Django.
 
 Features:
