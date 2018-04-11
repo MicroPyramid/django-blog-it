@@ -146,3 +146,8 @@ We welcome your feedback and support, raise github ticket if you want to report 
 
 .. _contact us here: https://micropyramid.com/contact-us/
 .. _Here: https://micropyramid.com/django-ecommerce-development/
+
+
+.. image:: https://api.codacy.com/project/badge/Grade/7eab875ee3b943d1a3a443f9b5d274b9
+   :alt: Codacy Badge
+   :target: https://app.codacy.com/app/ashwin/django-blog-it?utm_source=github.com&utm_medium=referral&utm_content=MicroPyramid/django-blog-it&utm_campaign=badger
