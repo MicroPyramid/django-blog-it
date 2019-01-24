@@ -1,5 +1,5 @@
 django-blog-it
-------------
+--------------
 
 .. image:: https://readthedocs.org/projects/django-blog-it/badge/?version=latest
    :target: http://django-blog-it.readthedocs.org/en/latest/?badge=latest
@@ -80,13 +80,13 @@ Installation
 
     export DISQUSSHORTNAME
 
-   # google api key for short url
+    # google api key for short url
 
     API_KEY="google api key"
 
     export API_KEY
 
-   # google captcha
+    # google captcha
 
     GOOGLE_CAPTCHA_SITE_KEY="Site key"
 
@@ -96,13 +96,13 @@ Installation
 
     export GOOGLE_CAPTCHA_SECRET_KEY
 
-   # Google Analytics Account
+    # Google Analytics Account
 
     GOOGLE_ANALYTICS_ID="UA-123456789"
 
     export GOOGLE_ANALYTICS_ID
 
-   # Google Login
+    # Google Login
 
     GP_CLIENT_ID="google client id"
 
@@ -112,7 +112,7 @@ Installation
 
     export GP_CLIENT_SECRET
 
-   # Facebook Login
+    # Facebook Login
 
     FB_APP_ID="facebook app id"
 
@@ -122,7 +122,7 @@ Installation
 
     export FB_SECRET
 
-   # Default E-mail
+    # Default E-mail
 
     DEFAULT_EMAIL="noreply@djangoblogit.com"
 
