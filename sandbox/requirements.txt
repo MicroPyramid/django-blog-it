@@ -1,5 +1,5 @@
 boto==2.40.0
-Django==1.11.18
+Django==1.11.19
 django-simple-pagination==1.1.4
 django-storages==1.4.1
 Pillow==4.3.0
