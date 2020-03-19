@@ -3,7 +3,7 @@ from django.test import Client
 from django_blog_it.django_blog_it.models import Category, Post, Tags, PostHistory, UserRole, Page
 from django.contrib.auth.models import User
 from django_blog_it.django_blog_it.forms import BlogCategoryForm, BlogPostForm, AdminLoginForm
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django_blog_it.django_blog_it.models import Menu, Theme
 from .forms import UserForm
 
