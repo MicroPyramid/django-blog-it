@@ -83,6 +83,9 @@ class BlogPostForm(forms.ModelForm):
                 self.fields[field].widget.attrs.update({
                     'class': 'form-control', "placeholder": "Please enter your Blog " + field.capitalize()
                 })
+        if self.instance:
+            tags_value = ",".join([tag.name for tag in self.instance.tags.all()])
+            self.fields['tags'].initial = tags_value
         self.fields['category'].queryset = Category.objects.filter(is_active=True)
 
     def clean_status(self):

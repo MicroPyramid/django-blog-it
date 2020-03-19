@@ -24,8 +24,10 @@ STATUS_CHOICE = (
 class UserRole(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     role = models.CharField(max_length=10, choices=STATUS_CHOICE)
+
     class Meta:
         ordering = ['-id']
+
 
 class Theme(models.Model):
     name = models.CharField(max_length=20, unique=True)
@@ -150,7 +152,8 @@ class Post(models.Model):
             admin_emails = [admin_role.user.email for admin_role in admin_roles]
             user = self.user
             author_name = user.first_name + user.last_name if user.first_name else user.email
-            text = "New blog post has been created by {0} with the name {1} in the category {2}.".format(author_name, self.title, self.category.name)
+            text = "New blog post has been created by {0} with the name {1} in the category {2}.".format(
+                author_name, self.title, self.category.name)
             send_mail(
                 subject="New Blog Post created",
                 message=text,

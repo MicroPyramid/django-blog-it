@@ -4,7 +4,7 @@ from PIL import Image
 import os
 import requests
 from django.db.models.aggregates import Max
-from django.shortcuts import render, render_to_response, get_object_or_404
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.contrib import messages
 from django.contrib import auth
@@ -469,7 +469,7 @@ def recent_photos(request):
         if obj.thumbnail:
             thumburl = "/" + obj.thumbnail.url
         imgs.append({'src': upurl, 'thumb': thumburl, 'is_image': True})
-    return render_to_response('dashboard/browse.html', {'files': imgs})
+    return render(request, 'dashboard/browse.html', {'files': imgs})
 
 
 class UserListView(AdminOnlyMixin, ListView):
@@ -945,8 +945,10 @@ class ThemesBulkActionsView(AdminOnlyMixin, View):
                 messages.success(request, "Selected Theme's successfully deleted!")
             return JsonResponse({'response': True})
         else:
-            messages.warning(request,'Please select at-least one record to perform this action')
+            messages.warning(
+                request, 'Please select at-least one record to perform this action')
             return JsonResponse({'response': False})
+
 
 # social login
 def google_login(request):
@@ -971,7 +973,7 @@ def google_login(request):
         gender = user_document['gender'] if 'gender' in user_document.keys() else ""
         link = user_document['link'] if 'link' in user_document.keys() else link
 
-        if request.user.is_authenticated():
+        if request.user.is_authenticated:
             user = request.user
         else:
             user = User.objects.filter(email=user_document['email']).first()
@@ -1009,7 +1011,7 @@ def google_login(request):
                 UserRole.objects.create(user=user, role="Admin")
             elif not role:
                 UserRole.objects.create(user=user, role="Author")
-        if not request.user.is_authenticated():
+        if not request.user.is_authenticated:
             if not hasattr(user, 'backend'):
                 for backend in settings.AUTHENTICATION_BACKENDS:
                     if user == load_backend(backend).get_user(user.pk):
@@ -1021,18 +1023,21 @@ def google_login(request):
         return HttpResponseRedirect(reverse_lazy('blog'))
 
     else:
-        rty = "https://accounts.google.com/o/oauth2/auth?client_id=" + os.getenv("GP_CLIENT_ID")\
-              + "&response_type=code"
+        rty = "https://accounts.google.com/o/oauth2/auth?client_id=" + os.getenv("GP_CLIENT_ID") + "&response_type=code"
         rty += "&scope=https://www.googleapis.com/auth/userinfo.profile \
-               https://www.googleapis.com/auth/userinfo.email&redirect_uri=" + request.scheme\
-               + "://" + request.META['HTTP_HOST'] + reverse('google_login')\
-               + "&state=1235dfghjkf123"
+               https://www.googleapis.com/auth/userinfo.email&redirect_uri=" + \
+               request.scheme + "://" + request.META['HTTP_HOST'] + reverse('google_login') + \
+               "&state=1235dfghjkf123"
         return HttpResponseRedirect(rty)
 
 
 def facebook_login(request):
     if 'code' in request.GET:
-        accesstoken = get_access_token_from_code(request.GET['code'], 'https://' + request.META['HTTP_HOST'] + reverse('facebook_login'), os.getenv("FB_APP_ID"), os.getenv("FB_SECRET"))
+        accesstoken = get_access_token_from_code(
+            request.GET['code'],
+            'https://' + request.META['HTTP_HOST'] + reverse('facebook_login'),
+            os.getenv("FB_APP_ID"), os.getenv("FB_SECRET")
+        )
         if 'error' in accesstoken.keys():
             messages.error(request, "Sorry, Your session has been expired")
             return render(request, '404.html')
@@ -1040,7 +1045,10 @@ def facebook_login(request):
         accesstoken = graph.extend_access_token(os.getenv("FB_APP_ID"), os.getenv("FB_SECRET"))['accesstoken']
         hometown = profile['hometown']['name'] if 'hometown' in profile.keys() else ''
         location = profile['location']['name'] if 'location' in profile.keys() else ''
-        bday = datetime.strptime(profile['birthday'], '%m/%d/%Y').strftime('%Y-%m-%d') if 'birthday' in profile.keys() else '1970-09-09'
+        bday = datetime.strptime(
+            profile['birthday'],
+            '%m/%d/%Y'
+        ).strftime('%Y-%m-%d') if 'birthday' in profile.keys() else '1970-09-09'
 
         if 'email' in profile.keys():
             user, created = User.objects.get_or_create(
@@ -1092,7 +1100,7 @@ def facebook_login(request):
                 fb.timezone = profile['timezone'],
                 fb.accesstoken = accesstoken
                 fb.save()
-            if not request.user.is_authenticated():
+            if not request.user.is_authenticated:
                 if not hasattr(user, 'backend'):
                     for backend in settings.AUTHENTICATION_BACKENDS:
                         if user == load_backend(backend).get_user(user.pk):

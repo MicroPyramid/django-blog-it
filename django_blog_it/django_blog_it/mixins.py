@@ -1,6 +1,6 @@
 from django.http.response import HttpResponseRedirect
 from .models import UserRole, Post
-from django.shortcuts import render, render_to_response, get_object_or_404
+from django.shortcuts import get_object_or_404
 from django.contrib import messages
 
 
