@@ -1,10 +1,10 @@
 from django.test import TestCase
 from django.test import Client
-from django_blog_it.django_blog_it.models import Category, Post, Tags, PostHistory, UserRole, Page
+from django_blog_it.django_blog_it.models import Category, Post, Tags, PostHistory, UserRole
 from django.contrib.auth.models import User
 from django_blog_it.django_blog_it.forms import BlogCategoryForm, BlogPostForm, AdminLoginForm
 from django.urls import reverse
-from django_blog_it.django_blog_it.models import Menu, Theme
+from django_blog_it.django_blog_it.models import Theme
 from .forms import UserForm
 
 
@@ -31,22 +31,6 @@ class tags_models_test(TestCase):
         w = self.create_tags()
         self.assertTrue(isinstance(w, Tags))
         self.assertEqual(w.__str__(), w.name)
-
-
-# models test
-class pages_models_test(TestCase):
-
-    def create_pages(
-        self, title="simple page", content="simple content",
-        meta_description="meta description", meta_title="meta title"
-    ):
-        return Page.objects.create(
-            title=title, content=content, meta_description=meta_description, meta_title=meta_title)
-
-    def test_page_creation(self):
-        w = self.create_pages()
-        self.assertTrue(isinstance(w, Page))
-        self.assertEqual(w.__str__(), w.title)
 
 
 # models test
@@ -717,121 +701,8 @@ class users_roles(TestCase):
         response = self.client.get('/dashboard/user/delete/' + str(self.employee.id) + '/')
         self.assertEqual(response.status_code, 302)
 
-        response = self.client.get('/dashboard/user/delete/' + str(self.employee.id+1) + '/')
+        response = self.client.get('/dashboard/user/delete/' + str(self.employee.id + 1) + '/')
         self.assertEqual(response.status_code, 404)
-
-
-class Pages(TestCase):
-
-    def setUp(self):
-        self.client = Client()
-        self.user = User.objects.create_superuser(
-            'mp@mp.com', 'mp', 'mp')
-        self.user_role = UserRole.objects.create(user=self.user, role='Admin')
-        self.employee = User.objects.create_user(
-            'mp@micropyramid.com', 'mp', 'mp')
-        self.page = Page.objects.create(
-            title="test", content="test content", meta_description='page desc', keywords='keywords', meta_title="meta title")
-
-    def test_pages_list(self):
-        user_login = self.client.login(username='mp@mp.com', password='mp')
-        self.assertTrue(user_login)
-
-        response = self.client.get(reverse('pages'))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'dashboard/pages/new_list.html')
-
-        response = self.client.get(reverse('pages'), {'select_status': 'True'})
-        self.assertEqual(response.status_code, 200)
-
-        response = self.client.get(reverse('pages'), {'select_status': 'False'})
-        self.assertEqual(response.status_code, 200)
-
-        response = self.client.get(reverse('bulk_actions_pages'), {'page_ids[]': [str(self.page.id)]})
-        self.assertEqual(response.status_code, 200)
-
-        response = self.client.get(reverse('bulk_actions_pages'), {'page_ids[]': [str(self.page.id)], 'action': 'True'})
-        self.assertEqual(response.status_code, 200)
-
-        response = self.client.get(reverse('bulk_actions_pages'), {'page_ids[]': [str(self.page.id)], 'action': 'False'})
-        self.assertEqual(response.status_code, 200)
-
-        response = self.client.get(reverse('bulk_actions_pages'), {'page_ids[]': [str(self.page.id)], 'action': 'Delete'})
-        self.assertEqual(response.status_code, 200)
-        response = self.client.get(reverse('bulk_actions_pages'), {'action': 'Delete'})
-        self.assertEqual(response.status_code, 200)
-
-    def test_pages_add(self):
-        user_login = self.client.login(username='mp@mp.com', password='mp')
-        self.assertTrue(user_login)
-
-        response = self.client.post(
-            reverse('add_page'),
-            {
-                'title': 'nginx post',
-                'content': 'This is content',
-                'meta_description': 'page meta data',
-                'meta_title': 'meta title',
-                'keywords': 'django',
-            })
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue('Successfully added your page' in str(response.content))
-
-        response = self.client.post(
-            reverse('add_page'),
-            {
-                'title': '',
-                'content': 'This is content',
-                'meta_description': 'page meta data',
-                'meta_title': 'meta title',
-                'keywords': 'django',
-            })
-        self.assertEqual(response.status_code, 200)
-        self.assertFalse('Successfully added your page' in str(response.content))
-
-        response = self.client.get(reverse('add_page'))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'dashboard/pages/new_add_page.html')
-
-        response = self.client.get(reverse('edit_page', kwargs={'page_slug': self.page.slug}))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'dashboard/pages/new_add_page.html')
-
-        response = self.client.post(
-            reverse('edit_page', kwargs={'page_slug': self.page.slug}),
-            {
-                'title': '',
-                'content': 'This is content',
-                'meta_description': 'page meta data',
-                'meta_title': 'meta title',
-                'keywords': 'django',
-            })
-        self.assertEqual(response.status_code, 200)
-        self.assertFalse('Successfully added your page' in str(response.content))
-        response = self.client.post(
-            reverse('edit_page', kwargs={'page_slug': self.page.slug}),
-            {
-                'title': 'Hello world',
-                'content': 'This is content',
-                'meta_description': 'page meta data',
-                'meta_title': 'meta title',
-                'keywords': 'django',
-            })
-        self.assertEqual(response.status_code, 200)
-
-    def test_delete_page(self):
-        user_login = self.client.login(username='mp@mp.com', password='mp')
-        self.assertTrue(user_login)
-        response = self.client.get(reverse('delete_page', kwargs={'page_slug': self.page.slug}))
-        self.assertEqual(response.status_code, 302)
-
-    def test_delete_page_404(self):
-        user_login = self.client.login(username='mp@mp.com', password='mp')
-        self.assertTrue(user_login)
-        self.user.is_superuser = False
-        self.user.save()
-        response = self.client.get(reverse('delete_page', kwargs={'page_slug': self.page.slug}))
-        self.assertEqual(response.status_code, 302)
 
 
 class AdminLogin(TestCase):
@@ -852,78 +723,6 @@ class AdminLogin(TestCase):
         self.assertEqual(response.status_code, 200)
         data['email'] = 'not@used.com'
         response = response = self.client.post(url, data)
-        self.assertEqual(response.status_code, 200)
-
-
-class TestMenu(TestCase):
-
-    def setUp(self):
-        self.client = Client()
-        self.user = User.objects.create_superuser('mp@mp.com',
-                                                  'mp',
-                                                  'mp')
-
-    def get_menu_and_parent(self):
-        menu = Menu.objects.create(title='django',
-                                   url="http://www.django.com",
-                                   lvl=1)
-        parent = Menu.objects.create(title='jquery',
-                                     url="http://www.django.com",
-                                     lvl=2)
-        return menu, parent
-
-    def test_add_menu(self):
-        url = reverse('add_menu')
-        is_logged_in = self.client.login(username='mp@mp.com', password='mp')
-        self.assertTrue(is_logged_in)
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        response = self.client.post(url)
-        self.assertEqual(response.status_code, 200)
-        data = {'title': 'django', 'url': 'http://django.com'}
-        response = self.client.post(url, data)
-        self.assertEqual(response.status_code, 200)
-
-    def test_edit_menu(self):
-        menu, parent = self.get_menu_and_parent()
-        url = reverse('edit_menu', kwargs={'pk': menu.pk})
-        is_logged_in = self.client.login(username='mp@mp.com', password='mp')
-        self.assertTrue(is_logged_in)
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        response = self.client.post(url)
-        self.assertEqual(response.status_code, 200)
-        context = {'title': 'django',
-                   'url': 'http://django.com'}
-        response = self.client.post(url, context)
-        self.assertEqual(response.status_code, 200)
-        context['parent'] = parent.pk
-        response = self.client.post(url, context)
-        self.assertEqual(response.status_code, 200)
-        context['parent'] = menu.pk
-        response = self.client.post(url, context)
-        self.assertEqual(response.status_code, 200)
-        menu.delete()
-        parent.delete()
-
-
-class Menus(TestCase):
-
-    def setUp(self):
-        self.client = Client()
-        self.user = User.objects.create_superuser('mp@mp.com',
-                                                  'mp',
-                                                  'mp')
-
-    def test_menus(self):
-        url = reverse('menus')
-        is_logged_in = self.client.login(username='mp@mp.com', password='mp')
-        self.assertTrue(is_logged_in)
-        context = {'select_status': 'True'}
-        response = self.client.get(url, context)
-        self.assertEqual(response.status_code, 200)
-        context['select_status'] = 'False'
-        response = self.client.get(url, context)
         self.assertEqual(response.status_code, 200)
 
 
@@ -961,21 +760,6 @@ class TestThemesList(TestCase):
         context = {'select_status': 'Published', "search_text": "hi"}
         response = self.client.post(url, context)
         self.assertEqual(response.status_code, 200)
-
-
-class TestMenuStatusUpdate(TestCase):
-
-    def setUp(self):
-        self.client = Client()
-        self.user = User.objects.create_superuser('mp@mp.com', 'mp', 'mp')
-        self.menu = Menu.objects.create(title="menu-1", lvl=1)
-
-    def test_menu_status_update(self):
-        login = self.client.login(username='mp@mp.com', password='mp')
-        self.assertTrue(login)
-        url = reverse("menu_status_update", kwargs={"pk": self.menu.pk})
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 302)
 
 
 class TestThemesBulkActionsView(TestCase):
@@ -1090,6 +874,7 @@ class TestUserForm(TestCase):
         self.assertFalse(form.is_valid())
 
     def test_user_save(self):
-        form = UserForm(data={"username": "mp@mp.com", "email": "mp@mp.com", "password": "password", "role": "Admin", "code": "Admin"}, instance=self.user)
+        form = UserForm(data={"username": "mp@mp.com", "email": "mp@mp.com", "password": "password",
+                              "role": "Admin", "code": "Admin"}, instance=self.user)
         self.assertTrue(form.is_valid())
         form.save()
