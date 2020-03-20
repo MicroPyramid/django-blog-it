@@ -1,5 +1,5 @@
 from django import forms
-from .models import Post, Category, Page, Menu, ContactUsSettings, ROLE_CHOICE, Theme
+from .models import Post, Category, ContactUsSettings, ROLE_CHOICE, Theme
 from django.template.defaultfilters import slugify
 # for authentication
 from django.contrib.auth import authenticate
@@ -83,7 +83,7 @@ class BlogPostForm(forms.ModelForm):
                 self.fields[field].widget.attrs.update({
                     'class': 'form-control', "placeholder": "Please enter your Blog " + field.capitalize()
                 })
-        if self.instance:
+        if self.instance and self.instance.id:
             tags_value = ",".join([tag.name for tag in self.instance.tags.all()])
             self.fields['tags'].initial = tags_value
         self.fields['category'].queryset = Category.objects.filter(is_active=True)
@@ -121,46 +121,6 @@ class BlogCategoryForm(forms.ModelForm):
 
 class UserRoleForm(forms.Form):
     role = forms.CharField(max_length=10)
-
-
-class PageForm(forms.ModelForm):
-    class Meta:
-        model = Page
-        exclude = ('slug',)
-
-    def __init__(self, *args, **kwargs):
-        super(PageForm, self).__init__(*args, **kwargs)
-
-        for field in iter(self.fields):
-            if max(enumerate(iter(self.fields)))[0] != field:
-                self.fields[field].widget.attrs.update({
-                    'class': 'form-control', "placeholder": "Please enter your Page " + field.capitalize()
-                })
-
-    def clean_title(self):
-        if not self.instance.id:
-            if self.Meta.model.objects.filter(slug=slugify(self.cleaned_data['title'])).exists():
-                raise forms.ValidationError('Page with this title already exists.')
-        else:
-            if self.Meta.model.objects.filter(title__icontains=self.cleaned_data['title']).exclude(id=self.instance.id):
-                raise forms.ValidationError('Page with this title already exists.')
-
-        return self.cleaned_data['title']
-
-
-class MenuForm(forms.ModelForm):
-    class Meta:
-        model = Menu
-        exclude = ('lvl',)
-
-    def __init__(self, *args, **kwargs):
-        super(MenuForm, self).__init__(*args, **kwargs)
-
-        for field in iter(self.fields):
-            if max(enumerate(iter(self.fields)))[0] != field:
-                self.fields[field].widget.attrs.update({
-                    'class': 'form-control', "placeholder": "Please enter your Menu " + field.capitalize()
-                })
 
 
 class ContactUsSettingsForm(forms.ModelForm):

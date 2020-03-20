@@ -48,18 +48,6 @@ urlpatterns = [
     path('dashboard/bulk_actions_category/',
          CategoryBulkActionsView.as_view(), name='bulk_actions_category'),
 
-    path('dashboard/pages/', PagesListView.as_view(), name='pages'),
-    path('dashboard/pages/add/', PageCreateView.as_view(), name='add_page'),
-    path('dashboard/pages/edit/<slug:page_slug>/',
-         PageUpdateView.as_view(), name='edit_page'),
-    path('dashboard/pages/update/<slug:page_slug>/',
-         page_status_update, name='page_status_update'),
-    path('dashboard/pages/delete/<slug:page_slug>/',
-         PageDeleteView.as_view(), name='delete_page'),
-    path('dashboard/bulk_actions_pages/',
-         BulkActionsPageView.as_view(), name='bulk_actions_pages'),
-    path('<page_slug>/', PageView.as_view(), name='page_view'),
-
     path('dashboard/upload_photos/', upload_photos, name='upload_photos'),
     path('dashboard/recent_photos/', recent_photos, name='recent_photos'),
     path('dashboard/users/', UserListView.as_view(), name='users'),
@@ -73,14 +61,6 @@ urlpatterns = [
     path('dashboard/bulk_actions_users/',
          UserBulkActionsView.as_view(), name='bulk_actions_users'),
 
-    # menu management
-    path('dashboard/menu/', MenuListView.as_view(), name='menus'),
-    path('dashboard/menu/add/', MenuCreateView.as_view(), name='add_menu'),
-    path('dashboard/menu/edit/<slug:pk>/', MenuUpdateView.as_view(), name='edit_menu'),
-    path('dashboard/menu/update/<slug:pk>/', menu_status_update, name='menu_status_update'),
-    path('dashboard/bulk_actions_menu/',
-         MenuBulkActionsView.as_view(), name='bulk_actions_menu'),
-
     # themes management
     path('dashboard/themes/', ThemesList.as_view(), name='themes'),
     # path('dashboard/themes/add/', add_theme, name='add_theme'),
@@ -90,7 +70,7 @@ urlpatterns = [
     path('dashboard/themes/<slug:theme_slug>/',
          ThemeDetailView.as_view(),
          name='view_theme'),
-    path('dashboard/themes/edit/<slug:int:pk>/',
+    path('dashboard/themes/edit/<int:pk>/',
          ThemeUpdateView.as_view(),
          name='edit_theme'),
     # path('dashboard/themes/edit/<slug:theme_slug>/',

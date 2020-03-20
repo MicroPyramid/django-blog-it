@@ -36,8 +36,12 @@ class tags_models_test(TestCase):
 # models test
 class pages_models_test(TestCase):
 
-    def create_pages(self, title="simple page", content="simple content", meta_description="meta description", meta_title="meta title"):
-        return Page.objects.create(title=title, content=content, meta_description=meta_description, meta_title=meta_title)
+    def create_pages(
+        self, title="simple page", content="simple content",
+        meta_description="meta description", meta_title="meta title"
+    ):
+        return Page.objects.create(
+            title=title, content=content, meta_description=meta_description, meta_title=meta_title)
 
     def test_page_creation(self):
         w = self.create_pages()
@@ -49,14 +53,14 @@ class pages_models_test(TestCase):
 class post_models_test(TestCase):
 
     def create_post(
-            self,
-            tag="simple page",
-            category="simple page",
-            description="simple page content",
-            title="post",
-            content="content",
-            status="D"
-            ):
+        self,
+        tag="simple page",
+        category="simple page",
+        description="simple page content",
+        title="post",
+        content="content",
+        status="D"
+    ):
         user = User.objects.create_superuser('mp@mp.com', 'micro-test', 'mp')
         category = Category.objects.create(name=category, description=description, user=user)
         tag = Tags.objects.create(name=tag)

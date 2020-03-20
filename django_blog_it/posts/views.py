@@ -3,7 +3,7 @@ import requests
 import json
 from datetime import datetime
 from django.shortcuts import render, get_list_or_404, get_object_or_404
-from django_blog_it.django_blog_it.models import Post, Category, Tags, Page
+from django_blog_it.django_blog_it.models import Post, Category, Tags
 from django_blog_it.django_blog_it.forms import ContactForm
 from django.db.models import Count
 from django_blog_it import settings
@@ -163,13 +163,6 @@ class ArchiveView(ListView):
         })
         context.update(categories_tags_lists())
         return context
-
-
-class PageView(DetailView):
-    template_name = "posts/page.html"
-    model = Page
-    slug_url_kwarg = "page_slug"
-    context_object_name = "page"
 
 
 def contact_us(request):

@@ -217,52 +217,6 @@ class Image_File(models.Model):
         return self.date_created
 
 
-class Page(models.Model):
-    title = models.CharField(max_length=100)
-    content = models.TextField()
-    slug = models.SlugField()
-    is_active = models.BooleanField(default=True)
-    meta_description = models.TextField()
-    keywords = models.TextField()
-    meta_title = models.TextField()
-
-    class Meta:
-        ordering = ['-id']
-
-    def save(self, *args, **kwargs):
-        tempslug = slugify(self.title)
-        if self.id:
-            existed_page = Page.objects.get(pk=self.id)
-            if existed_page.title != self.title:
-                self.slug = create_slug(tempslug)
-        else:
-            self.slug = create_slug(tempslug)
-
-        super(Page, self).save(*args, **kwargs)
-
-    def __str__(self):
-        return self.title
-
-
-class Menu(models.Model):
-    parent = models.ForeignKey('self', blank=True, null=True, on_delete=models.CASCADE)
-    title = models.CharField(max_length=255)
-    url = models.URLField(max_length=255, blank=True)
-    status = models.BooleanField(default=True)
-    lvl = models.IntegerField(blank=True)
-
-    def __str__(self):
-        return self.title
-
-    def get_children(self):
-        return self.menu_set.all()
-
-    def has_children(self):
-        if self.get_children():
-            return True
-        return False
-
-
 class ContactUsSettings(models.Model):
     from_email = models.EmailField()
     reply_to_email = models.EmailField(blank=True, null=True)
