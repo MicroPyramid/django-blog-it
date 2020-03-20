@@ -1,7 +1,7 @@
 import datetime
 import os
 from django import template
-from django_blog_it.django_blog_it.models import Post, Tags, Menu
+from django_blog_it.django_blog_it.models import Post, Tags
 from django_blog_it.django_blog_it.views import get_user_role
 from django_blog_it import settings
 
@@ -12,7 +12,10 @@ register = template.Library()
 def get_archives(context):
     archives = []
     dates = []
-    for each_object in Post.objects.filter(category__is_active=True, status="Published").order_by('created_on').values('created_on'):
+    post_objects = Post.objects.filter(
+        category__is_active=True, status="Published"
+    ).order_by('created_on').values('created_on')
+    for each_object in post_objects:
         for date in each_object.values():
             dates.append((date.year, date.month, 1))
 

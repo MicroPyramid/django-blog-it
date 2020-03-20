@@ -28,19 +28,19 @@ class posts_views_get(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'posts/new_index.html')
 
-        response = self.client.get('/blog/'+str(self.blogppost.slug)+'/')
+        response = self.client.get('/blog/' + str(self.blogppost.slug) + '/')
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'posts/new_blog_view.html')
 
-        response = self.client.get('/blog/category/'+str(self.category.slug)+'/')
+        response = self.client.get('/blog/category/' + str(self.category.slug) + '/')
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'posts/new_index.html')
 
-        response = self.client.get('/blog/tags/'+str(self.tag.slug)+'/')
+        response = self.client.get('/blog/tags/' + str(self.tag.slug) + '/')
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'posts/new_index.html')
 
         response = self.client.get(
-            '/blog/'+str(self.blogppost.updated_on.year)+'/'+str(self.blogppost.updated_on.month)+'/')
+            '/blog/' + str(self.blogppost.updated_on.year) + '/' + str(self.blogppost.updated_on.month) + '/')
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'posts/new_index.html')

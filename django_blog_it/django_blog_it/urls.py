@@ -23,7 +23,4 @@ urlpatterns = [
     url(r'^bulk_actions_category/$', bulk_actions_category, name='bulk_actions_category'),
     url(r'upload_photos/$', upload_photos, name='upload_photos'),
     url(r'recent_photos/$', recent_photos, name='recent_photos'),
-
-    # menu management
-    url(r'^menu/$', menus, name='menus'),
 ]
