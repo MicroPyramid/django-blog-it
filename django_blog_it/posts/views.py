@@ -3,7 +3,7 @@ import requests
 import json
 from datetime import datetime
 from django.shortcuts import render, get_list_or_404, get_object_or_404
-from django_blog_it.django_blog_it.models import Post, Category, Tags, Page
+from django_blog_it.django_blog_it.models import Post, Category, Tags
 from django_blog_it.django_blog_it.forms import ContactForm
 from django.db.models import Count
 from django_blog_it import settings
@@ -12,7 +12,6 @@ from django.http import JsonResponse, HttpResponseRedirect
 from django.core.mail import EmailMultiAlternatives
 from django.template import Context
 from django.views.generic import ListView, DetailView
-from django.shortcuts import render_to_response
 from django.urls import reverse
 from microurl import google_mini
 from django_blog_it.django_blog_it.models import ContactUsSettings, Post_Slugs
@@ -166,13 +165,6 @@ class ArchiveView(ListView):
         return context
 
 
-class PageView(DetailView):
-    template_name = "posts/page.html"
-    model = Page
-    slug_url_kwarg = "page_slug"
-    context_object_name = "page"
-
-
 def contact_us(request):
     form = ContactForm()
     if request.POST:
@@ -196,7 +188,7 @@ def contact_us(request):
                 "USER_DESCRIPTION": form.cleaned_data.get("content"),
                 "BLOG_TITLE": settings.BLOG_TITLE
             })
-            html_content = render_to_response('emails/email_to_admin.html', context).content.decode("utf-8")
+            html_content = render(request, 'emails/email_to_admin.html', context).content.decode("utf-8")
             msg = EmailMultiAlternatives(subject, subject, from_email, [contact_us.email_admin])
             # msg.attach(html_content, 'text/html')
             msg.attach_alternative(html_content, "text/html")
@@ -208,7 +200,7 @@ def contact_us(request):
                 "BODY_USER": contact_us.body_user,
                 "BLOG_TITLE": settings.BLOG_TITLE
             })
-            html_content = render_to_response('emails/email_to_user.html', context).content.decode("utf-8")
+            html_content = render(request, 'emails/email_to_user.html', context).content.decode("utf-8")
             headers = {'Reply-To': contact_us.reply_to_email}
             msg = EmailMultiAlternatives(subject, subject, from_email, [form.cleaned_data.get("contact_email")], headers=headers)
             msg.attach_alternative(html_content, "text/html")

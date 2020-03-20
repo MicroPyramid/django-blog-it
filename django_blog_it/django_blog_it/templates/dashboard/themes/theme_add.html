@@ -1,5 +1,5 @@
 {% extends 'dashboard/new_base.html' %}
-{% load staticfiles %}
+{% load static %}
 {% block title %}
 {% if add_theme %}
 Add
@@ -15,7 +15,7 @@ Edit
 </div>
 <div class="row no_row_margin">
   <div class="container-fluid">
-    <form action="" method="post" enctype="multipart/form-data" id="theme-form" role="form">
+    <form action="" method="post" enctype="multipart/form-data" id="theme-form" role="form" novalidate>
       {% csrf_token %}
       <div class="row form_row no_row_margin">
         <div class="col-md-12">
@@ -83,10 +83,18 @@ Edit
   $(document).ready(function(){
 
     // for form submission
-    CKEDITOR.replace('description', {
+    /*CKEDITOR.replace('description', {
       uiColor: '#ffffff',
       height:100,
-    });
+    });*/
+    ClassicEditor
+        .create( document.querySelector( '#id_description' ) )
+        .then( newEditor => {
+            window.editor = newEditor;
+        } )
+        .catch( error => {
+            console.error( error );
+        } );
 
     // $('#theme-form').submit(function(event){
     //   event.preventDefault();
@@ -107,7 +115,7 @@ Edit
     $('form#theme-form').ajaxForm({
       beforeSerialize: function()
       {
-        $('#id_description').val(CKEDITOR.instances.id_description.getData());
+        $('#id_description').val(window.editor.getData());
       },
 
       dataType:  'json',

@@ -4,7 +4,7 @@ from PIL import Image
 import os
 import requests
 from django.db.models.aggregates import Max
-from django.shortcuts import render, render_to_response, get_object_or_404
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.contrib import messages
 from django.contrib import auth
@@ -14,8 +14,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.files import File
 from django import forms
 from django.forms import inlineformset_factory
-from .models import Menu, Post, PostHistory, Category, Tags, Image_File, \
-    STATUS_CHOICE, ROLE_CHOICE, UserRole, Page, Theme, Google, Facebook, \
+from .models import Post, PostHistory, Category, Tags, Image_File, \
+    STATUS_CHOICE, ROLE_CHOICE, UserRole, Theme, Google, Facebook, \
     Post_Slugs
 from .forms import *
 from django.conf import settings
@@ -469,7 +469,7 @@ def recent_photos(request):
         if obj.thumbnail:
             thumburl = "/" + obj.thumbnail.url
         imgs.append({'src': upurl, 'thumb': thumburl, 'is_image': True})
-    return render_to_response('dashboard/browse.html', {'files': imgs})
+    return render(request, 'dashboard/browse.html', {'files': imgs})
 
 
 class UserListView(AdminOnlyMixin, ListView):
@@ -604,184 +604,6 @@ def edit_user_role(request, pk):
     else:
         data = {'error': True, 'response': validate_user_role.errors}
     return HttpResponse(json.dumps(data))
-
-
-class PagesListView(AdminMixin, ListView):
-    template_name = "dashboard/pages/new_list.html"
-    context_object_name = "pages_list"
-
-    def get_queryset(self):
-        queryset = Page.objects.all()
-        if self.request.GET.get('select_status'):
-            if self.request.GET.get('select_status') == "True":
-                queryset = queryset.filter(is_active=True)
-            else:
-                queryset = queryset.filter(is_active=False)
-        if self.request.GET.get('search_text'):
-            queryset = queryset.filter(title__icontains=self.request.GET.get('search_text'))
-        return queryset
-
-
-class PageCreateView(AdminOnlyMixin, CreateView):
-    template_name = "dashboard/pages/new_add_page.html"
-    form_class = PageForm
-
-    def form_valid(self, form):
-        form.save()
-        messages.success(self.request, 'Successfully added your page')
-        return JsonResponse({'error': False, 'response': 'Successfully added your page'})
-
-    def form_invalid(self, form):
-        return JsonResponse({'error': True, 'response': form.errors})
-
-
-class PageUpdateView(AdminOnlyMixin, UpdateView):
-    template_name = "dashboard/pages/new_add_page.html"
-    model = Page
-    form_class = PageForm
-    slug_url_kwarg = "page_slug"
-
-    def form_valid(self, form):
-        form.save()
-        messages.success(self.request, 'Successfully updated your page')
-        return JsonResponse({'error': False, 'response': 'Successfully updated your page'})
-
-    def form_invalid(self, form):
-        return JsonResponse({'error': True, 'response': form.errors})
-
-
-@active_admin_required
-def page_status_update(request, page_slug):
-    page = get_object_or_404(Page, slug=page_slug)
-    if page.is_active:
-        page.is_active = False
-    else:
-        page.is_active = True
-    page.save()
-    return HttpResponseRedirect(reverse_lazy("pages"))
-
-
-class PageDeleteView(AdminOnlyMixin, View):
-
-    def get(self, request, *args, **kwargs):
-        page = get_object_or_404(Page, slug=kwargs.get("page_slug"))
-        page.delete()
-        messages.success(request, 'Page successfully deleted!')
-        return HttpResponseRedirect(reverse_lazy("pages"))
-
-
-class BulkActionsPageView(AdminOnlyMixin, View):
-
-    def get(self, request, *args, **kwargs):
-        if 'page_ids[]' in request.GET:
-            if request.GET.get('action') == 'True':
-                Page.objects.filter(id__in=request.GET.getlist('page_ids[]')).update(is_active=True)
-                messages.success(request, 'Selected Pages successfully updated as Active')
-            elif request.GET.get('action') == 'False':
-                Page.objects.filter(id__in=request.GET.getlist('page_ids[]')).update(is_active=False)
-                messages.success(request, 'Selected Pages successfully updated as Inactive')
-            elif request.GET.get('action') == 'Delete':
-                Page.objects.filter(id__in=request.GET.getlist('page_ids[]')).delete()
-                messages.success(request, 'Selected Pages successfully deleted!')
-            return JsonResponse({'response': True})
-        else:
-            messages.warning(request, 'Please select a record to perform this action')
-            return JsonResponse({'response': False})
-
-
-class MenuListView(AdminMixin, ListView):
-    template_name = "dashboard/menu/new_list.html"
-    context_object_name = "menu_list"
-
-    def get_queryset(self):
-        queryset = Menu.objects.filter(parent=None)
-        if self.request.GET.get('select_status'):
-            if self.request.GET.get('select_status') == "True":
-                queryset = queryset.filter(status=True)
-            else:
-                queryset = queryset.filter(status=False)
-        if self.request.GET.get('search_text'):
-            queryset = queryset.filter(title__icontains=self.request.GET.get('search_text'))
-        return queryset
-
-
-class MenuCreateView(AdminOnlyMixin, CreateView):
-    template_name = "dashboard/menu/new_manage.html"
-    form_class = MenuForm
-
-    def form_valid(self, form):
-        menu_obj = form.save(commit=False)
-        menu_count = Menu.objects.filter(parent=menu_obj.parent).count()
-        menu_obj.lvl = menu_count + 1
-        if menu_obj.url[-1] != '/':
-            menu_obj.url = menu_obj.url + '/'
-        menu_obj.save()
-        messages.success(self.request, 'Successfully added menu.')
-        return JsonResponse({'error': False, 'response': 'Successfully added menu.'})
-
-    def form_invalid(self, form):
-        return JsonResponse({'error': True, 'response': form.errors})
-
-
-class MenuUpdateView(AdminOnlyMixin, UpdateView):
-    template_name = "dashboard/menu/new_manage.html"
-    model = Menu
-    pk = "pk"
-    form_class = MenuForm
-
-    def form_valid(self, form):
-        current_parent = self.object.parent
-        current_lvl = self.object.lvl
-        updated_menu_obj = form.save(commit=False)
-        if updated_menu_obj.parent != current_parent:
-            if updated_menu_obj.parent.id == updated_menu_obj.id:
-                return JsonResponse({'error': True, 'message': 'you can not choose the same as parent'})
-            menu_count = Menu.objects.filter(parent=updated_menu_obj.parent).count()
-            updated_menu_obj.lvl = menu_count + 1
-            menu_max_lvl = Menu.objects.filter(parent=current_parent).aggregate(Max('lvl'))['lvl__max']
-            if menu_max_lvl != 1:
-                for i in Menu.objects.filter(parent=current_parent, lvl__gt=current_lvl, lvl__lte=menu_max_lvl):
-                    i.lvl = i.lvl - 1
-                    i.save()
-        if updated_menu_obj.url[-1] != '/':
-            updated_menu_obj.url = updated_menu_obj.url + '/'
-        updated_menu_obj.save()
-
-        messages.success(self.request, 'Successfully updated menu')
-        return JsonResponse({'error': False, 'response': 'Successfully updated menu'})
-
-    def form_invalid(self, form):
-        return JsonResponse({'error': True, 'response': form.errors})
-
-
-@active_admin_required
-def menu_status_update(request, pk):
-    menu = get_object_or_404(Menu, pk=pk)
-    if menu.status:
-        menu.status = False
-    else:
-        menu.status = True
-    menu.save()
-    return HttpResponseRedirect(reverse_lazy("menus"))
-
-
-class MenuBulkActionsView(AdminOnlyMixin, View):
-
-    def get(self, request, *args, **kwargs):
-        if 'menu_ids[]' in request.GET:
-            if request.GET.get('action') == 'True':
-                Menu.objects.filter(id__in=request.GET.getlist('menu_ids[]')).update(status=True)
-                messages.success(request, "Selected Menu's successfully updated as Active")
-            elif request.GET.get('action') == 'False':
-                Menu.objects.filter(id__in=request.GET.getlist('menu_ids[]')).update(status=False)
-                messages.success(request, "Selected Menu's successfully updated as Inactive")
-            elif request.GET.get('action') == 'Delete':
-                Menu.objects.filter(id__in=request.GET.getlist('menu_ids[]')).delete()
-                messages.success(request, "Selected Menu's successfully deleted!")
-            return JsonResponse({'response': True})
-        else:
-            messages.warning(request, 'Please select a record to perform this action')
-            return JsonResponse({'response': False})
 
 
 @active_admin_required
@@ -945,8 +767,10 @@ class ThemesBulkActionsView(AdminOnlyMixin, View):
                 messages.success(request, "Selected Theme's successfully deleted!")
             return JsonResponse({'response': True})
         else:
-            messages.warning(request,'Please select at-least one record to perform this action')
+            messages.warning(
+                request, 'Please select at-least one record to perform this action')
             return JsonResponse({'response': False})
+
 
 # social login
 def google_login(request):
@@ -971,7 +795,7 @@ def google_login(request):
         gender = user_document['gender'] if 'gender' in user_document.keys() else ""
         link = user_document['link'] if 'link' in user_document.keys() else link
 
-        if request.user.is_authenticated():
+        if request.user.is_authenticated:
             user = request.user
         else:
             user = User.objects.filter(email=user_document['email']).first()
@@ -1009,7 +833,7 @@ def google_login(request):
                 UserRole.objects.create(user=user, role="Admin")
             elif not role:
                 UserRole.objects.create(user=user, role="Author")
-        if not request.user.is_authenticated():
+        if not request.user.is_authenticated:
             if not hasattr(user, 'backend'):
                 for backend in settings.AUTHENTICATION_BACKENDS:
                     if user == load_backend(backend).get_user(user.pk):
@@ -1021,18 +845,21 @@ def google_login(request):
         return HttpResponseRedirect(reverse_lazy('blog'))
 
     else:
-        rty = "https://accounts.google.com/o/oauth2/auth?client_id=" + os.getenv("GP_CLIENT_ID")\
-              + "&response_type=code"
+        rty = "https://accounts.google.com/o/oauth2/auth?client_id=" + os.getenv("GP_CLIENT_ID") + "&response_type=code"
         rty += "&scope=https://www.googleapis.com/auth/userinfo.profile \
-               https://www.googleapis.com/auth/userinfo.email&redirect_uri=" + request.scheme\
-               + "://" + request.META['HTTP_HOST'] + reverse('google_login')\
-               + "&state=1235dfghjkf123"
+               https://www.googleapis.com/auth/userinfo.email&redirect_uri=" + \
+               request.scheme + "://" + request.META['HTTP_HOST'] + reverse('google_login') + \
+               "&state=1235dfghjkf123"
         return HttpResponseRedirect(rty)
 
 
 def facebook_login(request):
     if 'code' in request.GET:
-        accesstoken = get_access_token_from_code(request.GET['code'], 'https://' + request.META['HTTP_HOST'] + reverse('facebook_login'), os.getenv("FB_APP_ID"), os.getenv("FB_SECRET"))
+        accesstoken = get_access_token_from_code(
+            request.GET['code'],
+            'https://' + request.META['HTTP_HOST'] + reverse('facebook_login'),
+            os.getenv("FB_APP_ID"), os.getenv("FB_SECRET")
+        )
         if 'error' in accesstoken.keys():
             messages.error(request, "Sorry, Your session has been expired")
             return render(request, '404.html')
@@ -1040,7 +867,10 @@ def facebook_login(request):
         accesstoken = graph.extend_access_token(os.getenv("FB_APP_ID"), os.getenv("FB_SECRET"))['accesstoken']
         hometown = profile['hometown']['name'] if 'hometown' in profile.keys() else ''
         location = profile['location']['name'] if 'location' in profile.keys() else ''
-        bday = datetime.strptime(profile['birthday'], '%m/%d/%Y').strftime('%Y-%m-%d') if 'birthday' in profile.keys() else '1970-09-09'
+        bday = datetime.strptime(
+            profile['birthday'],
+            '%m/%d/%Y'
+        ).strftime('%Y-%m-%d') if 'birthday' in profile.keys() else '1970-09-09'
 
         if 'email' in profile.keys():
             user, created = User.objects.get_or_create(
@@ -1092,7 +922,7 @@ def facebook_login(request):
                 fb.timezone = profile['timezone'],
                 fb.accesstoken = accesstoken
                 fb.save()
-            if not request.user.is_authenticated():
+            if not request.user.is_authenticated:
                 if not hasattr(user, 'backend'):
                     for backend in settings.AUTHENTICATION_BACKENDS:
                         if user == load_backend(backend).get_user(user.pk):

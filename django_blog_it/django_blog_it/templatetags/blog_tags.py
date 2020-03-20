@@ -52,12 +52,6 @@ def get_range(value):
     return range(value)
 
 
-@register.inclusion_tag('posts/new_nav_menu.html', takes_context=True)
-def load_menu(context):
-    context['menu'] = Menu.objects.filter(parent=None, status=True).order_by("lvl")
-    return context
-
-
 @register.filter
 def posts_published_list(blogs_list):
     return len(blogs_list.filter(status='Published'))

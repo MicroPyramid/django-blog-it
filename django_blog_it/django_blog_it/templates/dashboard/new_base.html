@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Dashboard - {% block title %}Home{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    {% load staticfiles %}
+    {% load static %}
     <!-- for online links -->
     <link rel="shortcut icon" href="{%static 'images/favicon.png' %}">
     <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
@@ -51,13 +51,11 @@
                     </ul>
                   </li> -->
                   <li class="categories"><a href="{% url 'categories' %}">Categories </a></li>
-                  <li class="menu"><a href="{% url 'menus' %}">Menu </a></li>
               {% with request.user.userrole_set.last as user_role %}
                 {% if request.user.is_superuser or user_role.role == "Admin"%}
                   <li class="users"><a href="{% url 'users' %}">Users </a></li>
                 {% endif %}
               {% endwith %}
-                  <li class="pages"><a href="{% url 'pages' %}">Pages </a></li>
                   <li class="themes"><a href="{% url 'themes' %}">Themes</a></li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
@@ -113,9 +111,9 @@
     <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
-    <script src="//cdn.ckeditor.com/4.5.4/standard/ckeditor.js"></script>
     <script src="//malsup.github.com/jquery.form.js"></script>
-    <script src="https://cdn.ckeditor.com/4.5.4/basic/ckeditor.js"></script>
+    <!-- <script src="//cdn.ckeditor.com/4.14.0/standard/ckeditor.js"></script> -->
+    <script src="https://cdn.ckeditor.com/ckeditor5/17.0.0/classic/ckeditor.js"></script>
     <script src="{% static 'js/jquery.tagsinput.js' %}"></script>
     <script type="text/javascript">
       $('.select2').select2(

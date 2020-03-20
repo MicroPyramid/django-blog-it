@@ -1,5 +1,5 @@
 {% extends 'dashboard/new_base.html' %}
-{% load staticfiles %}
+{% load static %}
 {% block title %}
 Configure Contact Us.
 {% endblock %}
@@ -63,7 +63,7 @@ Configure Contact Us.
   $(document).ready(function(){
 
     // for form submission
-    CKEDITOR.replace('body_user',{
+    /*CKEDITOR.replace('body_user',{
       filebrowserUploadUrl: '{% url "upload_photos" %}',
       filebrowserBrowseUrl: '{% url "recent_photos" %}',
       uiColor: '#ffffff',
@@ -74,13 +74,31 @@ Configure Contact Us.
       filebrowserBrowseUrl: '{% url "recent_photos" %}',
       uiColor: '#ffffff',
       height: 175,
-    });
+    });*/
+
+    ClassicEditor
+      .create( document.querySelector( '#id_body_user' ) )
+      .then( newEditor => {
+          window.userEditor = newEditor;
+      } )
+      .catch( error => {
+          console.error( error );
+      } );
+
+    ClassicEditor
+      .create( document.querySelector( '#id_body_admin' ) )
+      .then( newEditor => {
+          window.adminEditor = newEditor;
+      } )
+      .catch( error => {
+          console.error( error );
+      } );
   });
 
   $('#contact-us-configure-form').submit(function(event){
       event.preventDefault();
-      $('#id_body_user').val(CKEDITOR.instances.id_body_user.getData());
-      $('#id_body_admin').val(CKEDITOR.instances.id_body_admin.getData());
+      $('#id_body_user').val(window.userEditor.getData());
+      $('#id_body_admin').val(window.adminEditor.getData());
       $.post("",$('#contact-us-configure-form').serialize(), function(data){
           if(data.error){
               $('p.error_required').remove();
