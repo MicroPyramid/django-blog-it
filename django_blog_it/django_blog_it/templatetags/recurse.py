@@ -18,7 +18,8 @@ class RecurseNode(template.Node):
         try:
             if len(vals):
                 pass
-        except:
+        except Exception as e:
+            print (e)
             vals = [vals]
         if len(vals):
             if 'loop' in self.nodeList:
@@ -65,4 +66,6 @@ def do_recurse(parser, token):
             break
 
     return RecurseNode(var, name, child, nodeList)
+
+
 do_recurse = register.tag('recurse', do_recurse)
