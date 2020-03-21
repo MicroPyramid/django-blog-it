@@ -30,13 +30,14 @@
             <div class="blog_title" itemprop="blog-article">
               <a href="{% url 'blog_post_view' blog_slug=blog_name.slug %}" itemprop="name headline">{{ blog_name.title }}</a>
             </div>
-            <div class="blog_heading">
+            <!-- <div class="blog_heading">
               <span class="head_line"></span>
               <span class="heading">{{ blog_name.updated_on|date:"F d, Y" }}</span>
-            </div>
-            <div class="blog_cat_author text-center">
-              <a href="#" class="author" itemprop="author" itemtype="http://schema.org/Person"><i class="fa fa-user"></i> By <span itemprop="name">{{ blog_name.user }}</span></a>
-              <a href="{% url 'selected_category' category_slug=blog_name.category.slug %}" class="category" itemprop="category" itemtype="http://schema.org/category"><span itemprop="name"><i class="fa fa-case"></i> {{ blog_name.category }}</span></a>
+            </div> -->
+            <div class="blog_cat_author">
+              <a href="#" class="author" itemprop="author" itemtype="http://schema.org/Person"><i class="fa fa-user"></i> By <span itemprop="name">{{ blog_name.user }}</span></a>, 
+              <span class="heading">{{ blog_name.updated_on|date:"F d, Y" }}</span>, 
+              <a href="{% url 'selected_category' category_slug=blog_name.category.slug %}" class="category" itemprop="category" itemtype="http://schema.org/category"><span itemprop="name"><i class="fa fa-list"></i> {{ blog_name.category }}</span></a>
               <br clear="all">
             </div>
             {% if blog_name.featured_image %}
@@ -104,11 +105,11 @@
             <!-- recent_blog starts here -->
             <div class="col-md-4">
               <div class="blog_block">
-                <div class="blog_date">
-                  {{ post.updated_on|date:"F d, Y" }}
-                </div>
                 <div class="blog_title">
                   <a href="{% url 'blog_post_view' blog_slug=post.slug %}">{{ post.title }}</a>
+                </div>
+                <div class="blog_date">
+                  {{ post.updated_on|date:"F d, Y" }}
                 </div>
                 <div class="blog_cat_author">
                   <a href="#" class="author">By {{ post.user }}</a>

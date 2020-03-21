@@ -216,7 +216,8 @@ header .navbar-default .navbar-toggle:hover .icon-bar {
 }
 
 .main_container .middle_container .main_left_container .blog_list_container .blog_container .blog_content_container {
-  display: table-cell;
+  /* display: table-cell; */
+  display: block;
   width: auto;
   position: relative;
   padding: 25px;
@@ -224,16 +225,20 @@ header .navbar-default .navbar-toggle:hover .icon-bar {
 }
 
 .main_container .middle_container .main_left_container .blog_list_container .blog_container .blog_content_container .author_category {
-  position: absolute;
-  left: 25px;
-  top: 0;
+  position: relative;
+  /*left: 25px;
+  top: 0;*/
+}
+
+.main_container .middle_container .main_left_container .blog_list_container .blog_container .blog_content_container .author_category span.activity{
+  color: #00bcd5;
 }
 
 .main_container .middle_container .main_left_container .blog_list_container .blog_container .blog_content_container .author_category a {
-  float: left;
-  color: #fff;
+  /*float: left;*/
+  /*color: #fff;*/
   margin: 0;
-  padding: 4px 10px;
+  /*padding: 4px 10px;*/
   font-size: 10px;
   font-weight: 500;
   letter-spacing: 1px;
@@ -292,6 +297,8 @@ header .navbar-default .navbar-toggle:hover .icon-bar {
 .main_container .middle_container .main_left_container .blog_list_container .blog_container .blog_content_container .blog_title {
   font-weight: 500;
   font-size: 16px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #e5e5e5;
 }
 
 .main_container .middle_container .main_left_container .blog_list_container .blog_container .blog_content_container .blog_title a {
@@ -588,10 +595,10 @@ header .navbar-default .navbar-toggle:hover .icon-bar {
 }
 
 .main_container .middle_container .main_left_container .you_may_like .related_blog_panel .panel-body .blog_block .blog_cat_author a {
-  float: left;
+  /*float: left;*/
   /*color: #fff;*/
   margin: 0;
-  padding: 4px 10px;
+  /*padding: 4px 10px;*/
   font-size: 10px;
   font-weight: 500;
   letter-spacing: 1px;
@@ -680,7 +687,7 @@ header .navbar-default .navbar-toggle:hover .icon-bar {
 .main_container .middle_container .main_left_container .blog_detail_container .blog_details .blog_panel .panel-body .blog_detail_content .blog_cat_author a {
   /*color: #fff;*/
   margin: 0;
-  padding: 4px 10px;
+  /*padding: 4px 10px;*/
   font-size: 11px;
   font-weight: 500;
   letter-spacing: 1px;
@@ -712,7 +719,8 @@ header .navbar-default .navbar-toggle:hover .icon-bar {
 
 .main_container .middle_container .main_left_container .blog_detail_container .blog_details .blog_panel .panel-body .blog_detail_content .blog_title {
   color: #000;
-  text-align: center;
+  /*text-align: center;*/
+  border-bottom: 1px solid #e5e5e5;
 }
 
 .main_container .middle_container .main_left_container .blog_detail_container .blog_details .blog_panel .panel-body .blog_detail_content .blog_title a {
@@ -1002,10 +1010,10 @@ header .navbar-default .navbar-toggle:hover .icon-bar {
 }
 
 .main_container .middle_container .main_right_container .recent_posts_container .panel .panel-body .blog_block .blog_cat_author a {
-  float: left;
-  color: #fff;
+  /*float: left;*/
+  /*color: #fff;*/
   margin: 0;
-  padding: 4px 10px;
+  /*padding: 4px 10px;*/
   font-size: 10px;
   font-weight: 500;
   letter-spacing: 1px;
