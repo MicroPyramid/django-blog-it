@@ -23,19 +23,17 @@
             {% for post in recent_posts %}
               <!-- recent_blog starts here -->
               <div class="blog_block">
-                <div class="blog_date">
-                  {{ post.updated_on|date:"F d, Y" }}
-                </div>
                 <div class="blog_title">
                   <a href="{% url 'blog_post_view' blog_slug=post.slug %}">{{ post.title }}</a>
                 </div>
-                <div class="blog_cat_author">
-                  <a href="#" class="author">By {{ post.user }}</a>
-                  <a href="{% url 'selected_category' category_slug=post.category.slug %}" class="category">{{ post.category }}</a>
+                <div class="blog_date">
+                  <a href="#" class="author"><i class="fa fa-user"></i> By {{ post.user }}</a>, 
+                  <i class="fa fa-calendar"></i> {{ post.updated_on|date:"F d, Y" }}, 
+                  <a href="{% url 'selected_category' category_slug=post.category.slug %}" class="category"><i class="fa fa-list"></i> {{ post.category }}</a>
                 </div>
                 <br clear="all">
                 <div class="blog_content">
-                  {{ post.content|safe|truncatewords_html:20 }}
+                  {{ post.content|safe|truncatewords_html:10 }}
                 </div>
               </div>
               <!-- recent blog ends here -->
