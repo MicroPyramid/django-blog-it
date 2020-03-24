@@ -31,49 +31,47 @@
   </div> -->
   <!-- breadcrumbs-schema -->
   {% if tag or date or category %}
-    <ol itemscope itemtype="http://schema.org/BreadcrumbList" class="breadcrumb">
-      <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
-        <a itemprop="item" href="/">
-          <span itemprop="name">Blog</span></a>
-        <meta itemprop="position" content="1" />
-      </li>
-      {% if tag %}
-      <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
-        <a itemprop="item" href="/">
-          <span itemprop="name">Tag</span></a>
-        <meta itemprop="position" content="2" />
-      </li>
-      <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
-        <a itemprop="item" href="/">
-          <span itemprop="tag">{{ tag }}</span></a>
-        <meta itemprop="position" content="3" />
-      </li>
-      {% endif %}
-      {% if date %}
-      <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
-        <a itemprop="item" href="/">
-          <span itemprop="name">Archive</span></a>
-        <meta itemprop="position" content="2" />
-      </li>
-      <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
-        <a itemprop="item" href="/">
-          <span itemprop="month">{{ date|date:"F Y"}}</span></a>
-        <meta itemprop="position" content="3" />
-      </li>
-      {% endif %}
-      {% if category %}
-      <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
-        <a itemprop="item" href="/">
-          <span itemprop="name">Category</span></a>
-        <meta itemprop="position" content="2" />
-      </li>
-      <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
-        <a itemprop="item" href="">
-          <span itemprop="name"> {{ category }}</span></a>
-        <meta itemprop="position" content="3" />
-      </li>
-      {% endif %}
-    </ol>
+    <nav aria-label="breadcrumb">
+      <ol itemscope itemtype="http://schema.org/BreadcrumbList" class="breadcrumb">
+        <li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+          <a itemprop="item" href="/">
+            <span itemprop="name">Blog</span></a>
+          <meta itemprop="position" content="1" />
+        </li>
+        {% if tag %}
+          <li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+            <a itemprop="item" href="/">
+              <span itemprop="name">Tag</span></a>
+            <meta itemprop="position" content="2" />
+          </li>
+          <li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem" aria-current="page">
+            <span itemprop="tag">{{ tag }}</span>
+            <meta itemprop="position" content="3" />
+          </li>
+        {% endif %}
+        {% if date %}
+          <li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+            <span itemprop="name">Archive</span>
+            <meta itemprop="position" content="2" />
+          </li>
+          <li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem" aria-current="page">
+            <span itemprop="month">{{ date|date:"F Y"}}</span>
+            <meta itemprop="position" content="3" />
+          </li>
+        {% endif %}
+        {% if category %}
+          <li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+            <a itemprop="item" href="/">
+              <span itemprop="name">Category</span></a>
+            <meta itemprop="position" content="2" />
+          </li>
+          <li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem" aria-current="page">
+            <span itemprop="name"> {{ category }}</span>
+            <meta itemprop="position" content="3" />
+          </li>
+        {% endif %}
+      </ol>
+    </nav>
   {% endif %}
   <!-- end -->
   <!-- blog_list_container starts here -->

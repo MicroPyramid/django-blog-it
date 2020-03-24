@@ -14,27 +14,26 @@
     <div class="main_right_container col-md-3 col-sm-4 col-xs-12">
       <!-- recent_posts starts here -->
       <div class="recent_posts_container">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <span class="head_line"></span>
-            <span class="heading">Recent Posts</span>
+        <div class="card mb-3">
+          <div class="card-header bg-dark text-white">
+            <h5>Recent Posts</h5>
           </div>
-          <div class="panel-body">
+          <div class="card-body">
             {% for post in recent_posts %}
               <!-- recent_blog starts here -->
               <div class="blog_block">
                 <div class="blog_title">
-                  <a href="{% url 'blog_post_view' blog_slug=post.slug %}">{{ post.title }}</a>
+                  <h6 class="card-subtitle m-2 text-muted"><a href="{% url 'blog_post_view' blog_slug=post.slug %}">{{ post.title }}</a></h6>
                 </div>
-                <div class="blog_date">
+                <div class="blog_date m-2">
                   <a href="#" class="author"><i class="fa fa-user"></i> By {{ post.user }}</a>, 
                   <i class="fa fa-calendar"></i> {{ post.updated_on|date:"F d, Y" }}, 
                   <a href="{% url 'selected_category' category_slug=post.category.slug %}" class="category"><i class="fa fa-list"></i> {{ post.category }}</a>
                 </div>
-                <br clear="all">
+                <!-- <br clear="all">
                 <div class="blog_content">
                   {{ post.content|safe|truncatewords_html:10 }}
-                </div>
+                </div> -->
               </div>
               <!-- recent blog ends here -->
             {% endfor %}
@@ -44,13 +43,12 @@
       <!-- recent_posts ends here -->
       <!-- categories starts here -->
       <div class="recent_posts_container">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <span class="head_line"></span>
-            <span class="heading">Categories</span>
+        <div class="card mb-3">
+          <div class="card-header bg-dark text-white">
+            <h5>Categories</h5>
           </div>
-          <div class="panel-body">
-            <ul class="category_list">
+          <div class="card-body">
+            <ul class="category_list m-2">
               {% for category in categories_list %}
                 <li class="cat-item cat-item-2"><a href="{% url 'selected_category' category_slug=category.slug %}">{{ category }} ({{ category|category_posts }})</a></li>
               {% endfor %}
@@ -61,13 +59,12 @@
       <!-- categories ends here -->
       <!-- Blog-posts starts here -->
       <div class="recent_posts_container">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <span class="head_line"></span>
-            <span class="heading">Blog-Posts</span>
+        <div class="card mb-3">
+          <div class="card-header bg-dark text-white">
+            <h5>Blog-Posts</h5>
           </div>
-          <div class="panel-body">
-            <ul class="category_list">
+          <div class="card-body">
+            <ul class="category_list m-2">
               {% get_archives as archives %}
               {% for archive in archives %}
                 <li><a href="{% url 'archive_posts' year=archive|date:'Y' month=archive|date:'m' %}">{{ archive|date:"F Y" }}</a></li>
@@ -79,13 +76,12 @@
       <!-- Blog-posts ends here -->
       <!-- tags starts here -->
       <div class="recent_posts_container">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <span class="head_line"></span>
-            <span class="heading">Tags</span>
+        <div class="card mb-3">
+          <div class="card-header bg-dark text-white">
+            <h5>Tags</h5>
           </div>
-          <div class="panel-body">
-            <div class="tags_block">
+          <div class="card-body">
+            <div class="tags_block m-2">
               {% for tag in tags_list %}
                 <a href="{% url 'selected_tag' tag_slug=tag.slug %}"><i class="fa fa-tag"></i> {{ tag }}</a>
               {% endfor %}

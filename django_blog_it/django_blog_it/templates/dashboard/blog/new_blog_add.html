@@ -11,28 +11,26 @@
   </div>
   <div class="row no_row_margin">
     <div class="container-fluid">
-      <form action="" method="post" enctype="multipart/form-data" id="post-form" role="form" novalidate>
+      <form class="form" action="" method="post" enctype="multipart/form-data" id="post-form" role="form" novalidate>
         {% csrf_token %}
         <div class="row form_row no_row_margin">
-          <div class="col-md-12">
-            <div class="col-md-6">
-              {% for field in form %}
-                {% if field.name != 'content' %}
-                  <div class="form-group">
-                    <label>{% if field.name == 'title' %}POST TITLE{% else %}{{ field.label }}{% endif %}</label>
-                    <div class="controls">
+          <div class="col col-md-12">
+            <div class="row">
+              <div class="col col-md-6">
+                {% for field in form %}
+                  {% if field.name != 'content' %}
+                    <div class="form-group">
+                      <label>{% if field.name == 'title' %}POST TITLE{% else %}{{ field.label }}{% endif %}</label>
                       {{ field }}
                       {% if field.help_text %}
                       <p class="help-inline"><small>{{ field.help_text }}</small></p>
                       {% endif %}
                     </div>
-                  </div>
-                {% endif %}
-              {% endfor %}
-              {% if form.instance.id %}
-                <div class="form-group">
-                  <label>History:</label>
-                  <div class="controls">
+                  {% endif %}
+                {% endfor %}
+                {% if form.instance.id %}
+                  <div class="form-group">
+                    <label>History:</label>
                     <select name="history" class="form-control">
                       <option value=""> Please choose previous edit </option>
                       {% for history in history_list %}
@@ -41,37 +39,49 @@
                     </select>
                     <p class="help-inline"><small>Revert to previous edits</small></p>
                   </div>
-                </div>
-              {% endif %}
-            </div>
-            <div class="col-md-6">
-              {% for field in form %}
-                {% if field.name == 'content' %}
-                  <div class="form-group">
-                    <label>Description</label>
-                    <div class="controls">
+                {% endif %}
+              </div>
+              <div class="col col-md-6">
+                {% for field in form %}
+                  {% if field.name == 'content' %}
+                    <div class="form-group">
+                      <label>Description</label>
                       {{ field }}
                       {% if field.help_text %}
                       <p class="help-inline"><small>{{ field.help_text }}</small></p>
                       {% endif %}
                     </div>
-                  </div>
-                {% endif %}
-              {% endfor %}
+                  {% endif %}
+                {% endfor %}
+              </div>
             </div>
           </div>
-          <div class="col-md-12">
+          <div class="col">
             {{ formset.management_form }}
             {% for form in formset %}
-              <div class="col-md-12 slug">
-                {{ form }}
+              <div class="col-md-6 slug">
+                <!-- {{ form }}-->
+                {% for hidden_field in form.hidden_fields %}
+                  {{ hidden_field }}
+                {% endfor %}
+
+                {% for field in form.visible_fields %}
+                  <div class="form-group">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {% if field.help_text %}
+                      <small class="form-text text-muted">{{ field.help_text }}</small>
+                    {% endif %}
+                  </div>
+                {% endfor %}
+
               </div>
             {% endfor %}
           </div>
           <br clear="all">
           <div class=" col-md-12 buttons_row text-left">
-            <button type="submit" class="btn btn-default green_btn"> <i class="fa fa-floppy-o" aria-hidden="true"></i> Save</button>
-            <button type="reset" class="btn btn-default blue_btn"> <i class="fa fa-refresh" aria-hidden="true"></i> Reset</button>
+            <button type="submit" class="btn btn-secondary green_btn"> <i class="fa fa-floppy-o" aria-hidden="true"></i> Save</button>
+            <button type="reset" class="btn btn-secondary blue_btn"> <i class="fa fa-refresh" aria-hidden="true"></i> Reset</button>
           </div>
         </div>
       </form>

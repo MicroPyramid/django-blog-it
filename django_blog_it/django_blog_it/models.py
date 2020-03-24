@@ -217,15 +217,6 @@ class Image_File(models.Model):
         return self.date_created
 
 
-class ContactUsSettings(models.Model):
-    from_email = models.EmailField()
-    reply_to_email = models.EmailField(blank=True, null=True)
-    email_admin = models.EmailField()
-    subject = models.CharField(max_length=500)
-    body_user = models.TextField()
-    body_admin = models.TextField()
-
-
 class Google(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='google', on_delete=models.CASCADE)
     google_id = models.CharField(max_length=200, default='')

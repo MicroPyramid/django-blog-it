@@ -15,10 +15,10 @@
         {% csrf_token %}
         <div class="row form_row no_row_margin">
           <div class="col-md-12">
-            <div class="col-md-6">
+            <div class="row">
               {% for field in form %}
                 {% if field.name != 'email' and field.name != 'is_active' %}
-                  <div class="form-group col-md-12">
+                  <div class="form-group col-lg-6 col-md-12 col-sm-12 col-xs-12">
                     <label>{{ field.label }} :</label>
                     <div class="controls">
                       {{ field }}
@@ -30,10 +30,10 @@
                 {% endif %}
               {% endfor %}
             </div>
-            <div class="col-md-6">
+            <div class="row">
               {% for field in form %}
                 {% if field.name == 'email' %}
-                  <div class="form-group col-md-12">
+                  <div class="form-group col-lg-6 col-md-12 col-sm-12 col-xs-12">
                     <label>{{ field.label }} :</label>
                     <div class="controls">
                       {{ field }}
@@ -44,7 +44,7 @@
                   </div>
                 {% endif %}
                 {% if field.name == 'is_active' %}
-                  <div class="form-group col-md-12">
+                  <div class="form-group col-lg-6 col-md-12 col-sm-12 col-xs-12">
                     <label>{{ field.label }}</label>
                     <div class="controls">
                       <select class="form-control" id="id_is_active" name="is_active">
@@ -60,10 +60,10 @@
               {% endfor %}
             </div>
             <br clear="all">
-            <div class=" col-md-12 buttons_row text-left">
+            <div class=" col-md-12 buttons_row text-center">
               <div class="form-group">
-                <button type="submit" class="btn btn-default green_btn"> <i class="fa fa-floppy-o" aria-hidden="true"></i> Save</button>
-                <button type="reset" class="btn btn-default blue_btn"> <i class="fa fa-refresh" aria-hidden="true"></i> Reset</button>
+                <button type="submit" class="btn btn-secondary green_btn"> <i class="fa fa-floppy-o" aria-hidden="true"></i> Save</button>
+                <button type="reset" class="btn btn-secondary blue_btn"> <i class="fa fa-refresh" aria-hidden="true"></i> Reset</button>
               </div>
             </div>
           </div>

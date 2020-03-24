@@ -7,7 +7,6 @@ from .settings import MEDIA_URL, MEDIA_ROOT
 
 urlpatterns = [
     path('', Home.as_view(), name='index'),
-    path('blog/contact/', contact_us, name='contact_us'),
     path('blog/category/<slug:category_slug>/', SelectedCategoryView.as_view(), name='selected_category'),
     path('blog/tags/<slug:tag_slug>/', SelectedTagView.as_view(), name='selected_tag'),
     re_path(r'^blog/(?P<year>\w{0,})/(?P<month>\w{0,})/$', ArchiveView.as_view(), name='archive_posts'),
@@ -87,8 +86,6 @@ urlpatterns = [
          theme_status_update,
          name='theme_status_update'),
 
-    path('dashboard/contactUs/',
-         configure_contact_us, name='configure_contact_us'),
     path('dashboard/change-password/', ChangePasswordView.as_view(), name='change_password'),
 
 ] + static(MEDIA_URL, document_root=MEDIA_ROOT)

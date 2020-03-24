@@ -3,29 +3,30 @@
 {% block title %} {{ blog_name.title }} {% endblock %}
 {% block blog_content %}
   <!-- breadcrumbs-schema -->
-  <ol itemscope itemtype="http://schema.org/BreadcrumbList" class="breadcrumb">
-    <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
-      <a itemprop="item" href="/">
-        <span itemprop="name">Blog</span></a>
-      <meta itemprop="position" content="1" />
-    </li>
-    <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
-      <a itemprop="item" href="{% url 'selected_category' category_slug=blog_name.category.slug %}">
-        <span itemprop="name"> {{ blog_name.category }}</span></a>
-      <meta itemprop="position" content="2" />
-    </li>
-    <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
-      <a itemprop="item" href="">
-        <span itemprop="name"> {{ blog_name.title }}</span></a>
-      <meta itemprop="position" content="3" />
-    </li>
-  </ol>
+  <nav aria-label="breadcrumb">
+    <ol itemscope itemtype="http://schema.org/BreadcrumbList" class="breadcrumb">
+      <li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+        <a itemprop="item" href="/">
+          <span itemprop="name">Blog</span></a>
+        <meta itemprop="position" content="1" />
+      </li>
+      <li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+        <a itemprop="item" href="{% url 'selected_category' category_slug=blog_name.category.slug %}">
+          <span itemprop="name"> {{ blog_name.category }}</span></a>
+        <meta itemprop="position" content="2" />
+      </li>
+      <li class="breadcrumb-item active" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"  aria-current="page">
+        <span itemprop="name"> {{ blog_name.title }}</span>
+        <meta itemprop="position" content="3" />
+      </li>
+    </ol>
+  </nav>
   <!-- end -->
   <!-- blog_detail_container starts here -->
   <div class="blog_detail_container" itemscope itemtype="http://schema.org/BlogPosting">
     <div class="blog_details">
-      <div class="panel panel-default blog_panel">
-        <div class="panel-body">
+      <div class="card card-default blog_card">
+        <div class="card-body">
           <div class="blog_detail_content">
             <div class="blog_title" itemprop="blog-article">
               <a href="{% url 'blog_post_view' blog_slug=blog_name.slug %}" itemprop="name headline">{{ blog_name.title }}</a>
@@ -36,7 +37,7 @@
             </div> -->
             <div class="blog_cat_author">
               <a href="#" class="author" itemprop="author" itemtype="http://schema.org/Person"><i class="fa fa-user"></i> By <span itemprop="name">{{ blog_name.user }}</span></a>, 
-              <span class="heading">{{ blog_name.updated_on|date:"F d, Y" }}</span>, 
+              <span class="activity">{{ blog_name.updated_on|date:"F d, Y" }}</span>, 
               <a href="{% url 'selected_category' category_slug=blog_name.category.slug %}" class="category" itemprop="category" itemtype="http://schema.org/category"><span itemprop="name"><i class="fa fa-list"></i> {{ blog_name.category }}</span></a>
               <br clear="all">
             </div>
@@ -56,35 +57,37 @@
                 -->
             </div>
             <div class="col-md-12">
-              <div class="social_block col-md-8">
-                <ul class="social_connections">
-                  <li><strong>Share To:</strong></li>
-                  <li class="text-center">
-                    <a target="_blank" href="https://www.facebook.com/sharer/sharer.php?u={{short_url}}&t={{blog_name.title}}" class="facebook">
-                      <i class="fa fa-facebook"></i>
-                    </a>
-                  </li>
-                  <li class="text-center">
-                    <a target="_blank" href="https://twitter.com/intent/tweet?text={{blog_name.title}}&url={{short_url}}&via={{blog_title}}" class="twitter">
-                      <i class="fa fa-twitter"></i>
-                    </a>
-                  </li>
-                  <li class="text-center">
-                    <a target="_blank" href="https://www.linkedin.com/cws/share?url={{ short_url }}&token=&isFramed=true" class="youtube">
-                      <i class="fa fa-linkedin"></i>
-                    </a>
-                  </li>
-                  <br clear="all">
-                </ul>
-              </div>
-              <!--<span class="more"><a href="#">Leave Comment</a></span>-->
-              <div class="col-md-4">
-                <span>
-                  <strong>Tags</strong>:
-                  {% for tag in blog_name.tags.all %}
-                  <a href="{% url 'selected_tag' tag_slug=tag.slug %}">{{ tag }}{% if not forloop.last %}, {% endif %}</a>
-                  {% endfor %}
-                </span>
+              <div class="row">
+                <div class="social_block col-md-8">
+                  <ul class="social_connections">
+                    <li><strong>Share To:</strong></li>
+                    <li class="text-center">
+                      <a target="_blank" href="https://www.facebook.com/sharer/sharer.php?u={{short_url}}&t={{blog_name.title}}" class="facebook">
+                        <i class="fa fa-facebook"></i>
+                      </a>
+                    </li>
+                    <li class="text-center">
+                      <a target="_blank" href="https://twitter.com/intent/tweet?text={{blog_name.title}}&url={{short_url}}&via={{blog_title}}" class="twitter">
+                        <i class="fa fa-twitter"></i>
+                      </a>
+                    </li>
+                    <li class="text-center">
+                      <a target="_blank" href="https://www.linkedin.com/cws/share?url={{ short_url }}&token=&isFramed=true" class="youtube">
+                        <i class="fa fa-linkedin"></i>
+                      </a>
+                    </li>
+                    <br clear="all">
+                  </ul>
+                </div>
+                <!--<span class="more"><a href="#">Leave Comment</a></span>-->
+                <div class="col-md-4">
+                  <span>
+                    <strong>Tags</strong>:
+                    {% for tag in blog_name.tags.all %}
+                    <a href="{% url 'selected_tag' tag_slug=tag.slug %}">{{ tag }}{% if not forloop.last %}, {% endif %}</a>
+                    {% endfor %}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -94,8 +97,8 @@
     <!-- you_may_like starts here -->
     {% if related_posts %}
     <div class="you_may_like">
-      <div class="panel panel-default related_blog_panel">
-        <div class="panel-body">
+      <div class="card card-default related_blog_card">
+        <div class="card-body">
           <div class="blog_heading">
             <span class="head_line"></span>
             <span class="heading">You may Like</span>
@@ -109,11 +112,11 @@
                   <a href="{% url 'blog_post_view' blog_slug=post.slug %}">{{ post.title }}</a>
                 </div>
                 <div class="blog_date">
-                  {{ post.updated_on|date:"F d, Y" }}
                 </div>
                 <div class="blog_cat_author">
-                  <a href="#" class="author">By {{ post.user }}</a>
-                  <a href="{% url 'selected_category' category_slug=post.category.slug %}" class="category">{{ post.category }}</a>
+                  <a href="#" class="author"><i class="fa fa-user"></i> By {{ post.user }}, </a>
+                  <span class="activity"><i class="fa fa-calendar"></i> {{ post.updated_on|date:"F d, Y" }}, </span>
+                  <a href="{% url 'selected_category' category_slug=post.category.slug %}" class="category"><i class="fa fa-list"></i>  {{ post.category }}</a>
                 </div>
                 <br clear="all">
                 <div class="blog_content">
@@ -132,8 +135,8 @@
     <!-- view_comment starts here -->
     <!--
               <div class="view_comment">
-                <div class="panel panel-default view_comment_panel">
-                  <div class="panel-body">
+                <div class="card card-default view_comment_card">
+                  <div class="card-body">
                    <div class="blog_heading">
                       <span class="head_line"></span>
                       <span class="heading">View Comments</span>
@@ -188,8 +191,8 @@
     <!-- leave_comment starts here -->
     <!--
               <div class="leave_comment">
-                <div class="panel panel-default leave_comment_panel">
-                  <div class="panel-body">
+                <div class="card card-default leave_comment_card">
+                  <div class="card-body">
                    <div class="blog_heading">
                       <span class="head_line"></span>
                       <span class="heading">Leave Comment</span>
@@ -226,7 +229,7 @@
      *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
      *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
      */
-    var disqus_config = function() {
+    /*var disqus_config = function() {
       this.page.identifier = '{{ blog_name.slug }}';
       this.page.title = '{{ blog_name.title }}';
     };
@@ -240,9 +243,9 @@
 
       s.setAttribute('data-timestamp', +new Date());
       (d.head || d.body).appendChild(s);
-    })();
+    })();*/
     </script>
-    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+    <!-- <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript> -->
   </div>
   <!-- blog_detail_container ends here -->
 {% endblock %}

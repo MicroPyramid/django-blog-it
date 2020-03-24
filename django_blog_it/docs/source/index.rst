@@ -17,9 +17,9 @@ Requirements
 ======================
 
 ======  ====================
-Python  >= 2.6 (or Python 3.4)
-Django  = 1.9
-jQuery  >= 1.7
+Python  >= 3.5
+Django  = 2.1
+jQuery  >= 3
 ======  ====================
 
 Installation Procedure
@@ -64,11 +64,8 @@ Working modules
 Planned Modules
 ===============
 * Blog pages
-* Contact us page (configurable)
 * google analytics
 * SEO compliant
-* Configurable contact us page.
-* Dynamic Menu.
 * Social Login.
 
 We are always looking to help you customize the whole or part of the code as you like.

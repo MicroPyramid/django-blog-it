@@ -27,8 +27,9 @@
     <link rel="stylesheet" href="{% static 'css/menu/sm-core-css.css' %}" type="text/css">
     <link rel="stylesheet" href="{% static 'css/menu/sm-blue.css' %}" type="text/css">
     <!-- for online links -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="{% static 'css/menu/dropdown_submenu.css' %}" type="text/css">
     {% block extra_css %}
     {% endblock %}
@@ -61,11 +62,12 @@
   </div>
   <!-- end div container -->
   <!-- for online links  -->
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-  <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
   <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.smartmenus/1.0.0/jquery.smartmenus.js"></script> -->
-  <script type="text/javascript">
+  <script>
     // for pagination
     // $(function() {
     //   $('#main-menu').smartmenus({
@@ -81,7 +83,7 @@
       })
     });
 
-    $('.pagination li a.active').each(function() {
+    /*$('.pagination li a.active').each(function() {
       $(this).css('background', '#337AB7');
       $(this).css('color', '#fff');
     });
@@ -99,7 +101,7 @@
     }
     if ($('.pagination li:nth-last-child(2)').find('a span').text() == '>') {
       $('.pagination li:nth-last-child(2)').find('a span').text('Next');
-    }
+    }*/
   </script>
   {% google_analytics_id as GOOGLE_ANALYTICS_ID %}
   {% if GOOGLE_ANALYTICS_ID %}

@@ -833,32 +833,6 @@ class TestThemeUpdateView(TestCase):
         self.assertEqual(response.status_code, 200)
 
 
-class TestConfigureContactUs(TestCase):
-
-    def setUp(self):
-        self.client = Client()
-        self.user = User.objects.create_superuser('mp@mp.com', 'mp', 'mp')
-
-    def test_configure_contact_us_get(self):
-        login = self.client.login(username='mp@mp.com', password='mp')
-        self.assertTrue(login)
-        url = reverse("configure_contact_us")
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        context = {
-            "from_email": "admin@mp.com",
-            "reply_to_email": "admin1@mp.com",
-            "email_admin": "admin2@mp.com",
-            "subject": "Thank you for contacting us",
-            "body_user": "Thanks! We will contact you soon",
-            "body_admin": "Thanks"
-        }
-        response = self.client.post(url, context)
-        self.assertEqual(response.status_code, 200)
-        response = self.client.post(url, context)
-        self.assertEqual(response.status_code, 200)
-
-
 # test forms
 class TestUserForm(TestCase):
 

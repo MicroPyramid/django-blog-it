@@ -14,57 +14,49 @@
       <form action="" method="post" enctype="multipart/form-data" id="theme-form" role="form" novalidate>
         {% csrf_token %}
         <div class="row form_row no_row_margin">
-          <div class="col-md-12">
-            <div class="col-md-6">
-              {% for field in form %}
-                {% if field.name != 'description' %}
-                  <div class="form-group">
-                    {% if field.name == 'name' %}
+          <div class="col-lg-6 col-md-12 col-sm-12 col-xs-12">
+            {% for field in form %}
+              {% if field.name != 'description' %}
+                <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                  {% if field.name == 'name' %}
                     <label>Theme Title</label>
-                    <div class="controls">
-                      {{ field }}
-                      {% if field.help_text %}
-                        <p class="help-inline"><small>{{ field.help_text }}</small></p>
-                      {% endif %}
-                    </div>
+                    {{ field }}
+                    {% if field.help_text %}
+                      <p class="help-inline"><small>{{ field.help_text }}</small></p>
                     {% endif %}
-                    {% if field.name == 'enabled' %}
-                      <label>{{ field.label }}</label>
-                      <div class="controls">
-                        <select class="form-control" id="id_enabled" name="enabled">
-                          <option selected="selected">Select A State</option>
-                          <option value="True" {% if theme and field.value %}selected{% endif %}>Enabled</option>
-                          <option value="False" {% if theme and not field.value %}selected{% endif %}>Disabled</option>
-                        </select>
-                        {% if field.help_text %}
-                          <p class="help-inline"><small>{{ field.help_text }}</small></p>
-                        {% endif %}
-                      </div>
+                  {% endif %}
+                  {% if field.name == 'enabled' %}
+                    <label>{{ field.label }}</label>
+                    <select class="form-control" id="id_enabled" name="enabled">
+                      <option selected="selected">Select A State</option>
+                      <option value="True" {% if theme and field.value %}selected{% endif %}>Enabled</option>
+                      <option value="False" {% if theme and not field.value %}selected{% endif %}>Disabled</option>
+                    </select>
+                    {% if field.help_text %}
+                      <p class="help-inline"><small>{{ field.help_text }}</small></p>
                     {% endif %}
-                  </div>
-                {% endif %}
-              {% endfor %}
-            </div>
-            <div class="col-md-6">
-              {% for field in form %}
-                {% if field.name == 'description' %}
-                  <div class="form-group">
-                    <label>Description</label>
-                    <div class="controls">
-                      {{ field }}
-                      {% if field.help_text %}
-                        <p class="help-inline"><small>{{ field.help_text }}</small></p>
-                      {% endif %}
-                    </div>
-                  </div>
-                {% endif %}
-              {% endfor %}
-            </div>
+                  {% endif %}
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+          <div class="col-lg-6 col-md-12 col-sm-12 col-xs-12">
+            {% for field in form %}
+              {% if field.name == 'description' %}
+                <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                  <label>Description</label>
+                  {{ field }}
+                  {% if field.help_text %}
+                    <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                  {% endif %}
+                </div>
+              {% endif %}
+            {% endfor %}
           </div>
           <br clear="all">
-          <div class=" col-md-12 buttons_row text-left">
-            <button type="submit" class="btn btn-default green_btn"> <i class="fa fa-floppy-o" aria-hidden="true"></i> Save</button>
-            <button type="reset" class="btn btn-default blue_btn"> <i class="fa fa-refresh" aria-hidden="true"></i> Reset</button>
+          <div class=" col-md-12 buttons_row text-center">
+            <button type="submit" class="btn btn-secondary green_btn"> <i class="fa fa-floppy-o" aria-hidden="true"></i> Save</button>
+            <button type="reset" class="btn btn-secondary blue_btn"> <i class="fa fa-refresh" aria-hidden="true"></i> Reset</button>
           </div>
         </div>
       </form>

@@ -2,60 +2,59 @@
 {% load paginate %}
 {% load blog_tags %}
 {% block title %}Users{% endblock %}
-{% block extra_css %}
-  <style type="text/css">
-    table td {
-      padding: 6px;
-    }
-  </style>
-{% endblock %}
 {% block content %}
   <div class="row no_row_margin heading_count">
     <div class="heading col-md-6">Users</div>
     <div class="count_add-new col-md-6 text-right">
       <ul class="list-inline">
-        <li><a href="#">All ({{ users_list|length }}) </a></li>
+        <li class="list-inline-item"><a href="#">All ({{ users_list|length }}) </a></li>
       </ul>
       <span class="add_new"><a href="{% url 'add_user' %}"><i class="fa fa-plus"></i> Add User</a></span>
     </div>
   </div>
-  <div class="filters_row">
-    <div class="col-md-6 filter_left">
+  <div class="filters_row row no_row_margin justify-content-between">
+    <div class="col-lg-6 col-md-12 col-sm-12 col-xs-12 filter_left">
       {% if request.user.is_superuser %}
-        <form class="bulk_actions_form" method='get'>
+        <form class="bulk_actions_form form-inline" method='get'>
           {% csrf_token %}
-          <select class="form-control" name="bulk_actions_select" id='bulk_actions_select'>
-            <option>Choose An Action</option>
-            <option value="True">Active</option>
-            <option value="False">In-Active</option>
-            <option value="Delete">Delete</option>
-          </select>
-          <button class="btn btn-default" type="submit">Apply Action</button>
+          <div class="form-group m-2">
+            <select class="form-control" name="bulk_actions_select" id='bulk_actions_select'>
+              <option>Choose An Action</option>
+              <option value="True">Active</option>
+              <option value="False">In-Active</option>
+              <option value="Delete">Delete</option>
+            </select>
+          </div>
+          <button class="btn btn-secondary" type="submit">Apply Action</button>
         </form>
       {% endif %}
     </div>
-    <div class="col-md-6 filter_right">
-      <form action="" method="GET" id="users_data" class="form-inline">
-        <input type="text" placeholder="Filter By Title" value="{{ request.GET.search_text }}" name='search_text' class="form-control" />
-        <select class='input form-control' id="select_role" name="select_role">
-          <option value="" default>Role</option>
-          {% for role in roles %}
-          <option value="{{ role.0 }}" {% ifequal request.GET.select_role role.0 %}Selected{% endifequal %}>{{ role.1 }}</option>
-          {% endfor %}
-        </select>
-        <button class="btn btn-default" type="submit">Apply Filter</button>
+    <div class="col-lg-6 col-md-12 col-sm-12 col-xs-12 filter_right">
+      <form action="" method="GET" id="users_data" class="form-inline d-flex justify-content-end">
+        <div class="form-group m-2">
+          <input type="text" placeholder="Filter By Title" value="{{ request.GET.search_text }}" name='search_text' class="form-control" />
+        </div>
+        <div class="form-group m-2">
+          <select class='input form-control' id="select_role" name="select_role">
+            <option value="" default>Role</option>
+            {% for role in roles %}
+            <option value="{{ role.0 }}" {% ifequal request.GET.select_role role.0 %}Selected{% endifequal %}>{{ role.1 }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button class="btn btn-secondary" type="submit">Apply Filter</button>
       </form>
     </div>
     <br clear="all">
   </div>
   {% if users_list %}
     <div class="row no_row_margin table_row">
-      <div class="container-fluid">
+      <div class="container-fluid table-responsive">
         {% paginate 5 users_list %}
         {% show_pageitems %}
         {% with request.user.userrole_set.last as user_role %}
           <table class="table table-bordered table-hover" id="my_table">
-            <thead>
+            <thead class="thead-dark">
               <tr>
                 {% if user_role.role != "Author" and user_role.role != "Publisher"%}
                 <th width='5%' class="text-center"><input name="bulk_actions" id="selectAll" type="checkbox"></th>
@@ -74,8 +73,8 @@
                 {% endif %}
               </tr>
             </thead>
-            {% for user in users_list %}
-              <tbody>
+            <tbody>
+              {% for user in users_list %}
                 <tr>
                   {% if user_role.role != "Author" and user_role.role != "Publisher"%}
                   <td class="text-center"><input name="bulk_actions" class="bulk_actions" value="{{ user.id }}" type="checkbox"></td>
@@ -96,13 +95,13 @@
                   </td>
                   {% endif %}
                 </tr>
-              </tbody>
-            {% endfor %}
+              {% endfor %}
+            </tbody>
           </table>
         {% endwith %}
         <!-- end div of table -->
         <!-- pagination -->
-        <div class="pagination_wrap text-center">
+        <div class="pagination_wrap row justify-content-center">
           {% show_pages %}
         </div>
         <!--/ pagination -->
