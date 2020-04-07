@@ -111,6 +111,8 @@
                 <div class="blog_title">
                   <a href="{% url 'blog_post_view' blog_slug=post.slug %}">{{ post.title }}</a>
                 </div>
+                <div class="blog_date">
+                </div>
                 <div class="blog_cat_author">
                   <a href="#" class="author"><i class="fa fa-user"></i> By {{ post.user }}, </a>
                   <span class="activity"><i class="fa fa-calendar"></i> {{ post.updated_on|date:"F d, Y" }}, </span>

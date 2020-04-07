@@ -10,7 +10,7 @@
         <li class="list-inline-item"><a href="#">All ({{ blog_list|length }}) </a></li>
         <li class="list-inline-item"><a href="#">Published ({{ published_blogs|length }}) </a></li>
       </ul>
-      <span class="add_new"><a href="{% url 'blog_add' %}"><i class="fa fa-plus"></i> Add Blog</a></span>
+      <span class="add_new"><a href="{% url 'blog_editor' %}"><i class="fa fa-plus"></i> Add Blog</a></span>
     </div>
   </div>
   <div class="filters_row row no_row_margin justify-content-between">
@@ -77,7 +77,7 @@
                   <td class="text-center"><input name="bulk_actions" class="bulk_actions" value="{{ blog.id }}" type="checkbox">
                 </td>
                 {% endif %}
-                <td><a href="#">{{ blog.title }}</a></td>
+                <td><a href="#">{{ blog.title }} #{{ blog.id }} </a></td>
                 <td>{{ blog.user }}</td>
                 <td>{{ blog.category }}</td>
                 <td id="blog_status">
@@ -100,7 +100,7 @@
                   {% endif %}
                   <a href="{% url 'view_blog' blog_slug=blog.slug %}" class="view"><i class="fa fa-eye"></i> View</a>
                   {% if blog|is_deletable_by:request.user or request.user|get_user_role_name != 'Author' %}
-                  <a href="{% url 'edit_blog' blog_slug=blog.slug %}" class="edit"><i class="fa fa-edit"></i> Edit</a>
+                  <a href="{{ blog.edit_link }}" class="edit"><i class="fa fa-edit"></i> Edit</a>
                   {% endif %}
                   {% if request.user.is_superuser or request.user|get_user_role_name != 'Author' or blog.user == request.user %}
                   {% ifequal blog.status "Trashed" %}

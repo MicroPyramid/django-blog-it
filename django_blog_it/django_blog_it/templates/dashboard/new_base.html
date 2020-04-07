@@ -30,51 +30,49 @@
       {% if request.user.is_active %}
         {% block menu_block %}
           <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-            <div class="container">
-              <a class="navbar-brand" href="{% url 'index' %}">Django Blog</a>
-              <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarSupportedContent" area-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-              </button>
-              <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav mr-auto">
-                  <li class="nav-item dashboard">
-                    <a class="nav-link" href="{% url 'admin_login' %}">Dashboard <span class="sr-only">(current)</span></a>
-                  </li>
-                  <!-- <li class="dropdown">
-                    <a href="{% url 'categories' %}" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Categories <span class="caret"></span></a>
-                    <ul class="dropdown-menu">
-                      <li><a href="#">Action</a></li>
-                      <li><a href="#">Another action</a></li>
-                      <li><a href="#">Something else here</a></li>
-                      <li><a href="#">One more separated link</a></li>
-                    </ul>
-                  </li> -->
-                  <li class="nav-item categories">
-                    <a class="nav-link" href="{% url 'categories' %}">Categories </a>
-                  </li>
-                  {% with request.user.userrole_set.last as user_role %}
-                    {% if request.user.is_superuser or user_role.role == "Admin"%}
-                      <li class="nav-item users">
-                        <a class="nav-link" href="{% url 'users' %}">Users </a>
-                      </li>
-                    {% endif %}
-                  {% endwith %}
-                  <li class="nav-item themes">
-                    <a class="nav-link" href="{% url 'themes' %}">Themes</a>
-                  </li>
-                </ul>
-                <ul class="nav">
-                  <li class="dropdown">
-                    <a href="#" class="btn btn-secondary dropdown-toggle" role="button" id="navbarDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{request.user}}</a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                      <a class="dropdown-item" href="{% url 'change_password' %}"><i class="fa fa-key" aria-hidden="true"></i> Change Password</a>
-                      <div class="dropdown-divider"></div>
-                      <a class="dropdown-item" href="{% url 'admin_logout' %}"><i class="fa fa-sign-out"></i> Logout</a>
-                    </div>
-                    </ul>
-                  </li>
-                </ul>
-              </div>
+            <a class="navbar-brand" href="{% url 'index' %}">Django Blog</a>
+            <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarSupportedContent" area-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul class="navbar-nav mr-auto">
+                <li class="nav-item dashboard">
+                  <a class="nav-link" href="{% url 'admin_login' %}">Dashboard <span class="sr-only">(current)</span></a>
+                </li>
+                <!-- <li class="dropdown">
+                  <a href="{% url 'categories' %}" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Categories <span class="caret"></span></a>
+                  <ul class="dropdown-menu">
+                    <li><a href="#">Action</a></li>
+                    <li><a href="#">Another action</a></li>
+                    <li><a href="#">Something else here</a></li>
+                    <li><a href="#">One more separated link</a></li>
+                  </ul>
+                </li> -->
+                <li class="nav-item categories">
+                  <a class="nav-link" href="{% url 'categories' %}">Categories </a>
+                </li>
+                {% with request.user.userrole_set.last as user_role %}
+                  {% if request.user.is_superuser or user_role.role == "Admin"%}
+                    <li class="nav-item users">
+                      <a class="nav-link" href="{% url 'users' %}">Users </a>
+                    </li>
+                  {% endif %}
+                {% endwith %}
+                <li class="nav-item themes">
+                  <a class="nav-link" href="{% url 'themes' %}">Themes</a>
+                </li>
+              </ul>
+              <ul class="nav">
+                <li class="dropdown">
+                  <a href="#" class="btn btn-secondary dropdown-toggle" role="button" id="navbarDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{request.user}}</a>
+                  <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" href="{% url 'change_password' %}"><i class="fa fa-key" aria-hidden="true"></i> Change Password</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="{% url 'admin_logout' %}"><i class="fa fa-sign-out"></i> Logout</a>
+                  </div>
+                  </ul>
+                </li>
+              </ul>
             </div>
           </nav>
         {% endblock %}
@@ -107,6 +105,11 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.2.2/jquery.form.js"></script>
   <!-- <script src="//cdn.ckeditor.com/4.14.0/standard/ckeditor.js"></script> -->
   <script src="https://cdn.ckeditor.com/ckeditor5/17.0.0/classic/ckeditor.js"></script>
+  <!-- <script src="https://cdn.tiny.cloud/1/h80lo4fshdp24bo02dleqanp8ubnnivflha4h87s709v7vrb/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script> -->
+  <!-- <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script> -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/4.9.2/tinymce.min.js"></script>
+  <!-- <script src='https://cloud.tinymce.com/stable/tinymce.min.js'></script> -->
+
   <script src="{% static 'js/jquery.tagsinput.js' %}"></script>
   <script type="text/javascript">
     $('.select2').select2({

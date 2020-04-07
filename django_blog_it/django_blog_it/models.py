@@ -5,6 +5,7 @@ from django.template.defaultfilters import slugify
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail
+from django.urls import reverse
 
 
 ROLE_CHOICE = (
@@ -18,6 +19,11 @@ STATUS_CHOICE = (
     ('Published', 'Published'),
     ('Rejected', 'Rejected'),
     ('Trashed', 'Trashed'),
+)
+
+EDITOR_CHOICE = (
+    ('ckeditor', 'CKEditor'),
+    ('tinymce', 'TinyMCE'),
 )
 
 
@@ -102,6 +108,7 @@ class Post(models.Model):
     updated_on = models.DateField(auto_now=True)
     meta_description = models.TextField(max_length=160, null=True, blank=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    editor = models.CharField(max_length=10, choices=EDITOR_CHOICE, default='ckeditor')
     content = models.TextField()
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     tags = models.ManyToManyField(Tags, related_name='rel_posts')
@@ -144,6 +151,9 @@ class Post(models.Model):
 
     def remove_activity(self):
         self.history.all().delete()
+
+    def edit_link(self):
+        return reverse('edit_' + str(self.editor) + '_blog', kwargs={'blog_slug': self.slug})
 
     def email_to_admins_on_post_create(self):
         email = os.getenv("DEFAULT_EMAIL")

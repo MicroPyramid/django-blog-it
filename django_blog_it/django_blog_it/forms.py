@@ -66,6 +66,7 @@ class BlogPostForm(forms.ModelForm):
     class Meta:
         model = Post
         exclude = ('slug', 'user', 'tags')
+        # widgets = {'editor': forms.RadioSelect}
 
     def __init__(self, *args, **kwargs):
         self.user_role = kwargs.pop('user_role', None)
@@ -83,6 +84,10 @@ class BlogPostForm(forms.ModelForm):
                 self.fields[field].widget.attrs.update({
                     'class': 'form-control', "placeholder": "Please enter your Blog " + field.capitalize()
                 })
+            # if field == 'editor':
+            #     self.fields[field].widget.attrs.update({
+            #         'class': 'custom-control-input'
+            #     })
         if self.instance and self.instance.id:
             tags_value = ",".join([tag.name for tag in self.instance.tags.all()])
             self.fields['tags'].initial = tags_value

@@ -1,0 +1,37 @@
+{% extends 'dashboard/new_base.html' %}
+{% load static %}
+{% block title %}
+  Choose an Editor
+{% endblock %}
+{% block extra_css %}
+{% endblock %}
+{% block content %}
+  <div class="row no_row_margin heading_count">
+    <div class="heading col-md-6" id='page_title'></div>
+  </div>
+  <div class="row no_row_margin">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-6">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">CKEditor 5</h5>
+              <p class="card-text">For ref: <a href="https://ckeditor.com/ckeditor-5/">CKEditor 5</a>.</p>
+              <a href="{% url 'blog_ckeditor_add' %}" class="btn btn-primary">Go <i class="fa fa-arrow-circle-right"></i></a>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">TinyMCE</h5>
+              <p class="card-text">For ref: <a href="https://www.tiny.cloud/">TinyMCE</a>.</p>
+              <a href="{% url 'blog_tinymce_add' %}" class="btn btn-primary">Go <i class="fa fa-arrow-circle-right"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- end of add form div -->
+{% endblock %}

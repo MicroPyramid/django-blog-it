@@ -103,6 +103,10 @@ class PostList(AdminMixin, ListView):
                       {'blog_list': blog_list, 'blog_choices': STATUS_CHOICE})
 
 
+class EditorChoice(TemplateView):
+    template_name = 'dashboard/blog/choice_of_editor.html'
+
+
 class PostDetailView(DetailView):
     model = Post
     template_name = 'dashboard/blog/new_blog_view.html'
@@ -110,14 +114,14 @@ class PostDetailView(DetailView):
     context_object_name = 'blog_post'
 
 
-class PostCreateView(AdminMixin, CreateView):
+class PostCKEditorCreateView(AdminMixin, CreateView):
     model = Post
     form_class = BlogPostForm
-    template_name = "dashboard/blog/new_blog_add.html"
+    template_name = "dashboard/blog/new_blog_add_ckeditor.html"
     success_url = reverse_lazy('blog')
 
     def get_form_kwargs(self):
-        kwargs = super(PostCreateView, self).get_form_kwargs()
+        kwargs = super(PostCKEditorCreateView, self).get_form_kwargs()
         role = get_user_role(self.request.user)
         role = role if role in dict(ROLE_CHOICE).keys() else None
         kwargs["user_role"] = role
@@ -135,6 +139,7 @@ class PostCreateView(AdminMixin, CreateView):
         if self.request.user.is_superuser:
             self.blog_post.status = self.request.POST.get('status')
         self.blog_post.save()
+        print ("self.blog_post.slug", self.blog_post.slug)
         self.blog_post.store_old_slug(self.blog_post.slug)
         formset.save()
         if self.request.POST.get('tags', ''):
@@ -157,7 +162,7 @@ class PostCreateView(AdminMixin, CreateView):
         return JsonResponse({'error': True, 'response': form.errors})
 
     def get_context_data(self, **kwargs):
-        context = super(PostCreateView, self).get_context_data(**kwargs)
+        context = super(PostCKEditorCreateView, self).get_context_data(**kwargs)
         tags_list = Tags.objects.all()
         categories_list = Category.objects.filter(is_active=True)
         context['status_choices'] = STATUS_CHOICE
@@ -172,11 +177,74 @@ class PostCreateView(AdminMixin, CreateView):
         return context
 
 
-class PostEditView(AdminMixin, UpdateView):
+class PostTinyMCECreateView(AdminMixin, CreateView):
+    model = Post
+    form_class = BlogPostForm
+    template_name = "dashboard/blog/new_blog_add_tinymce.html"
+    success_url = reverse_lazy('blog')
+
+    def get_form_kwargs(self):
+        kwargs = super(PostTinyMCECreateView, self).get_form_kwargs()
+        role = get_user_role(self.request.user)
+        role = role if role in dict(ROLE_CHOICE).keys() else None
+        kwargs["user_role"] = role
+        return kwargs
+
+    def form_valid(self, form):
+        self.blog_post = form.save(commit=False)
+        formset = inlineformset_factory(
+            Post, Post_Slugs, can_delete=True, extra=3, fields=('slug', 'is_active'),
+            formset=CustomBlogSlugInlineFormSet)
+        formset = formset(self.request.POST, instance=self.blog_post)
+        if not formset.is_valid():
+            return JsonResponse({'error': True, "response": formset.errors})
+        self.blog_post.user = self.request.user
+        if self.request.user.is_superuser:
+            self.blog_post.status = self.request.POST.get('status')
+        self.blog_post.save()
+        print ("self.blog_post.slug", self.blog_post.slug)
+        self.blog_post.store_old_slug(self.blog_post.slug)
+        formset.save()
+        if self.request.POST.get('tags', ''):
+            splitted = self.request.POST.get('tags').split(',')
+            for s in splitted:
+                blog_tags = Tags.objects.filter(name__iexact=s.strip())
+                if blog_tags:
+                    blog_tag = blog_tags.first()
+                else:
+                    blog_tag = Tags.objects.create(name=s.strip())
+                self.blog_post.tags.add(blog_tag)
+
+        self.blog_post.create_activity(user=self.request.user, content="added")
+        messages.success(self.request, 'Successfully posted your blog')
+        data = {'error': False, 'response': 'Successfully posted your blog',
+                'title': self.request.POST['title']}
+        return JsonResponse(data)
+
+    def form_invalid(self, form):
+        return JsonResponse({'error': True, 'response': form.errors})
+
+    def get_context_data(self, **kwargs):
+        context = super(PostTinyMCECreateView, self).get_context_data(**kwargs)
+        tags_list = Tags.objects.all()
+        categories_list = Category.objects.filter(is_active=True)
+        context['status_choices'] = STATUS_CHOICE
+        context['categories_list'] = categories_list
+        context['tags_list'] = tags_list
+        context['add_blog'] = True
+        self.formset = inlineformset_factory(
+            Post, Post_Slugs, can_delete=True, extra=3, fields=('slug', 'is_active'),
+            formset=CustomBlogSlugInlineFormSet,
+            widgets={'slug': forms.TextInput(attrs={'class': 'form-control'})})
+        context['formset'] = self.formset()
+        return context
+
+
+class PostCKEditorEditView(AdminMixin, UpdateView):
     model = Post
     success_url = reverse_lazy('blog')
     slug_url_kwarg = 'blog_slug'
-    template_name = "dashboard/blog/new_blog_add.html"
+    template_name = "dashboard/blog/new_blog_add_ckeditor.html"
     form_class = BlogPostForm
     context_object_name = "blog_name"
 
@@ -187,10 +255,10 @@ class PostEditView(AdminMixin, UpdateView):
                 history_post = instance.history.filter(id=request.POST.get("history_id")).last()
                 if history_post:
                     return JsonResponse({"content": history_post.content})
-        return super(PostEditView, self).dispatch(request, *args, **kwargs)
+        return super(PostCKEditorEditView, self).dispatch(request, *args, **kwargs)
 
     def get_form_kwargs(self):
-        kwargs = super(PostEditView, self).get_form_kwargs()
+        kwargs = super(PostCKEditorEditView, self).get_form_kwargs()
         role = get_user_role(self.request.user)
         role = role if role in dict(ROLE_CHOICE).keys() else None
         kwargs["user_role"] = role
@@ -216,7 +284,8 @@ class PostEditView(AdminMixin, UpdateView):
         else:
             self.blog_post.status = previous_status
         self.blog_post.save()
-        self.blog_post.tags.clear()
+        if self.blog_post.tags.count():
+            self.blog_post.tags.clear()
         if self.request.POST.get('tags', ''):
             splitted = self.request.POST.get('tags').split(',')
             for s in splitted:
@@ -245,7 +314,94 @@ class PostEditView(AdminMixin, UpdateView):
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
-        context = super(PostEditView, self).get_context_data(**kwargs)
+        context = super(PostCKEditorEditView, self).get_context_data(**kwargs)
+        categories_list = Category.objects.filter(is_active=True)
+        context['status_choices'] = STATUS_CHOICE,
+        context['categories_list'] = categories_list
+        context['history_list'] = self.get_object().history.all()
+        self.formset = inlineformset_factory(
+            Post, Post_Slugs, can_delete=True, extra=3, fields=('slug', 'is_active'),
+            formset=CustomBlogSlugInlineFormSet,
+            widgets={'slug': forms.TextInput(attrs={'class': 'form-control'})})
+        context['formset'] = self.formset(instance=self.get_object())
+        return context
+
+
+class PostTinyMCEEditView(AdminMixin, UpdateView):
+    model = Post
+    success_url = reverse_lazy('blog')
+    slug_url_kwarg = 'blog_slug'
+    template_name = "dashboard/blog/new_blog_add_tinymce.html"
+    form_class = BlogPostForm
+    context_object_name = "blog_name"
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.POST:
+            instance = self.get_object()
+            if request.POST.get("history_id"):
+                history_post = instance.history.filter(id=request.POST.get("history_id")).last()
+                if history_post:
+                    return JsonResponse({"content": history_post.content})
+        return super(PostTinyMCEEditView, self).dispatch(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        kwargs = super(PostTinyMCEEditView, self).get_form_kwargs()
+        role = get_user_role(self.request.user)
+        role = role if role in dict(ROLE_CHOICE).keys() else None
+        kwargs["user_role"] = role
+        return kwargs
+
+    def form_invalid(self, form):
+        return JsonResponse({'error': True, 'response': form.errors})
+
+    def form_valid(self, form):
+        formset = inlineformset_factory(
+            Post, Post_Slugs, can_delete=True, extra=3, fields=('slug', 'is_active'), formset=CustomBlogSlugInlineFormSet)
+        formset = formset(self.request.POST, instance=self.get_object())
+        if not formset.is_valid():
+            return JsonResponse({'error': True, "response": formset.errors})
+        else:
+            formset.save()
+        previous_status = self.get_object().status
+        previous_content = self.get_object().content
+        self.blog_post = form.save(commit=False)
+        # self.blog_post.user = self.request.user
+        if self.request.user.is_superuser or get_user_role(self.request.user) != 'Author':
+            self.blog_post.status = self.request.POST.get('status')
+        else:
+            self.blog_post.status = previous_status
+        self.blog_post.save()
+        if self.blog_post.tags.count():
+            self.blog_post.tags.clear()
+        if self.request.POST.get('tags', ''):
+            splitted = self.request.POST.get('tags').split(',')
+            for s in splitted:
+                blog_tags = Tags.objects.filter(name__iexact=s.strip())
+                if blog_tags:
+                    blog_tag = blog_tags.first()
+                else:
+                    blog_tag = Tags.objects.create(name=s.strip())
+                self.blog_post.tags.add(blog_tag)
+        if previous_content != self.blog_post.content:
+            self.blog_post.create_activity(
+                user=self.request.user, content=previous_content)
+        # if self.blog_post.status == previous_status:
+        #     self.blog_post.create_activity(
+        #         user=self.request.user, content="updated")
+        # else:
+        #     self.blog_post.create_activity(
+        #         user=self.request.user,
+        #         content="changed status from " +
+        #         str(previous_status) + " to " + str(blog_post.status)
+        #     )
+        self.blog_post.store_old_slug(self.kwargs.get("blog_slug"))
+        messages.success(self.request, 'Successfully updated your blog post')
+        data = {'error': False,
+                'response': 'Successfully updated your blog post'}
+        return JsonResponse(data)
+
+    def get_context_data(self, **kwargs):
+        context = super(PostTinyMCEEditView, self).get_context_data(**kwargs)
         categories_list = Category.objects.filter(is_active=True)
         context['status_choices'] = STATUS_CHOICE,
         context['categories_list'] = categories_list
