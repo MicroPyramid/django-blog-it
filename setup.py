@@ -22,10 +22,10 @@ for dirpath, dirnames, filenames in os.walk(PROJECT_NAME):
 
 setup(
     name='django-blog-it',
-    version='0.3.1',
+    version='1.0',
     packages=find_packages(exclude=['tests', 'tests.*']),
     include_package_data=True,
-    description='A simple installable app for writing blog posts',
+    description='A simple installable app to mange web pages and blog posts',
     long_description=README,
     url='https://github.com/MicroPyramid/django-blog-it.git',
     author='Micropyramid',
@@ -45,13 +45,7 @@ setup(
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     ],
     install_requires=[
-        'boto',
         'Django',
-        'django-simple-pagination',
-        'django-storages',
-        'Pillow',
-        'requests',
-        'wheel',
-        'microurl'
+        'arrow'
     ],
 )

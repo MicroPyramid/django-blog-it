@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta <table></table>gs -->
+      <meta name="_token" content="{{ csrf_token }}">
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha256-aAr2Zpq8MZ+YA/D6JtRD3xtrwpEz2IqOS+pWD/7XKIw=" crossorigin="anonymous" />
+    <script src="https://kit.fontawesome.com/035229a296.js"></script>
+
+    <script src="https://cdn.tiny.cloud/1/ndtthxd2553ioiko6stk6t10ecnvzeb1t8d60ypp8h0mm8f1/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.12/css/select2.min.css" integrity="sha256-FdatTf20PQr/rWg+cAKfl6j4/IY3oohFAJ7gVC3M34E=" crossorigin="anonymous" />
+    <title>
+      Django-Blog-It
+    </title>
+  </head>
+  <body>
+    <textarea class="editor" id="basic-example" name='content'>{{blog.content}}</textarea>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.0/jquery.min.js" integrity="sha256-xNzN2a4ltkB44Mc/Jz3pT4iU1cmeR0FkXs4pru/JxaQ=" crossorigin="anonymous"></script>
+
+<script>
+tinymce.init({
+  selector: 'textarea',
+  height: 400,
+  menubar: true,
+  plugins: [
+    'advlist autolink lists link image charmap print preview anchor',
+    'searchreplace visualblocks  fullscreen',
+    'insertdatetime media table contextmenu save'
+  ],
+  toolbar: 'save undo redo | insert | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | advcode spellchecker code a11ycheck',
+  content_css: [
+    '//fonts.googleapis.com/css?family=Lato:300,300i,400,400i',
+    '//www.tiny.cloud/css/codepen.min.css'],
+  
+  powerpaste_allow_local_images: true,
+  powerpaste_word_import: 'prompt',
+  powerpaste_html_import: 'prompt',
+  
+  spellchecker_language: 'en',
+  spellchecker_dialog: true,
+  
+  //Save button call back function
+  save_onsavecallback: function () {  
+    var content = tinymce.activeEditor.getContent();
+    console.log(content);
+    var csrftoken = $('meta[name="_token"]').attr('content');
+    var status = confirm("Are you sure you want save?")
+          if(status){
+
+    $.ajax({
+          type: 'POST',
+          url: '.',
+          data: {
+              "csrfmiddlewaretoken": csrftoken,
+              "content": content
+            },
+          success: function(data) {
+            window.location.href = data.redirect_url;
+          }
+        });
+  }
+  }
+});
+</script>

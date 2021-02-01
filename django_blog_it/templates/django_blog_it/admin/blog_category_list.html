@@ -1,0 +1,75 @@
+{% extends 'django_blog_it/admin/base.html' %}
+{% block content %}
+<!-- main_container starts here -->
+<div class="main_container">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-xl-12">
+        <div class="card table_Card">
+          <div class="card-header">
+            <span class="title">Category List</span> <span class="float-right"><a href="{% url 'django_blog_it:blog_category' %}" class="primary_btn"><i class="fas fa-plus"></i> New Category</a></span>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-xl-12">
+                <form class="form-inline float-right" method="GET">
+                  <button class="my-1 mr-2" type="submit">Show</button>
+                  <select class="custom-select my-1 mr-sm-2" id="inlineFormCustomSelectPref" name="page_length">
+                    {% if list_length == '15'%}<option value="15" selected>15</option>{% else %}<option value="15">15</option>{% endif %}
+                    {% if list_length == '30'%}<option value="30" selected>30</option>{% else %}<option value="30">30</option>{% endif %}
+                    {% if list_length == '50'%}<option value="50" selected>50</option>{% else %}<option value="50">50</option>{% endif %}
+                    {% if list_length == '100'%}<option value="100" selected>100</option>{% else %}<option value="100">100</option>{% endif %}
+                  </select>
+                  <input type="text" class="form-control mb-2 mr-sm-2" id="inlineFormInputName2" placeholder="Search Blog" name="name">
+                </form>
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Title</th>
+                      <th scope="col">Author</th>
+                      <th scope="col">Meta Description</th>
+                      <th scope="col">Meta Keywords</th>
+                      <th scope="col">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for blog in blogdata %}
+                    <tr>
+                      <td>{{ blog.name }}</td>
+                      <td>{{ blog.created_by.username }}</td>
+                      <td>{{ blog.meta_description }}</td>
+                      <td>{{ blog.meta_keywords }}</td>
+                      <td class="actions"><a href="{% url 'django_blog_it:blog_catergory_edit' pk=blog.id %}" class="edit"><i class="fa fa-pencil-square-o"></i></a> <a href="{% url 'django_blog_it:blog_category_delete' pk=blog.id %}" class="delete"><i class="fa fa-trash"></i></a></td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        <nav aria-label="Page navigation example" class="navigation">
+          {% if blogdata.has_other_pages %}
+          <ul class="pagination justify-content-center">
+            {% if blogdata.has_previous %}
+            <li class="page-item"><a class="page-link nav" href="?page={{ blogdata.previous_page_number }}">previous</a></li>
+            {% endif %}
+            {% for i in blogdata.paginator.page_range %}
+            {% if blogdata.number == i %}
+            <li class="active page-item"><a class="page-link">{{ i }} <span class="sr-only">(current)</span></a></li>
+            {% else %}
+            <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+            {% endif %}
+            {% endfor %}
+            {% if blogdata.has_next %}
+            <li class="page-item"><a class="page-link nav" href="?page={{ blogdata.next_page_number }}">next</a></li>
+            {% endif %}
+          </ul>
+          {% endif %}
+        </nav>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- main_container ends here -->
+{% endblock %}

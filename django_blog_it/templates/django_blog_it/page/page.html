@@ -1,0 +1,28 @@
+{% extends 'django_blog_it/page/base.html' %}
+{% block meta_content %}
+<meta name="description" content="{{data.meta_description}}">
+<meta name="keywords" content="{{data.meta_keywords}}">
+<meta name="author" content="{{data.meta_author}}">
+{% endblock %}
+{% block content %}
+<div class="main_container">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-xl-12">
+        <div class="card table_Card">
+          <div class="card-header">
+            <h1 class="mt-4 ">{{data.title}}</h1>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-lg-8">
+                <p>{{data.content | safe}}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}

@@ -1,0 +1,194 @@
+{%extends 'django_blog_it/admin/base.html' %}
+{% load role_tags %}
+{% load static %}
+{% block content %}
+<div class="main_container">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-xl-12">
+        <div class="card table_Card">
+          <div class="card-header">
+            <span class="title">Edit Article</span> <span class="float-right"><a href="{% url 'django_blog_it:blog_content_edit_grapejs' pk=blog.id%}" class="primary_btn"><i class="fa fa-pencil" aria-hidden="true"></i> Edit Content With Grapejs</a> <a href="{% url 'django_blog_it:blog_content_edit_ckeditor' pk=blog.id%}" class="primary_btn"><i class="fa fa-pencil"></i> Edit Content With CKEditor</a> <a href="{% url 'django_blog_it:get_blog_content' pk=blog.id%}" class="primary_btn"><i class="fas fa-eye"></i> Preview Content</a></span>
+
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-xl-12">
+                <form method="POST" action=".">
+                  {% csrf_token %}
+
+                  <div class="row">
+                    <div class="col-xl-7">
+                      <div class="form-group">
+                        <label for="exampleFormControlInput1">Title</label>
+                        <input type="text" class="form-control" id="title" name='title' value='{% if request.POST%}{{request.POST.title}}{% else %}{{blog.title}}{% endif %}'>
+                        <span class="form-error">{{form.title | striptags}}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-xl-5">
+                      <div class="form-group">
+                        <label for="exampleFormControlInput1">Slug</label>
+                        <input type="text" class="form-control" id="slug" name='slug'  value='{% if request.POST%}{{request.POST.slug}}{% else %}{{blog.slug}}{% endif %}'>
+                        <span class="form-error">{{form.slug | striptags}}</span>
+                      </div>
+                    </div>
+                    <div class="col-xl-3">
+                      <div class="form-group">
+                        <label for="exampleFormControlInput1">Category</label>
+                        <select class="form-control" id="exampleFormControlSelect1" name="category">
+                          <option value="">-----</option>
+                          {% for cat in category %}
+                          <option value="{{cat.id}}" {% if request.POST%}{% if request.POST.category == cat.id|to_str %} selected="" {% endif %}{% else %}{% if blog.category == cat %} selected="" {% endif %}{% endif %}>{{cat}}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div>
+                    <div class="col-xl-2">
+                      <label for="exampleFormControlInput1" class="ml-0">Publish On</label>
+                      <div id="datepicker" class="input-group date" data-date-format="dd-mm-yyyy">
+                        <input class="form-control" id="myDate" type="date" name="publish_on" />
+                        <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-xl-12">
+                      <div class="form-group">
+                        <label for="exampleFormControlInput1">Meta Description</label>
+                        <input type="text" name="meta_description" class="form-control" value="{% if request.POST%}{{request.POST.meta_description}}{% else %}{{blog.meta_description}}{% endif %}" />
+                      </div>
+                    </div>
+                    <div class="col-xl-12">
+                      <div class="form-group">
+                        <label for="exampleFormControlInput1">Meta Keywords</label>
+                        <input type="text" name="meta_keywords" class="form-control" value="{% if request.POST%}{{request.POST.meta_keywords}}{% else %}{{blog.meta_keywords}}{% endif %}" />
+                      </div>
+                    </div>
+                    <div class="col-xl-12">
+                      <div class="form-group">
+                        <label for="exampleFormControlInput1">Meta Author</label>
+                        <input type="text" name="meta_author" class="form-control" value="{% if request.POST%}{{request.POST.meta_author}}{% else %}{{blog.meta_author}}{% endif %}" />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mt-1">
+                    <div class="col-xl-12">
+                      <div class="form-group">
+                        <label for="exampleFormControlInput1">Tags</label>
+                          {% with request.POST|get_list:'tags' as tags_list%}
+                        <select multiple class="multiple_select" name="tags">
+                          {% if request.POST %}
+                          {% for tag in tags_list %}
+                          <option selected="">{{tag}}</option>
+                          {% endfor %}
+                          {% else %}
+                          {% for tag in tags%}
+                          <option {% if tag in blog.tags.all %}selected="" {% endif %}>{{tag.name}}</option>
+                          {% endfor %}
+                          {% endif %}
+                        </select>
+                         {% endwith %}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-xl-12">
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="status" id="exampleRadios1" value="Drafted" {% if request.POST and request.POST.status == "Drafted" or blog.status ==  "Drafted"%} checked="" {% endif %}>
+                        <label class="form-check-label" for="exampleRadios1">
+                          Draft
+                        </label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="status" id="exampleRadios2" value="Published"  {% if request.POST and request.POST.status == "Published" or blog.status ==  "Published"%} checked="" {% endif %}>
+                        <label class="form-check-label" for="exampleRadios2">
+                          Published
+                        </label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="status" id="exampleRadios3" value="Review" {% if request.POST and request.POST.status == "Review" or blog.status ==  "Review"%} checked="" {% endif %}>
+                        <label class="form-check-label" for="exampleRadios3">
+                          Review
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-xl-12">
+                       <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="is_page" id="exampleRadios4" value="Blog"  {% if request.POST and request.POST.is_page == "Blog" or not blog.is_page%} checked="" {% endif %}>
+                        <label class="form-check-label" for="exampleRadios2">
+                          Blog
+                        </label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="is_page" id="exampleRadios5" value="Page" {% if request.POST and request.POST.is_page == "Page" or blog.is_page%} checked="" {% endif %}>
+                        <label class="form-check-label" for="exampleRadios3">
+                          Page
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mt-1">
+                    <div class="col-xl-12 text-center">
+                      <button type="submit" class="primary_btn btn"><i class="fas fa-save"></i> Save</button>
+                      <button type="reset" class="secondary_btn btn"><i class="far fa-window-close"></i> Cancel</button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block script %}
+<script>
+tinymce.init({
+  selector: 'textarea#basic-example',
+  height: 500,
+  menubar: false,
+  plugins: [
+    'advlist autolink lists link image charmap print preview anchor',
+    'searchreplace visualblocks code fullscreen',
+    'insertdatetime media table paste code help wordcount'
+  ],
+  toolbar: 'undo redo | formatselect | ' +
+    'bold italic backcolor | alignleft aligncenter ' +
+    'alignright alignjustify | bullist numlist outdent indent | ' +
+    'removeformat | help',
+  content_css: '//www.tiny.cloud/css/codepen.min.css'
+});
+$(".multiple_select").select2({
+  width: '100%',
+  tags: true,
+  createTag: function(params) {
+    return {
+      id: params.term,
+      text: params.term,
+      newOption: true,
+      value: params.term
+    }
+  }
+});
+$('#title').on('input',function(){
+  var title = $('#title').val()
+  var slug = title.replace(/ /g,"-")
+  $('#slug').val(slug)
+});
+
+  var now = new Date('{{blog.publish_on}}');
+  console.log(now)
+  var day = ("0" + now.getDate()).slice(-2);
+  var month = ("0" + (now.getMonth() + 1)).slice(-2);
+  var today = now.getFullYear()+"-"+(month)+"-"+(day) ;
+  console.log(today)
+  document.getElementById("myDate").value = today;
+
+</script>
+{% endblock %}
