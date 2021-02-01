@@ -1,0 +1,124 @@
+{% extends 'django_blog_it/admin/base.html' %}
+{% block content %}
+<!-- main_container starts here -->
+<div class="main_container">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-xl-12">
+        <div class="card table_Card">
+          <div class="card-header">
+            <span class="title">Blog List</span> <span class="float-right"><a href="{% url 'django_blog_it:blog_new' %}" class="primary_btn"><i class="fas fa-plus"></i> New Blog Post</a></span>
+          </div>
+          <div class="card-body">
+            <ul class="nav nav-tabs" id="myTab" role="tablist">
+              <li class="nav-item" role="presentation">
+                <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Blogs ({{blogs_list|length}})</a>
+              </li>
+              <li class="nav-item mr-auto" role="presentation">
+                <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Pages({{pages_list|length}})</a>
+              </li>
+              <li class="float-right">
+                <form class="form-inline" method="GET">
+                  <input type="text" class="form-control mb-2 mr-sm-2" id="inlineFormInputName2" placeholder="Search Blog" name="name">
+                </form>
+              </li>
+            </ul>
+            <div class="tab-content" id="myTabContent">
+              <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                <div class="row">
+                  <div class="col-xl-12">
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th scope="col">Title</th>
+                          <th scope="col">Author</th>
+                          <th scope="col">Category</th>
+                          <th scope="col">Status</th>
+                          <th scope="col">Created</th>
+                          <th scope="col">Published</th>
+                          <th scope="col">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for blog in blogs_list %}
+                        <tr>
+                          <td>{{ blog.title }}</td>
+                          <td>{{ blog.created_by }}</td>
+                          <td>{{ blog.category|default_if_none:'--' }}</td>
+                          <td>{{ blog.status }}</td>
+                          <td data-toggle="tooltip" title="{{blog.created_on}}">{{ blog.created_on_arrow }}</td>
+                          <td data-toggle="tooltip" title="{{blog.publish_on}}">{{ blog.published_on_arrow }}</td>
+                          <!-- <td class="status publish"><i class="fas fa-square"></i> Published</td> -->
+                          <td class="actions"><a href="{% url 'django_blog_it:blog_edit' pk=blog.id %}" class="edit"><i class="fa fa-pencil-square-o"></i></a> <a href="{% url 'django_blog_it:blog_delete' pk=blog.id %}" class="delete"><i class="fa fa-trash"></i></a><a href="{% url 'django_blog_it:blog_detail' slug=blog.slug %}" class="edit"><i class="fas fa-eye"></i></a></td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+              <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                 <div class="row">
+                  <div class="col-xl-12">
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th scope="col">Title</th>
+                          <th scope="col">Author</th>
+                          <th scope="col">Category</th>
+                          <th scope="col">Status</th>
+                          <th scope="col">Created</th>
+                          <th scope="col">Published</th>
+                          <th scope="col">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for blog in pages_list %}
+                        <tr>
+                          <td>{{ blog.title }}</td>
+                          <td>{{ blog.created_by }}</td>
+                          <td>{{ blog.category|default_if_none:'--' }}</td>
+                          <td>{{ blog.status }}</td>
+                          <td data-toggle="tooltip" title="{{blog.created_on}}">{{ blog.created_on_arrow }}</td>
+                          <td data-toggle="tooltip" title="{{blog.publish_on}}">{{ blog.published_on_arrow }}</td>
+                          <!-- <td class="status publish"><i class="fas fa-square"></i> Published</td> -->
+                          <td class="actions"><a href="{% url 'django_blog_it:blog_edit' pk=blog.id %}" class="edit"><i class="fa fa-pencil-square-o"></i></a> <a href="{% url 'django_blog_it:blog_delete' pk=blog.id %}" class="delete"><i class="fa fa-trash"></i></a><a href="{% url 'django_blog_it:page_detail' slug=blog.slug %}" class="edit"><i class="fas fa-eye"></i></a></td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- <nav aria-label="Page navigation example" class="navigation">
+          {% if blogdata.has_other_pages %}
+          <ul class="pagination justify-content-center">
+            {% if blogdata.has_previous %}
+            <li class="page-item"><a class="page-link nav" href="?page={{ blogdata.previous_page_number }}">previous</a></li>
+            {% else %}
+            <li class="disabled page-item"><a class="page-link">previous</a></li>
+            {% endif %}
+            {% for i in blogdata.paginator.page_range %}
+            {% if blogdata.number == i %}
+            <li class="active page-item"><a class="page-link">{{ i }} <span class="sr-only">(current)</span></a></li>
+            {% else %}
+            <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+            {% endif %}
+            {% endfor %}
+            {% if blogdata.has_next %}
+            <li class="page-item"><a class="page-link nav" href="?page={{ blogdata.next_page_number }}">next</a></li>
+            {% else %}
+            <li class="disabled page-item"><a class="page-link">next</a></li>
+            {% endif %}
+          </ul>
+          {% endif %}
+        </nav> -->
+      </div>
+    </div>
+  </div>
+</div>
+<!-- main_container ends here -->
+{% endblock %}

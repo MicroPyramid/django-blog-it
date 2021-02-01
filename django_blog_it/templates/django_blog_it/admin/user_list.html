@@ -1,0 +1,99 @@
+{% extends 'django_blog_it/admin/base.html' %}
+{% load role_tags %}
+{% block content %}
+<!-- main_container starts here -->
+<div class="main_container">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-xl-12">
+        <div class="card table_Card">
+          <div class="card-body">
+            <div class="row">
+              <div class="col-xl-12">
+                <form class="form-inline float-right" method="GET">
+                  <button class="my-1 mr-2" type="submit">Show</button>
+                  <select class="custom-select my-1 mr-sm-2" id="inlineFormCustomSelectPref" name="page_length">
+                    {% if list_length == '15'%}<option value="15" selected>15</option>{% else %}<option value="15">15</option>{% endif %}
+                    {% if list_length == '30'%}<option value="30" selected>30</option>{% else %}<option value="30">30</option>{% endif %}
+                    {% if list_length == '50'%}<option value="50" selected>50</option>{% else %}<option value="50">50</option>{% endif %}
+                    {% if list_length == '100'%}<option value="100" selected>100</option>{% else %}<option value="100">100</option>{% endif %}
+                  </select>
+                  <input type="text" class="form-control mb-2 mr-sm-2" id="inlineFormInputName2" placeholder="Search User" name="name">
+                </form>
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th scope="col">User</th>
+                      <th scope="col">Blog Admin</th>
+                      <th scope="col">Blog Publisher</th>
+                      <th scope="col">Blog Auther</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for user in users %}
+                    <tr>
+                      <td>{{user.email}}</td>
+                      {% with user.user_roles.all|get_role_list as roles %}
+                       <td><input data_id='{{user.id}}' type="checkbox" name="role" value="blog_admin" {% if 'blog_admin' in roles %} checked="" {% endif %}></td>
+                        <td><input data_id='{{user.id}}' type="checkbox" name="role" value="blog_publisher" {% if 'blog_publisher' in roles %} checked{% endif %}></td>
+                        <td><input data_id='{{user.id}}' type="checkbox" name="role" value="blog_author" {% if 'blog_author' in roles %}checked{% endif %}></td>
+                      {% endwith %}
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        <nav aria-label="Page navigation example" class="navigation">
+          {% if users.has_other_pages %}
+          <ul class="pagination justify-content-center">
+            {% if users.has_previous %}
+            <li class="page-item"><a class="page-link nav" href="?page={{ users.previous_page_number }}">previous</a></li>
+            {% endif %}
+            {% for i in users.paginator.page_range %}
+            {% if users.number == i %}
+            <li class="active page-item"><a class="page-link">{{ i }} <span class="sr-only">(current)</span></a></li>
+            {% else %}
+            <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+            {% endif %}
+            {% endfor %}
+            {% if users.has_next %}
+            <li class="page-item"><a class="page-link nav" href="?page={{ users.next_page_number }}">next</a></li>
+            {% endif %}
+          </ul>
+          {% endif %}
+        </nav>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- main_container ends here -->
+{% endblock %}
+{% block script %}
+<script>
+$(document).ready(function() {
+  $('input[type="checkbox"]').click(function() {
+    var id = $(this)[0].attributes['data_id'].value
+    var role = $(this).val()
+    path = window.location
+    if ($(this).is(":checked")) {
+      $.post("/blog/admin/roles/", {
+          'csrfmiddlewaretoken': '{{ csrf_token }}',
+          'user_id': id,
+          'role': role
+        },
+        function(data) {
+          window.location = path;
+        });
+    } else if ($(this).is(":not(:checked)")) {
+      $.get("/blog/admin/roles/", { 'user_id': id,'role': role },
+        function(data) {
+          window.location = path;
+        });
+    }
+  });
+});
+</script>
+{% endblock %}

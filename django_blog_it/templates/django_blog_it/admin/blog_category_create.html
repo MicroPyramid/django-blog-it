@@ -1,0 +1,70 @@
+{%extends 'django_blog_it/admin/base.html' %}
+{% block content %}
+<div class="main_container">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-xl-12">
+        <div class="card table_Card">
+          <div class="card-header">
+            <span class="title">Create Catergory Blog</span> <span class="float-right"><a href="{% url 'django_blog_it:blog_category_list' %}" class="primary_btn"><i class="fas fa-eye"></i> View Blog Category List</a></span>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-xl-12">
+                <form method="POST" action=".">
+                  {% csrf_token %}
+                  <div class="row">
+                    <div class="col-xl-7">
+                      <div class="form-group">
+                        <label for="exampleFormControlInput1">Title</label>
+                        <input type="text" class="form-control" id="exampleFormControlInput1" name='name' value="{{request.POST.name}}">
+                        <span class="form-error">{{form.name | striptags}}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mt-1">
+                    <div class="col-xl-7">
+                      <div class="form-group mb-0">
+                        <label for="exampleFormControlInput1" value="{{request.POST.name}}">Description</label>
+                      </div>
+                    </div>
+                    <div class="col-xl-7">
+                      <div class="form-group">
+                        <textarea class="editor" rows="4" cols="67" name='description'>{{request.POST.description}}</textarea>
+                        <span class="form-error">{{form.description | striptags}}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-xl-7">
+                      <div class="form-group">
+                        <label for="exampleFormControlInput1">Meta KeyWords</label>
+                        <input type="title" class="form-control" name='meta_keywords' value="{{request.POST.meta_keywords}}">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-xl-7">
+                      <div class="form-group">
+                        <label for="exampleFormControlInput1">Meta Description</label>
+                        <input type="title" class="form-control" name='meta_description' value="{{request.POST.meta_description}}">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mt-1">
+                    <div class="col-xl-12 text-center">
+                      <button type="submit" class="primary_btn btn"><i class="fas fa-save"></i> Save</button>
+                      <button type="reset" class="secondary_btn btn"><i class="far fa-window-close"></i> Cancel</button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- main_container ends here -->
+{% endblock %}

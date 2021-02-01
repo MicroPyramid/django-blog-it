@@ -1,0 +1,87 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha256-aAr2Zpq8MZ+YA/D6JtRD3xtrwpEz2IqOS+pWD/7XKIw=" crossorigin="anonymous" />
+    <script src="https://kit.fontawesome.com/035229a296.js"></script>
+
+    <script src="https://cdn.tiny.cloud/1/ndtthxd2553ioiko6stk6t10ecnvzeb1t8d60ypp8h0mm8f1/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.12/css/select2.min.css" integrity="sha256-FdatTf20PQr/rWg+cAKfl6j4/IY3oohFAJ7gVC3M34E=" crossorigin="anonymous" />
+
+    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>
+      Django-Blog-It
+    </title>
+      <link href="{% static 'django_blog_it/css/main.css' %}" rel="stylesheet" type="text/css">
+  </head>
+  <body>
+      <header class="fixed-top">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-xl-12">
+              <nav class="navbar navbar-expand-md">
+                <a class="navbar-brand" href="#">DjangoBlogIt</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                  <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarCollapse">
+                  <ul class="navbar-nav mr-auto">
+                  </ul>
+                  <ul class="navbar-nav navbar-right my-2 my-lg-0">
+                    {% load role_tags %}
+                    {% rolelength request.user as add_users_flag %}
+                    {% if add_users_flag %}
+                    <li class="nav-item">
+                      <a class="nav-link link" href="{% url 'django_blog_it:dashboard' %}">Dashboard</a>
+                    </li>
+                    {% load role_tags %}
+                    {% adminuser request.user as user_admin %}
+                    {% if request.user.is_superuser or user_admin %}
+                    <li class="nav-item">
+                      <a class="nav-link link" href="{% url 'django_blog_it:user_list' %}">User</a>
+                    </li>
+                    {% endif %}
+                      <li class="nav-item dropdown">
+                        <a href="#" class="dropdown-toggle refactored_nav_dropdown nav-link" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" >Blog
+                       <!--  <b class="caret"></b> --><i class="fa fa-angle-down"></i></a>
+                        <div class="dropdown-menu dropdown-menu-right refactored_nav_dropdown_right" aria-labelledby="navbarDropdown">
+                          <a class="dropdown-item" href="{% url 'django_blog_it:blog_list' %}">Blog List</a>
+                          <a class="dropdown-item" href="{% url   'django_blog_it:blog_category_list' %}">Blog Category List</a>
+                        </div>
+                      </li>
+                      {% endif %}
+                      <li class="nav-item dropdown">
+                        <a href="#" class="dropdown-toggle abcd nav-link" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" >{{ request.user.username }}
+                        <!-- <b class="caret"></b> --><i class="fa fa-angle-down"></i></a>
+                        <div class="dropdown-menu dropdown-menu-right " aria-labelledby="navbarDropdown">
+                          <a class="dropdown-item" href="/logout/"><i class="fas fa-sign-out-alt"></i>Sign Out</a>
+                        </div>
+                      </li>
+                  </ul>
+                </div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </header>
+{% block content %}
+{% endblock %}
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.4.2/umd/popper.min.js" integrity="sha256-XahKYIZhnEztrOcCTmaEErjYDLoLqBoDJbVMYybyjH8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha256-OFRAJNoaD8L3Br5lglV7VyLRf0itmoBzWUoM+Sji4/8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.12/js/select2.min.js" integrity="sha256-wfVTTtJ2oeqlexBsfa3MmUoB77wDNRPqT1Q1WA2MMn4=" crossorigin="anonymous"></script>
+    {% block script %}
+{% endblock %}
+
+
+
+  </body>
+</html>
