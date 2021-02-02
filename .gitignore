@@ -56,11 +56,9 @@ docs/_build/
 
 # PyBuilder
 target/
-django_blog_it/migrations/
 .idea/
 db.sqlite3
 media/
 *~
 *.swp
 *.swo
-django_blog_it/awssettings.py
