@@ -2,7 +2,7 @@ boto==2.49.0
 Django==2.2.10
 django-simple-pagination==1.1.4
 django-storages==1.9.1
-Pillow==7.0.0
+Pillow==9.0.1
 requests==2.23.0
 gunicorn==19.6.0
 whitenoise==3.1
